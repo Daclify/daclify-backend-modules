@@ -37,7 +37,9 @@
     "codegen": "tsx tools/codegen.ts",
     "docs:generate": "tsx tools/docs/generate.ts",
     "docs:check": "tsx tools/docs/generate.ts --check",
-    "format:check": "prettier --check \"**/*.{ts,vue,css,json}\"",
+    "lint": "tsx tools/lint.ts",
+    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm test",
+    "format:check": "prettier --check \"**/*.{ts,vue,css,json,yml}\"",
     "format": "prettier --write \"**/*.{ts,vue,css,json}\""
   },
   "dependencies": {
