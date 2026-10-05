@@ -4,6 +4,8 @@ import { TimePointSec } from '@greymass/eosio';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
 import { load, send, row } from './helpers/vert.js';
+import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
+const payrollHash = wasmCodeHash('.artifacts/contracts/payroll.wasm');
 let chain: Blockchain;
 let core: ReturnType<typeof load>;
 let payroll: ReturnType<typeof load>;
@@ -26,7 +28,7 @@ beforeEach(async () => {
   await send(
     core,
     'setmodule',
-    [1, 'payroll', 1, ['commit'], ['reserve', 'approve']],
+    [1, 'payroll', 1, ['commit'], ['reserve', 'approve'], payrollHash],
     'alice@active',
   );
   await send(token, 'create', ['alice', '1000.0000 TLOS'], 'eosio.token@active');
@@ -97,7 +99,7 @@ describe('fixed-term funded payroll', () => {
   });
   it('preserves due commitments after module removal and offboarding', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');
-    await send(core, 'setmodule', [1, 'payroll', 1, [], []], 'alice@active');
+    await send(core, 'setmodule', [1, 'payroll', 1, [], [], ZERO_CODE_HASH], 'alice@active');
     await send(core, 'setactive', ['daclifycore', 1, 1, 2, false], 'daclifycore@active');
     chain.addTime(TimePointSec.from(61));
     await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');

@@ -5,6 +5,8 @@ import { CID } from 'multiformats/cid';
 import { sha256 } from 'multiformats/hashes/sha2';
 import { z } from 'zod';
 import { load, send, row } from './helpers/vert.js';
+import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
+const worksHash = wasmCodeHash('.artifacts/contracts/works.wasm');
 let core: ReturnType<typeof load>;
 let works: ReturnType<typeof load>;
 let token: ReturnType<typeof load>;
@@ -32,6 +34,7 @@ beforeEach(async () => {
       1,
       ['propose', 'accept', 'submitwork', 'review', 'cancel'],
       ['reserve', 'approve', 'cancel'],
+      worksHash,
     ],
     'alice@active',
   );
@@ -159,7 +162,7 @@ describe('Works obligations and independent review', () => {
     await send(works, 'accept', ['daclifycore', 1, 1, 1], 'daclifycore@active');
     await send(works, 'submitwork', submit(), 'daclifycore@active');
     await send(works, 'review', review(), 'daclifycore@active');
-    await send(core, 'setmodule', [1, 'works', 1, [], []], 'alice@active');
+    await send(core, 'setmodule', [1, 'works', 1, [], [], ZERO_CODE_HASH], 'alice@active');
     await send(works, 'settle', ['daclifycore', 1, 1], 'bob@active');
     expect(totals().claims).toBe(10000);
   });

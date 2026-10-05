@@ -4,6 +4,8 @@ import { Blockchain } from '@proton/vert';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
 import { load, send, row } from './helpers/vert.js';
+import { wasmCodeHash } from './helpers/code-hash.js';
+const decideHash = wasmCodeHash('.artifacts/contracts/decide.wasm');
 let chain: Blockchain;
 let core: ReturnType<typeof load>;
 let decide: ReturnType<typeof load>;
@@ -25,7 +27,7 @@ beforeEach(async () => {
     await send(
       core,
       'setmodule',
-      [dao, 'decide', 1, ['open', 'vote'], ['govlock']],
+      [dao, 'decide', 1, ['open', 'vote'], ['govlock'], decideHash],
       'alice@active',
     );
     await send(core, 'grantcredit', [dao, 1, 10], 'alice@active');
