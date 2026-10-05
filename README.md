@@ -13,4 +13,4 @@ Each module declares compatible core interfaces, versioned configuration and exp
 The user requests one continuous implementation session and reviews the complete code afterward. Internal tests and reviews continue throughout. Production deployment, authority changes and asset migration require separate express authorization after that review.
 Daclify V2 — governance, funding, payroll, and integration modules
 
-Install from the three sibling repositories using core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/feat/v2-implementation/docs/development.md). Run `npm run typecheck`, `npm run docs:check`, and `npm test`. The `--contracts` bootstrap option rebuilds artifacts and stages the core runtime used by the module harness; it does not deploy a chain.
+Install from the three sibling repositories using core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md). Run `npm run typecheck`, `npm run docs:check`, and `npm test`. The `--contracts` bootstrap option rebuilds artifacts and stages the core runtime used by the module harness; it does not deploy a chain.
