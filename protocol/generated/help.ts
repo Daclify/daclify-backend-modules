@@ -32,7 +32,8 @@ export const ModulesHelpBundle={
         "A payroll commitment names a DAO contributor, exact native-token amount, start date, payment interval and a bounded number of installments. The full term must be funded before commitment.",
         "Committed installments are approved liabilities. They remain payable after module removal, account offboarding or subscription expiry. Settlement after its due time is separate from approval.",
         "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
-        "Choose a future first-installment time in UTC. The UI shows each installment’s due time and core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term."
+        "Choose a future first-installment time in UTC. The UI shows each installment’s due time and core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.",
+        "The payroll settle action pays one installment and refuses a later installment while an earlier installment in that schedule is unpaid. Settling again, in order, can still pay every installment that is already due, including several in one transaction. The treasury pay action pays an approved due obligation directly and does not apply this order. The schedule does not store a catch-up mode."
       ]
     },
     {

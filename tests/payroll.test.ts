@@ -97,6 +97,15 @@ describe('fixed-term funded payroll', () => {
       'NOT_PAYABLE',
     );
   });
+  it('pays only the oldest missed period', async () => {
+    await send(payroll, 'commit', commit(), 'daclifycore@active');
+    chain.addTime(TimePointSec.from(61 + 86400));
+    await expect(send(payroll, 'settle', ['daclifycore', 1, 2], 'bob@active')).rejects.toThrow(
+      'PAYROLL_OLDEST',
+    );
+    await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');
+    await send(payroll, 'settle', ['daclifycore', 1, 2], 'bob@active');
+  });
   it('preserves due commitments after module removal and offboarding', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');
     await send(core, 'setmodule', [1, 'payroll', 1, [], [], ZERO_CODE_HASH], 'alice@active');

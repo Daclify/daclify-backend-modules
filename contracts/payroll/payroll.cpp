@@ -13,6 +13,12 @@ public:
   for(uint32_t i=0;i<periods;i++){auto id=items.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"PAYROLL_LIMIT");uint32_t due=starts+interval*i;ids.push_back(id);items.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.schedule_id=schedule_id;r.due=due;});core_action(runtime,get_self(),"reserve"_n,pack(std::make_tuple(dao_id,get_self(),id,recipient,quantity,due)));core_action(runtime,get_self(),"approveob"_n,pack(std::make_tuple(dao_id,get_self(),id)));}
   rows.emplace(get_self(),[&](auto& r){r.id=schedule_id;r.dao_id=dao_id;r.creator=member_id;r.recipient=recipient;r.quantity=quantity;r.periods=periods;r.interval=interval;r.starts=starts;r.entries=ids;});
  }
- ACTION settle(name runtime,uint64_t dao_id,uint64_t entry_id){entries items(get_self(),runtime.value);const auto& item=items.get(entry_id,"ENTRY_UNKNOWN");check(item.dao_id==dao_id,"PAYROLL_DOMAIN");core_action(runtime,get_self(),"payob"_n,pack(std::make_tuple(dao_id,get_self(),entry_id)));}
+ ACTION settle(name runtime,uint64_t dao_id,uint64_t entry_id){
+  entries items(get_self(),runtime.value);const auto& item=items.get(entry_id,"ENTRY_UNKNOWN");check(item.dao_id==dao_id,"PAYROLL_DOMAIN");
+  schedules rows(get_self(),runtime.value);const auto& schedule=rows.get(item.schedule_id,"SCHEDULE_UNKNOWN");check(schedule.dao_id==dao_id,"PAYROLL_DOMAIN");
+  obligations debts(runtime,dao_id);auto index=debts.get_index<"bysource"_n>();bool found=false;
+  for(const auto earlier:schedule.entries){if(earlier==entry_id){found=true;break;}auto packed=pack(std::make_tuple(get_self(),earlier));const auto& prior=index.get(sha256(packed.data(),packed.size()),"OBLIGATION_UNKNOWN");check(prior.source==get_self()&&prior.source_id==earlier,"OBLIGATION_DOMAIN");check(prior.status==2,"PAYROLL_OLDEST");}
+  check(found,"ENTRY_UNKNOWN");core_action(runtime,get_self(),"payob"_n,pack(std::make_tuple(dao_id,get_self(),entry_id)));
+ }
 };
 EOSIO_DISPATCH(payroll,(commit)(settle))
