@@ -1,0 +1,41 @@
+[
+  {
+    "id": "decide",
+    "title": "Weights with an explicit snapshot",
+    "paragraphs": [
+      "Choose equal active member voting, internal governance credits, or deposited native stake. Pick quorum and approval thresholds before opening a ballot.",
+      "A ballot snapshots its eligible denominator and highest member ID. Active ballots freeze issuance, stake changes, and reactivation so a voter cannot change their weight during voting.",
+      "Closing and finalization are separate from execution. A passed proposal does not authorize arbitrary contract calls. Executors require bounded, explicitly configured effects.",
+      "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions."
+    ]
+  },
+  {
+    "id": "works",
+    "title": "Fund work through milestones",
+    "paragraphs": [
+      "A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.",
+      "Submission and review are separate permissions. A contributor cannot approve their own work. A reviewer can request changes and the contributor can submit a revision. A separate dispute or arbitration process is not implemented in this release.",
+      "Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.",
+      "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments."
+    ]
+  },
+  {
+    "id": "payroll",
+    "title": "Funded payroll with a clear end date",
+    "paragraphs": [
+      "A payroll commitment names a DAO contributor, exact native-token amount, start date, payment interval and a bounded number of installments. The full term must be funded before commitment.",
+      "Committed installments are approved liabilities. They remain payable after module removal, account offboarding or subscription expiry. Settlement after its due time is separate from approval.",
+      "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
+      "Choose a future first-installment time in UTC. The UI shows each installment’s due time and core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term."
+    ]
+  },
+  {
+    "id": "module-reference",
+    "title": "Read the matching module reference",
+    "paragraphs": [
+      "Each reference bundle identifies the module package and interface version it describes. The module read API reports deployment versions, configured permissions and code verification alongside current ballots, projects and payroll entries.",
+      "The configuration reference is generated from the producer's validation schemas. Decide settings are selected for each ballot. Works currently uses a fixed limit of sixteen milestones and independent review; payroll uses a fixed limit of twelve installments. Installing a module does not yet persist custom Works or payroll settings.",
+      "Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment."
+    ]
+  }
+]
