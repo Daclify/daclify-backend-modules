@@ -1,0 +1,7 @@
+// Generated from the compiled ABI; input and RPC transport are validated separately.
+import {z} from 'zod';
+import {Uint64Schema,NativeAccountSchema} from "@daclify/core-protocol";
+const numericTransport=(value:unknown):unknown=>typeof value==='number'&&Number.isSafeInteger(value)?String(value):value;
+const TransportUint64=z.preprocess(numericTransport,Uint64Schema);
+export const PayrollActionSchemas={commit:z.strictObject({runtime:z.string().max(13).refine(value=>value===''||NativeAccountSchema.safeParse(value).success),dao_id:Uint64Schema,member_id:Uint64Schema,schedule_id:Uint64Schema,recipient:Uint64Schema,quantity:z.string().max(64).regex(/^-?(0|[1-9][0-9]*)(\.[0-9]+)? [A-Z]{1,7}$/),periods:z.int().min(0).max(255),interval:z.int().min(0).max(4294967295),starts:z.int().min(0).max(4294967295)}),settle:z.strictObject({runtime:z.string().max(13).refine(value=>value===''||NativeAccountSchema.safeParse(value).success),dao_id:Uint64Schema,entry_id:Uint64Schema})};
+export const PayrollTableSchemas={entries:z.strictObject({id:TransportUint64,dao_id:TransportUint64,schedule_id:TransportUint64,due:z.int().min(0).max(4294967295)}),schedules:z.strictObject({id:TransportUint64,dao_id:TransportUint64,creator:TransportUint64,recipient:TransportUint64,quantity:z.string().max(64).regex(/^-?(0|[1-9][0-9]*)(\.[0-9]+)? [A-Z]{1,7}$/),periods:z.int().min(0).max(255),interval:z.int().min(0).max(4294967295),starts:z.int().min(0).max(4294967295),entries:z.array(TransportUint64).max(64)})};

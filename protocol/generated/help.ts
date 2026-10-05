@@ -1,0 +1,1380 @@
+// Generated from producer-owned guides, compiled ABI and module schemas.
+import type {HelpBundle} from '@daclify/core-protocol';
+export const ModulesHelpBundle={
+  "producer": "modules",
+  "packageVersion": "0.1.0-alpha.1",
+  "interfaceVersion": 1,
+  "topics": [
+    {
+      "id": "decide",
+      "title": "Weights with an explicit snapshot",
+      "paragraphs": [
+        "Choose equal active member voting, internal governance credits, or deposited native stake. Pick quorum and approval thresholds before opening a ballot.",
+        "A ballot snapshots its eligible denominator and highest member ID. Active ballots freeze issuance, stake changes, and reactivation so a voter cannot change their weight during voting.",
+        "Closing and finalization are separate from execution. A passed proposal does not authorize arbitrary contract calls. Executors require bounded, explicitly configured effects.",
+        "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions."
+      ]
+    },
+    {
+      "id": "works",
+      "title": "Fund work through milestones",
+      "paragraphs": [
+        "A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.",
+        "Submission and review are separate permissions. A contributor cannot approve their own work. A reviewer can request changes and the contributor can submit a revision. A separate dispute or arbitration process is not implemented in this release.",
+        "Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.",
+        "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments."
+      ]
+    },
+    {
+      "id": "payroll",
+      "title": "Funded payroll with a clear end date",
+      "paragraphs": [
+        "A payroll commitment names a DAO contributor, exact native-token amount, start date, payment interval and a bounded number of installments. The full term must be funded before commitment.",
+        "Committed installments are approved liabilities. They remain payable after module removal, account offboarding or subscription expiry. Settlement after its due time is separate from approval.",
+        "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
+        "Choose a future first-installment time in UTC. The UI shows each installment’s due time and core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term."
+      ]
+    },
+    {
+      "id": "module-reference",
+      "title": "Read the matching module reference",
+      "paragraphs": [
+        "Each reference bundle identifies the module package and interface version it describes. The module read API reports deployment versions, configured permissions and code verification alongside current ballots, projects and payroll entries.",
+        "The configuration reference is generated from the producer's validation schemas. Decide settings are selected for each ballot. Works currently uses a fixed limit of sixteen milestones and independent review; payroll uses a fixed limit of twelve installments. Installing a module does not yet persist custom Works or payroll settings.",
+        "Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment."
+      ]
+    }
+  ],
+  "schemaVersion": 1,
+  "contracts": [
+    {
+      "name": "decide",
+      "abiVersion": "eosio::abi/1.2",
+      "sourceAbiHash": "ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4eedcb31614",
+      "actions": [
+        {
+          "name": "finalize",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "open",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "name": "choices",
+              "type": "uint8"
+            },
+            {
+              "name": "duration",
+              "type": "uint32"
+            },
+            {
+              "name": "quorum",
+              "type": "uint16"
+            },
+            {
+              "name": "approval",
+              "type": "uint16"
+            },
+            {
+              "name": "metadata",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "vote",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "choice",
+              "type": "uint8"
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "name": "ballots",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "creator",
+              "type": "uint64"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "name": "choices",
+              "type": "uint8"
+            },
+            {
+              "name": "closes",
+              "type": "uint32"
+            },
+            {
+              "name": "quorum",
+              "type": "uint16"
+            },
+            {
+              "name": "approval",
+              "type": "uint16"
+            },
+            {
+              "name": "denominator",
+              "type": "uint64"
+            },
+            {
+              "name": "max_member",
+              "type": "uint64"
+            },
+            {
+              "name": "cast",
+              "type": "uint64"
+            },
+            {
+              "name": "tallies",
+              "type": "uint64[]"
+            },
+            {
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "name": "winner",
+              "type": "int16"
+            },
+            {
+              "name": "metadata",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "votes",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot",
+              "type": "uint64"
+            },
+            {
+              "name": "member",
+              "type": "uint64"
+            },
+            {
+              "name": "weight",
+              "type": "uint64"
+            },
+            {
+              "name": "choice",
+              "type": "uint8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "works",
+      "abiVersion": "eosio::abi/1.2",
+      "sourceAbiHash": "49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a174e62dcd324",
+      "actions": [
+        {
+          "name": "accept",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "cancel",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "propose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            },
+            {
+              "name": "contributor",
+              "type": "uint64"
+            },
+            {
+              "name": "document_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_version",
+              "type": "uint32"
+            },
+            {
+              "name": "payments",
+              "type": "asset[]"
+            },
+            {
+              "name": "dues",
+              "type": "uint32[]"
+            }
+          ]
+        },
+        {
+          "name": "review",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "milestone_id",
+              "type": "uint64"
+            },
+            {
+              "name": "approve",
+              "type": "bool"
+            },
+            {
+              "name": "document_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_version",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "settle",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "milestone_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "submitwork",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "milestone_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_version",
+              "type": "uint32"
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "name": "milestones",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            },
+            {
+              "name": "quantity",
+              "type": "asset"
+            },
+            {
+              "name": "due",
+              "type": "uint32"
+            },
+            {
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "name": "submission_doc",
+              "type": "uint64"
+            },
+            {
+              "name": "submission_version",
+              "type": "uint32"
+            },
+            {
+              "name": "review_doc",
+              "type": "uint64"
+            },
+            {
+              "name": "review_version",
+              "type": "uint32"
+            },
+            {
+              "name": "reviewer",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "projects",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "creator",
+              "type": "uint64"
+            },
+            {
+              "name": "contributor",
+              "type": "uint64"
+            },
+            {
+              "name": "document_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_version",
+              "type": "uint32"
+            },
+            {
+              "name": "milestones",
+              "type": "uint64[]"
+            },
+            {
+              "name": "status",
+              "type": "uint8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "payroll",
+      "abiVersion": "eosio::abi/1.2",
+      "sourceAbiHash": "851a4e53ee8014e03d1e4ef6942d6430227cd6de0bb25ea7bbf3dd8e135a121c",
+      "actions": [
+        {
+          "name": "commit",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "schedule_id",
+              "type": "uint64"
+            },
+            {
+              "name": "recipient",
+              "type": "uint64"
+            },
+            {
+              "name": "quantity",
+              "type": "asset"
+            },
+            {
+              "name": "periods",
+              "type": "uint8"
+            },
+            {
+              "name": "interval",
+              "type": "uint32"
+            },
+            {
+              "name": "starts",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "settle",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "entry_id",
+              "type": "uint64"
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "name": "entries",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "schedule_id",
+              "type": "uint64"
+            },
+            {
+              "name": "due",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "schedules",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "creator",
+              "type": "uint64"
+            },
+            {
+              "name": "recipient",
+              "type": "uint64"
+            },
+            {
+              "name": "quantity",
+              "type": "asset"
+            },
+            {
+              "name": "periods",
+              "type": "uint8"
+            },
+            {
+              "name": "interval",
+              "type": "uint32"
+            },
+            {
+              "name": "starts",
+              "type": "uint32"
+            },
+            {
+              "name": "entries",
+              "type": "uint64[]"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "api": [
+    {
+      "method": "GET",
+      "path": "/v1/daos/:id/modules",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "modules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "deployment": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "enum": [
+                        "decide",
+                        "works",
+                        "payroll"
+                      ]
+                    },
+                    "account": {
+                      "type": "string",
+                      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "codeHash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "account",
+                    "version",
+                    "codeHash"
+                  ],
+                  "additionalProperties": false
+                },
+                "manifest": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "coreRange": {
+                      "type": "string"
+                    },
+                    "interfaceVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "configVersion": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "capabilities": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "ballot.create",
+                          "ballot.finalize",
+                          "obligation.create",
+                          "obligation.execute",
+                          "member.manage",
+                          "credit.issue",
+                          "content.publish",
+                          "notification.send"
+                        ]
+                      }
+                    },
+                    "helpTopic": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9.-]{1,63}$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "version",
+                    "coreRange",
+                    "interfaceVersion",
+                    "configVersion",
+                    "capabilities",
+                    "helpTopic"
+                  ],
+                  "additionalProperties": false
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "compatible": {
+                  "type": "boolean"
+                },
+                "codeVerified": {
+                  "type": "boolean"
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  }
+                },
+                "grants": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  }
+                }
+              },
+              "required": [
+                "deployment",
+                "manifest",
+                "enabled",
+                "compatible",
+                "codeVerified",
+                "actions",
+                "grants"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "ballots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "kind": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "choices": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "closes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "quorum": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "approval": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "denominator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "max_member": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "cast": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "tallies": {
+                  "maxItems": 64,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "winner": {
+                  "type": "integer",
+                  "minimum": -32768,
+                  "maximum": 32767
+                },
+                "metadata": {
+                  "type": "string",
+                  "maxLength": 16384
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator",
+                "kind",
+                "choices",
+                "closes",
+                "quorum",
+                "approval",
+                "denominator",
+                "max_member",
+                "cast",
+                "tallies",
+                "status",
+                "winner",
+                "metadata"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "ballot": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "member": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "weight": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "choice": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                }
+              },
+              "required": [
+                "id",
+                "ballot",
+                "member",
+                "weight",
+                "choice"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "contributor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "milestones": {
+                  "maxItems": 64,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator",
+                "contributor",
+                "document_id",
+                "document_version",
+                "milestones",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "project_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "quantity": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                },
+                "due": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "submission_doc": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "submission_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "review_doc": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "review_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "reviewer": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "project_id",
+                "quantity",
+                "due",
+                "status",
+                "submission_doc",
+                "submission_version",
+                "review_doc",
+                "review_version",
+                "reviewer"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "recipient": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "quantity": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                },
+                "periods": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "interval": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "starts": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "entries": {
+                  "maxItems": 64,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator",
+                "recipient",
+                "quantity",
+                "periods",
+                "interval",
+                "starts",
+                "entries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "schedule_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "due": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "schedule_id",
+                "due"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "dao",
+          "modules",
+          "ballots",
+          "votes",
+          "projects",
+          "milestones",
+          "schedules",
+          "entries"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "module-reference"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/decide/finalize",
+      "input": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "ballotId": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "dao",
+          "ballotId"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "const": "finalized"
+              },
+              "transactionId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "state",
+              "transactionId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "const": "already-finalized"
+              }
+            },
+            "required": [
+              "state"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "helpTopic": "decide"
+    }
+  ],
+  "modules": [
+    {
+      "manifest": {
+        "id": "decide",
+        "version": "0.1.0-alpha.1",
+        "coreRange": "^0.1.0-alpha.1",
+        "interfaceVersion": 1,
+        "configVersion": 1,
+        "capabilities": [
+          "ballot.create",
+          "ballot.finalize"
+        ],
+        "helpTopic": "decide"
+      },
+      "configuration": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "configVersion": {
+            "type": "number",
+            "const": 1
+          },
+          "weight": {
+            "type": "string",
+            "enum": [
+              "member",
+              "credit",
+              "native-stake"
+            ]
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 2592000
+          },
+          "quorumBasisPoints": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "approvalBasisPoints": {
+            "type": "integer",
+            "minimum": 5001,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "configVersion",
+          "weight",
+          "duration",
+          "quorumBasisPoints",
+          "approvalBasisPoints"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "manifest": {
+        "id": "works",
+        "version": "0.1.0-alpha.1",
+        "coreRange": "^0.1.0-alpha.1",
+        "interfaceVersion": 1,
+        "configVersion": 1,
+        "capabilities": [
+          "obligation.create",
+          "obligation.execute"
+        ],
+        "helpTopic": "works"
+      },
+      "configuration": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "configVersion": {
+            "type": "number",
+            "const": 1
+          },
+          "maxMilestones": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "reviewPolicy": {
+            "type": "string",
+            "const": "independent-reviewer"
+          }
+        },
+        "required": [
+          "configVersion",
+          "maxMilestones",
+          "reviewPolicy"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "manifest": {
+        "id": "payroll",
+        "version": "0.1.0-alpha.1",
+        "coreRange": "^0.1.0-alpha.1",
+        "interfaceVersion": 1,
+        "configVersion": 1,
+        "capabilities": [
+          "obligation.create",
+          "obligation.execute"
+        ],
+        "helpTopic": "payroll"
+      },
+      "configuration": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "configVersion": {
+            "type": "number",
+            "const": 1
+          },
+          "maxPeriods": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "minIntervalSeconds": {
+            "type": "integer",
+            "minimum": 86400,
+            "maximum": 2678400
+          }
+        },
+        "required": [
+          "configVersion",
+          "maxPeriods",
+          "minIntervalSeconds"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+} satisfies HelpBundle;
