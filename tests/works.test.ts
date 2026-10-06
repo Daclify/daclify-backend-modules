@@ -4,7 +4,7 @@ import { PrivateKey } from '@wharfkit/antelope';
 import { CID } from 'multiformats/cid';
 import { sha256 } from 'multiformats/hashes/sha2';
 import { z } from 'zod';
-import { load, send, row } from './helpers/vert.js';
+import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
 const worksHash = wasmCodeHash('.artifacts/contracts/works.wasm');
 let core: ReturnType<typeof load>;
@@ -17,6 +17,7 @@ beforeEach(async () => {
   works = load(chain, 'works', '.artifacts/contracts/works');
   token = load(chain, 'eosio.token', '.artifacts/core-release/testtoken');
   await send(core, 'init', ['ab'.repeat(32)], 'daclifycore@active');
+  await listFirstParty(core, 'works', worksHash);
   await send(core, 'createdao', [1, 'alice', '{}', 0, 'eosio.token', '4,TLOS'], 'alice@active');
   for (const id of [1, 2])
     await send(

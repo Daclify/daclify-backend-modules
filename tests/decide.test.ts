@@ -3,7 +3,7 @@ import { TimePointSec } from '@greymass/eosio';
 import { Blockchain } from '@proton/vert';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row } from './helpers/vert.js';
+import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 const decideHash = wasmCodeHash('.artifacts/contracts/decide.wasm');
 let chain: Blockchain;
@@ -12,9 +12,11 @@ let decide: ReturnType<typeof load>;
 beforeEach(async () => {
   chain = new Blockchain();
   chain.createAccounts('alice', 'bob');
+  chain.createAccounts('eosio.token');
   core = load(chain, 'daclifycore', '.artifacts/core-release/runtime');
   decide = load(chain, 'decide', '.artifacts/contracts/decide');
   await send(core, 'init', ['ab'.repeat(32)], 'daclifycore@active');
+  await listFirstParty(core, 'decide', decideHash);
   for (const dao of [1, 2]) {
     await send(core, 'createdao', [dao, 'alice', '{}', 0, 'eosio.token', '4,TLOS'], 'alice@active');
     for (const id of [1, 2, 3])

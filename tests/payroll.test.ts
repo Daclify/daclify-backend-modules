@@ -3,7 +3,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row } from './helpers/vert.js';
+import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
 const payrollHash = wasmCodeHash('.artifacts/contracts/payroll.wasm');
 let chain: Blockchain;
@@ -17,6 +17,7 @@ beforeEach(async () => {
   payroll = load(chain, 'payroll', '.artifacts/contracts/payroll');
   token = load(chain, 'eosio.token', '.artifacts/core-release/testtoken');
   await send(core, 'init', ['ab'.repeat(32)], 'daclifycore@active');
+  await listFirstParty(core, 'payroll', payrollHash);
   await send(core, 'createdao', [1, 'alice', '{}', 0, 'eosio.token', '4,TLOS'], 'alice@active');
   for (const id of [1, 2])
     await send(

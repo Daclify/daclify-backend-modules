@@ -64,3 +64,18 @@ export function row(account: Account, table: string, scope: bigint, id: bigint):
   if (!accessor) throw new Error(`Missing ABI table ${table}`);
   return accessor(scope).getTableRow(id);
 }
+
+export async function listFirstParty(core: Account, module: string, codeHash: string) {
+  await send(
+    core,
+    'setfees',
+    [500, 10000, 'alice', 'eosio.token', '4,TLOS', ''],
+    'daclifycore@active',
+  );
+  await send(
+    core,
+    'listmod',
+    [module, 'alice', 0, 1, '0.0000 TLOS', codeHash, 'First-party fixture'],
+    'daclifycore@active',
+  );
+}

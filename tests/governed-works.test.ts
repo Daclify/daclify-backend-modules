@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row } from './helpers/vert.js';
+import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain,
   core: ReturnType<typeof load>,
@@ -86,6 +86,8 @@ beforeEach(async () => {
   works = load(chain, 'works', '.artifacts/contracts/works');
   const token = load(chain, 'eosio.token', '.artifacts/core-release/testtoken');
   await send(core, 'init', ['ab'.repeat(32)], 'daclifycore@active');
+  for (const module of ['decide', 'works'])
+    await listFirstParty(core, module, wasmCodeHash('.artifacts/contracts/' + module + '.wasm'));
   await send(core, 'createdao', [1, 'alice', '{}', 0, 'eosio.token', '4,TLOS'], 'alice@active');
   await send(core, 'initgov', [1, policy], 'alice@active');
   for (const [index, key] of keys.entries())
@@ -188,7 +190,7 @@ describe('vote-authorised Works funding', () => {
     );
   });
   it('rolls back every reservation and execution marker when a later milestone exceeds its cap', async () => {
-    await act('daclifycore', 'setgov', {
+    await act('daclifycore', 'setdaogov', {
       settings: { ...policy, max_commitment: 10000, daily_commitment: 20000 },
     });
     await open();
@@ -228,7 +230,7 @@ describe('vote-authorised Works funding', () => {
   it('invalidates funding authority when the policy revision changes', async () => {
     await open();
     await pass();
-    await act('daclifycore', 'setgov', { settings: { ...policy, approval: 6667 } });
+    await act('daclifycore', 'setdaogov', { settings: { ...policy, approval: 6667 } });
     await expect(send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
       'POLICY_CHANGED',
     );
