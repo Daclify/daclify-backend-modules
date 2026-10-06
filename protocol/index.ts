@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.2.0-alpha.1';
+export const VERSION = '0.3.0-alpha.1';
 export const ModulePermissions = Object.freeze({
   decide: { actions: ['open', 'vote', 'openwork'] as const, grants: ['govlock'] as const },
   works: {
@@ -30,7 +30,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: VERSION,
-    coreRange: '^0.2.0-alpha.1',
+    coreRange: '^0.3.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
@@ -39,7 +39,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'works',
     version: VERSION,
-    coreRange: '^0.2.0-alpha.1',
+    coreRange: '^0.3.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -48,7 +48,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: VERSION,
-    coreRange: '^0.2.0-alpha.1',
+    coreRange: '^0.3.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],

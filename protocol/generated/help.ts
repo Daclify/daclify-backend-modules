@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.2.0-alpha.1",
+  "packageVersion": "0.3.0-alpha.1",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -1611,8 +1611,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "decide",
-        "version": "0.2.0-alpha.1",
-        "coreRange": "^0.2.0-alpha.1",
+        "version": "0.3.0-alpha.1",
+        "coreRange": "^0.3.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -1667,8 +1667,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "works",
-        "version": "0.2.0-alpha.1",
-        "coreRange": "^0.2.0-alpha.1",
+        "version": "0.3.0-alpha.1",
+        "coreRange": "^0.3.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -1706,8 +1706,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.2.0-alpha.1",
-        "coreRange": "^0.2.0-alpha.1",
+        "version": "0.3.0-alpha.1",
+        "coreRange": "^0.3.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
