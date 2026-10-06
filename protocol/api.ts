@@ -34,6 +34,7 @@ export const ModuleStateSchema = z.strictObject({
   schedules: z.array(PayrollTableSchemas.schedules),
   entries: z.array(PayrollTableSchemas.entries),
   controls: z.array(PayrollTableSchemas.controls),
+  executions: z.array(DecideTableSchemas.executions).default([]),
 });
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;
@@ -54,6 +55,16 @@ export const ModuleApiRoutes = {
     ]),
     helpTopic: 'decide',
   },
+  execute: {
+    method: 'POST',
+    path: '/v1/decide/execute',
+    input: z.strictObject({ dao: DaoRefSchema, ballotId: IdSchema }),
+    response: z.discriminatedUnion('state', [
+      z.strictObject({ state: z.literal('executed'), transactionId: ChainIdSchema }),
+      z.strictObject({ state: z.literal('already-executed') }),
+    ]),
+    helpTopic: 'governed-funding',
+  },
 } satisfies Record<
   string,
   {
@@ -66,3 +77,5 @@ export const ModuleApiRoutes = {
 >;
 export type FinalizationRequest = z.infer<typeof ModuleApiRoutes.finalize.input>;
 export type FinalizationResult = z.infer<typeof ModuleApiRoutes.finalize.response>;
+export type ExecutionRequest = z.infer<typeof ModuleApiRoutes.execute.input>;
+export type ExecutionResult = z.infer<typeof ModuleApiRoutes.execute.response>;

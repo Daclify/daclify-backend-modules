@@ -1,6 +1,6 @@
 // Generated build hashes; deployed code must match before enabling the release.
 export const ModuleCodeHashes={
-  "decide": "3c42f1cfbf872a61a5463cc79979d107255d56006efa18ac2763fbce0298141e",
-  "works": "dffe7e7429056e6970732b85fbc514714443a3e122ef99053224ea99edf2c8cc",
-  "payroll": "364d6f0bbb049251c7edc71218fc3d4a2b5fa34356d21a26d8ae61e2ce1f18e6"
+  "decide": "18e5c491604c1c7f130c44d6f702379b855f99d4464e753bd152ad9b705e7fe2",
+  "works": "cc5fa10c49eac3ed1b7cdf0e930f7f492f8c0f26d4f72aa5608f1d3643682e0f",
+  "payroll": "efdceb30d194fbf7ed06f921e94cafe0de9fb7f9d6c11792507f2c2388108ffc"
 };

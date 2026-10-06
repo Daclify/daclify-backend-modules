@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = 'ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4eedcb31614';
+export const decideAbiHash = '1c480fcf81851dc918b243573b48fb474030cb7876c1ff7386f808b23205e3c0';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -72,6 +72,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "execute",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "finalize",
       "base": "",
       "fields": [
@@ -116,6 +134,52 @@ export const decideAbi = {
         {
           "name": "choices",
           "type": "uint8"
+        },
+        {
+          "name": "duration",
+          "type": "uint32"
+        },
+        {
+          "name": "quorum",
+          "type": "uint16"
+        },
+        {
+          "name": "approval",
+          "type": "uint16"
+        },
+        {
+          "name": "metadata",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "openwork",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "works",
+          "type": "name"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
         },
         {
           "name": "duration",
@@ -186,9 +250,56 @@ export const decideAbi = {
           "type": "uint8"
         }
       ]
+    },
+    {
+      "name": "work_execution_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "works",
+          "type": "name"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "works_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "policy_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "deadline",
+          "type": "uint32"
+        },
+        {
+          "name": "executed",
+          "type": "bool"
+        }
+      ]
     }
   ],
   "actions": [
+    {
+      "name": "execute",
+      "type": "execute",
+      "ricardian_contract": ""
+    },
     {
       "name": "finalize",
       "type": "finalize",
@@ -197,6 +308,11 @@ export const decideAbi = {
     {
       "name": "open",
       "type": "open",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "openwork",
+      "type": "openwork",
       "ricardian_contract": ""
     },
     {
@@ -209,6 +325,13 @@ export const decideAbi = {
     {
       "name": "ballots",
       "type": "ballot_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "executions",
+      "type": "work_execution_record",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -242,6 +365,11 @@ export interface ballot_record {
   winner: number;
   metadata: string;
 }
+export interface execute {
+  runtime: string;
+  dao_id: string;
+  ballot_id: string;
+}
 export interface finalize {
   runtime: string;
   dao_id: string;
@@ -254,6 +382,18 @@ export interface open {
   ballot_id: string;
   kind: number;
   choices: number;
+  duration: number;
+  quorum: number;
+  approval: number;
+  metadata: string;
+}
+export interface openwork {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  ballot_id: string;
+  works: string;
+  project_id: string;
   duration: number;
   quorum: number;
   approval: number;
@@ -273,8 +413,21 @@ export interface vote_record {
   weight: string;
   choice: number;
 }
+export interface work_execution_record {
+  ballot_id: string;
+  dao_id: string;
+  works: string;
+  project_id: string;
+  commitment: string;
+  works_hash: string;
+  policy_revision: string;
+  deadline: number;
+  executed: boolean;
+}
 export interface DecideActions {
+  execute: execute;
   finalize: finalize;
   open: open;
+  openwork: openwork;
   vote: vote;
 }

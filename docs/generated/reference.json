@@ -1,6 +1,6 @@
 {
   "producer": "modules",
-  "packageVersion": "0.1.0-alpha.1",
+  "packageVersion": "0.2.0-alpha.1",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -10,7 +10,8 @@
         "Choose equal active member voting, internal governance credits, or deposited native stake. Pick quorum and approval thresholds before opening a ballot.",
         "A ballot snapshots its eligible denominator and highest member ID. Active ballots freeze issuance, stake changes, and reactivation so a voter cannot change their weight during voting.",
         "Closing and finalization are separate from execution. A passed proposal does not authorize arbitrary contract calls. Executors require bounded, explicitly configured effects.",
-        "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions."
+        "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions.",
+        "DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory."
       ]
     },
     {
@@ -20,7 +21,8 @@
         "A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.",
         "Submission and review are separate permissions. A contributor cannot approve their own work. A reviewer can request changes and the contributor can submit a revision. A separate dispute or arbitration process is not implemented in this release.",
         "Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.",
-        "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments."
+        "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.",
+        "When governed Works funding is enabled, direct administrator acceptance is rejected. An approved funding ballot reserves the pinned project; contributor submission and independent review are still required before payment."
       ]
     },
     {
@@ -40,7 +42,19 @@
       "paragraphs": [
         "Each reference bundle identifies the module package and interface version it describes. The module read API reports deployment versions, configured permissions and code verification alongside current ballots, projects and payroll entries.",
         "The configuration reference is generated from the producer's validation schemas. Decide settings are selected for each ballot. Works currently uses a fixed limit of sixteen milestones and independent review; payroll uses a fixed limit of twelve installments. Installing a module does not yet persist custom Works or payroll settings.",
-        "Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment."
+        "Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment.",
+        "Core now persists the DAO ballot policy and commitment limits. Module installation does not provide arbitrary custom Works or payroll policies. The executor supports only a specific Works project, not arbitrary contract calls."
+      ]
+    },
+    {
+      "id": "governed-funding",
+      "title": "Vote on a specific Works project",
+      "paragraphs": [
+        "Publish the deliverable reference, propose milestone work, then select Propose funding vote. The contract opens a binary vote using the DAO policy and pins the project, contributor, document version, milestone amounts and due times, runtime, module code and policy revision.",
+        "After closing, finalize the ballot. Only a passed, finalized result can execute. Execute approved funding reserves all milestones atomically and at most once. A failed reservation rolls back the execution flag. The native contract accepts permissionless execution; the hosted API requires a signed-in account and applies sponsorship limits.",
+        "Execution expires seven days after the scheduled closing time. Changed or cancelled projects, a changed policy revision, missing modules, replaced code, a guardian pause or insufficient funding prevent execution. A second passed ballot for an already funded project cannot reserve it again.",
+        "Funding approval does not approve a deliverable. The contributor submits evidence and a different administrator or reviewer accepts it before settlement. Distinct member keys do not prove different operators; admission and review policy must address conflicts. Existing approved liabilities remain payable after module removal, subject to a temporary guardian pause.",
+        "Advisory ballots cannot be repurposed as funding authority. There is no arbitrary-action executor, game-result oracle, secret ballot or independent-operator verification in this release."
       ]
     }
   ],
@@ -49,8 +63,25 @@
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4eedcb31614",
+      "sourceAbiHash": "1c480fcf81851dc918b243573b48fb474030cb7876c1ff7386f808b23205e3c0",
       "actions": [
+        {
+          "name": "execute",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        },
         {
           "name": "finalize",
           "fields": [
@@ -94,6 +125,51 @@
             {
               "name": "choices",
               "type": "uint8"
+            },
+            {
+              "name": "duration",
+              "type": "uint32"
+            },
+            {
+              "name": "quorum",
+              "type": "uint16"
+            },
+            {
+              "name": "approval",
+              "type": "uint16"
+            },
+            {
+              "name": "metadata",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "openwork",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "works",
+              "type": "name"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
             },
             {
               "name": "duration",
@@ -206,6 +282,47 @@
           ]
         },
         {
+          "name": "executions",
+          "fields": [
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "works",
+              "type": "name"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            },
+            {
+              "name": "commitment",
+              "type": "checksum256"
+            },
+            {
+              "name": "works_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "policy_revision",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint32"
+            },
+            {
+              "name": "executed",
+              "type": "bool"
+            }
+          ]
+        },
+        {
           "name": "votes",
           "fields": [
             {
@@ -235,7 +352,7 @@
     {
       "name": "works",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a174e62dcd324",
+      "sourceAbiHash": "fe2ba5568cec281572aabbc3086f7c83d9c1293342c6ec1e6bffd3eb6bb992a3",
       "actions": [
         {
           "name": "accept",
@@ -275,6 +392,27 @@
             },
             {
               "name": "project_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "govaccept",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "project_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
               "type": "uint64"
             }
           ]
@@ -771,6 +909,7 @@
                         "enum": [
                           "ballot.create",
                           "ballot.finalize",
+                          "ballot.execute",
                           "obligation.create",
                           "obligation.execute",
                           "member.manage",
@@ -1222,6 +1361,63 @@
               ],
               "additionalProperties": false
             }
+          },
+          "executions": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ballot_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "works": {
+                  "type": "string",
+                  "maxLength": 13
+                },
+                "project_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "commitment": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "works_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "policy_revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "deadline": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "executed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "ballot_id",
+                "dao_id",
+                "works",
+                "project_id",
+                "commitment",
+                "works_hash",
+                "policy_revision",
+                "deadline",
+                "executed"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
@@ -1233,7 +1429,8 @@
           "milestones",
           "schedules",
           "entries",
-          "controls"
+          "controls",
+          "executions"
         ],
         "additionalProperties": false
       },
@@ -1322,19 +1519,104 @@
         ]
       },
       "helpTopic": "decide"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/decide/execute",
+      "input": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "ballotId": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "dao",
+          "ballotId"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "const": "executed"
+              },
+              "transactionId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "state",
+              "transactionId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "const": "already-executed"
+              }
+            },
+            "required": [
+              "state"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "helpTopic": "governed-funding"
     }
   ],
   "modules": [
     {
       "manifest": {
         "id": "decide",
-        "version": "0.1.0-alpha.1",
-        "coreRange": "^0.1.0-alpha.1",
+        "version": "0.2.0-alpha.1",
+        "coreRange": "^0.2.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
           "ballot.create",
-          "ballot.finalize"
+          "ballot.finalize",
+          "ballot.execute"
         ],
         "helpTopic": "decide"
       },
@@ -1383,8 +1665,8 @@
     {
       "manifest": {
         "id": "works",
-        "version": "0.1.0-alpha.1",
-        "coreRange": "^0.1.0-alpha.1",
+        "version": "0.2.0-alpha.1",
+        "coreRange": "^0.2.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -1422,8 +1704,8 @@
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.1.0-alpha.1",
-        "coreRange": "^0.1.0-alpha.1",
+        "version": "0.2.0-alpha.1",
+        "coreRange": "^0.2.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

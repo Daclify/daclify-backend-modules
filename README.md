@@ -16,7 +16,9 @@ Decide (`contracts/decide`) opens a ballot with `kind` 0, 1, or 2.
 
 A ballot has 2 to 16 choices, a quorum and an approval threshold in basis points, and a duration from 60 seconds through 30 days. Closing and finalization are separate from execution. A passed ballot does not make an arbitrary contract call. An advisory poll is this ballot with no treasury movement. There is no separate poll contract.
 
-Works (`contracts/works`) funds a contributor through milestones. Acceptance reserves the DAO treasury and approves the obligation. Submission, review, and revision stay on the module. Settlement of an approved obligation goes through the core treasury. A separate dispute process is not implemented.
+Where core stores a governance policy, every ballot must match its exact settings. `openwork` binds a binary vote to a specific Works project, module code, policy revision and execution deadline. `execute` reserves the passed project's milestones once; it does not run arbitrary actions or approve delivery. See core's [authority and compatibility notes](../daclify-backend-core/docs/dao-presets.md).
+
+Works (`contracts/works`) funds a contributor through milestones. Acceptance reserves the DAO treasury. Delivery review approves the obligation. Governed funding requires inline acceptance from the configured Decide contract; direct administrator acceptance is rejected. Submission, review, and revision stay on the module. Settlement of an approved obligation goes through the core treasury. A separate dispute process is not implemented.
 
 Payroll (`contracts/payroll`) commits 1 to 12 installments of one native asset. One installment is the one-time payment. The full term is reserved and approved at commit. `settle` pays every installment that is already due, oldest first, and leaves a future installment unpaid. A paused schedule pays nothing until an administrator resumes it. The recipient, amount, interval, and start are not edited by the label or the pause. Direct core `payob` can still pay one approved obligation and does not apply the pause or the catch-up.
 
@@ -36,7 +38,7 @@ Testnet names are ordinary 12-character accounts because the testnet creator doe
 
 ## Not in these contracts
 
-The product catalogue still needs separate reviewed contracts for memberships, bounties, vesting, inbound dues, and a budget cap. A hackathon module would be global and would belong to the project DAO, not to Hub control of other DAOs. Committee seat counts and terms are not chosen. The legacy elections module stays in `daclifymodules` and is not ported. The legacy hooks registry is a different contract and is not this module host.
+The product catalogue still needs separate reviewed contracts for memberships, bounties, vesting and inbound dues. Per-obligation and UTC-day commitment limits now belong to core's governance policy. A hackathon module would be global and would belong to the project DAO, not to Hub control of other DAOs. Committee seat counts and terms are not chosen. The legacy elections module stays in `daclifymodules` and is not ported. The legacy hooks registry is a different contract and is not this module host.
 
 Custom persistent Works or payroll policy settings are not stored at install time. The guides in `docs/guides/topics.json` describe the fixed limits the contracts enforce today.
 

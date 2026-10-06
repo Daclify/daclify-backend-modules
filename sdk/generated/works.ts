@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = '49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a174e62dcd324';
+export const worksAbiHash = 'fe2ba5568cec281572aabbc3086f7c83d9c1293342c6ec1e6bffd3eb6bb992a3';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -45,6 +45,28 @@ export const worksAbi = {
         },
         {
           "name": "project_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "govaccept",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
           "type": "uint64"
         }
       ]
@@ -274,6 +296,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "govaccept",
+      "type": "govaccept",
+      "ricardian_contract": ""
+    },
+    {
       "name": "propose",
       "type": "propose",
       "ricardian_contract": ""
@@ -325,6 +352,12 @@ export interface cancel {
   dao_id: string;
   member_id: string;
   project_id: string;
+}
+export interface govaccept {
+  runtime: string;
+  dao_id: string;
+  project_id: string;
+  ballot_id: string;
 }
 export interface milestone_record {
   id: string;
@@ -385,6 +418,7 @@ export interface submitwork {
 export interface WorksActions {
   accept: accept;
   cancel: cancel;
+  govaccept: govaccept;
   propose: propose;
   review: review;
   settle: settle;

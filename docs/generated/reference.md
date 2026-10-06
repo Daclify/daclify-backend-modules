@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.1.0-alpha.1 · interface 1.
+Package 0.2.0-alpha.1 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -14,6 +14,8 @@ Closing and finalization are separate from execution. A passed proposal does not
 
 After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions.
 
+DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory.
+
 ## Fund work through milestones
 
 A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.
@@ -23,6 +25,8 @@ Submission and review are separate permissions. A contributor cannot approve the
 Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.
 
 Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.
+
+When governed Works funding is enabled, direct administrator acceptance is rejected. An approved funding ballot reserves the pinned project; contributor submission and independent review are still required before payment.
 
 ## Funded payroll with a clear end date
 
@@ -44,9 +48,31 @@ The configuration reference is generated from the producer's validation schemas.
 
 Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment.
 
+Core now persists the DAO ballot policy and commitment limits. Module installation does not provide arbitrary custom Works or payroll policies. The executor supports only a specific Works project, not arbitrary contract calls.
+
+## Vote on a specific Works project
+
+Publish the deliverable reference, propose milestone work, then select Propose funding vote. The contract opens a binary vote using the DAO policy and pins the project, contributor, document version, milestone amounts and due times, runtime, module code and policy revision.
+
+After closing, finalize the ballot. Only a passed, finalized result can execute. Execute approved funding reserves all milestones atomically and at most once. A failed reservation rolls back the execution flag. The native contract accepts permissionless execution; the hosted API requires a signed-in account and applies sponsorship limits.
+
+Execution expires seven days after the scheduled closing time. Changed or cancelled projects, a changed policy revision, missing modules, replaced code, a guardian pause or insufficient funding prevent execution. A second passed ballot for an already funded project cannot reserve it again.
+
+Funding approval does not approve a deliverable. The contributor submits evidence and a different administrator or reviewer accepts it before settlement. Distinct member keys do not prove different operators; admission and review policy must address conflicts. Existing approved liabilities remain payable after module removal, subject to a temporary guardian pause.
+
+Advisory ballots cannot be repurposed as funding authority. There is no arbitrary-action executor, game-result oracle, secret ballot or independent-operator verification in this release.
+
 ## decide contract
 
-Source ABI JSON SHA-256: `ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4eedcb31614`.
+Source ABI JSON SHA-256: `1c480fcf81851dc918b243573b48fb474030cb7876c1ff7386f808b23205e3c0`.
+
+### Action: execute
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| ballot_id | uint64 |
 
 ### Action: finalize
 
@@ -66,6 +92,21 @@ Source ABI JSON SHA-256: `ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4
 | ballot_id | uint64 |
 | kind | uint8 |
 | choices | uint8 |
+| duration | uint32 |
+| quorum | uint16 |
+| approval | uint16 |
+| metadata | string |
+
+### Action: openwork
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| ballot_id | uint64 |
+| works | name |
+| project_id | uint64 |
 | duration | uint32 |
 | quorum | uint16 |
 | approval | uint16 |
@@ -101,6 +142,20 @@ Source ABI JSON SHA-256: `ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4
 | winner | int16 |
 | metadata | string |
 
+### Table: executions
+
+| Field | ABI type |
+| --- | --- |
+| ballot_id | uint64 |
+| dao_id | uint64 |
+| works | name |
+| project_id | uint64 |
+| commitment | checksum256 |
+| works_hash | checksum256 |
+| policy_revision | uint64 |
+| deadline | uint32 |
+| executed | bool |
+
 ### Table: votes
 
 | Field | ABI type |
@@ -113,7 +168,7 @@ Source ABI JSON SHA-256: `ec9a6b6c7953392985b5bf3f19aa4bc1530bba12502718e1f328f4
 
 ## works contract
 
-Source ABI JSON SHA-256: `49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a174e62dcd324`.
+Source ABI JSON SHA-256: `fe2ba5568cec281572aabbc3086f7c83d9c1293342c6ec1e6bffd3eb6bb992a3`.
 
 ### Action: accept
 
@@ -132,6 +187,15 @@ Source ABI JSON SHA-256: `49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a17
 | dao_id | uint64 |
 | member_id | uint64 |
 | project_id | uint64 |
+
+### Action: govaccept
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| project_id | uint64 |
+| ballot_id | uint64 |
 
 ### Action: propose
 
@@ -383,6 +447,7 @@ Response:
                   "enum": [
                     "ballot.create",
                     "ballot.finalize",
+                    "ballot.execute",
                     "obligation.create",
                     "obligation.execute",
                     "member.manage",
@@ -834,6 +899,63 @@ Response:
         ],
         "additionalProperties": false
       }
+    },
+    "executions": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "works": {
+            "type": "string",
+            "maxLength": 13
+          },
+          "project_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "works_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "policy_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "deadline": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "executed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ballot_id",
+          "dao_id",
+          "works",
+          "project_id",
+          "commitment",
+          "works_hash",
+          "policy_revision",
+          "deadline",
+          "executed"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [
@@ -845,7 +967,8 @@ Response:
     "milestones",
     "schedules",
     "entries",
-    "controls"
+    "controls",
+    "executions"
   ],
   "additionalProperties": false
 }
@@ -944,11 +1067,104 @@ Response:
 }
 ```
 
+## POST /v1/decide/execute
+
+Guide: governed-funding.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "ballotId": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "required": [
+    "dao",
+    "ballotId"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "const": "executed"
+        },
+        "transactionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "state",
+        "transactionId"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "const": "already-executed"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
+```
+
 ## decide configuration
 
-Module 0.1.0-alpha.1 · config 1 · core ^0.1.0-alpha.1.
+Module 0.2.0-alpha.1 · config 1 · core ^0.2.0-alpha.1.
 
-Capabilities: ballot.create, ballot.finalize.
+Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
 Guide: decide.
 
@@ -998,7 +1214,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.1.0-alpha.1 · config 1 · core ^0.1.0-alpha.1.
+Module 0.2.0-alpha.1 · config 1 · core ^0.2.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -1034,7 +1250,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.1.0-alpha.1 · config 1 · core ^0.1.0-alpha.1.
+Module 0.2.0-alpha.1 · config 1 · core ^0.2.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 

@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.1.0-alpha.1';
+export const VERSION = '0.2.0-alpha.1';
+export const ModulePermissions = Object.freeze({
+  decide: { actions: ['open', 'vote', 'openwork'] as const, grants: ['govlock'] as const },
+  works: {
+    actions: ['propose', 'accept', 'submitwork', 'review', 'cancel'] as const,
+    grants: ['reserve', 'approve', 'cancel'] as const,
+  },
+  payroll: { actions: ['commit', 'edit'] as const, grants: ['reserve', 'approve'] as const },
+});
 export const DecideConfigSchema = z.strictObject({
   configVersion: z.literal(1),
   weight: z.enum(['member', 'credit', 'native-stake']),
@@ -22,16 +30,16 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: VERSION,
-    coreRange: '^0.1.0-alpha.1',
+    coreRange: '^0.2.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
-    capabilities: ['ballot.create', 'ballot.finalize'],
+    capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
     helpTopic: 'decide',
   }),
   ModuleManifestSchema.parse({
     id: 'works',
     version: VERSION,
-    coreRange: '^0.1.0-alpha.1',
+    coreRange: '^0.2.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -40,7 +48,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: VERSION,
-    coreRange: '^0.1.0-alpha.1',
+    coreRange: '^0.2.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -53,7 +61,11 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
     account: NativeAccountSchema,
     version: z.literal(VERSION),
     config: DecideConfigSchema,
-    actions: z.tuple([z.literal('open'), z.literal('vote')]),
+    actions: z.tuple([
+      z.literal(ModulePermissions.decide.actions[0]),
+      z.literal(ModulePermissions.decide.actions[1]),
+      z.literal(ModulePermissions.decide.actions[2]),
+    ]),
     grants: z.tuple([z.literal('govlock')]),
   }),
   z.strictObject({
@@ -75,7 +87,10 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
     account: NativeAccountSchema,
     version: z.literal(VERSION),
     config: PayrollConfigSchema,
-    actions: z.tuple([z.literal('commit')]),
+    actions: z.tuple([
+      z.literal(ModulePermissions.payroll.actions[0]),
+      z.literal(ModulePermissions.payroll.actions[1]),
+    ]),
     grants: z.tuple([z.literal('reserve'), z.literal('approve')]),
   }),
 ]);
