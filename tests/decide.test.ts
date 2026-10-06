@@ -147,6 +147,43 @@ describe('Decide snapshots and finalization', () => {
     expect(ballot().status).toBe(1);
     await send(core, 'grantcredit', [1, 2, 1], 'alice@active');
   });
+  it('rejects a ballot outside the preset bounds', async () => {
+    const badKind = open();
+    badKind[4] = 3;
+    await expect(send(decide, 'open', badKind, 'daclifycore@active')).rejects.toThrow(
+      'BALLOT_PRESET',
+    );
+    const oneChoice = open();
+    oneChoice[5] = 1;
+    await expect(send(decide, 'open', oneChoice, 'daclifycore@active')).rejects.toThrow(
+      'BALLOT_PRESET',
+    );
+    const short = open();
+    short[6] = 59;
+    await expect(send(decide, 'open', short, 'daclifycore@active')).rejects.toThrow(
+      'BALLOT_DURATION',
+    );
+    const long = open();
+    long[6] = 2592001;
+    await expect(send(decide, 'open', long, 'daclifycore@active')).rejects.toThrow(
+      'BALLOT_DURATION',
+    );
+    await expect(send(decide, 'open', open(1, 0, 0, 5001), 'daclifycore@active')).rejects.toThrow(
+      'BALLOT_THRESHOLD',
+    );
+    await expect(
+      send(decide, 'open', open(1, 0, 5000, 5000), 'daclifycore@active'),
+    ).rejects.toThrow('BALLOT_THRESHOLD');
+  });
+  it('refuses stake weight when none is eligible and a credit vote with no credits', async () => {
+    await expect(send(decide, 'open', open(1, 2), 'daclifycore@active')).rejects.toThrow(
+      'NO_ELIGIBLE_WEIGHT',
+    );
+    await send(decide, 'open', open(1, 1), 'daclifycore@active');
+    await expect(
+      send(decide, 'vote', ['daclifycore', 1, 3, 1, 1], 'daclifycore@active'),
+    ).rejects.toThrow('NO_VOTING_WEIGHT');
+  });
   it('finalizes once', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     chain.addTime(TimePointSec.from(301));

@@ -1,16 +1,57 @@
-# Daclify V2 Backend Modules
+# Daclify V2 backend modules
 
-Private development repository for first-party governance, funding, payroll and integration modules. Modules own their Antelope C++ contracts, TypeScript handlers/jobs, configuration schemas, generated module artifacts, namespaced migrations, guides and tests. Decide and Works reuse useful Telos governance patterns with Daclify's identity and authorization model.
+Antelope C++ contracts for Decide, Works, and payroll, plus the generated module protocol, configuration schemas, and guides. This repository does not own the runtime, the API, the database, or custody. Those live in [daclify-backend-core](https://github.com/Daclify/daclify-backend-core). The screens live in [daclify-frontend](https://github.com/Daclify/daclify-frontend).
 
-Current status: incomplete development implementation. Antelope C++ Decide, Works and fixed-term payroll contracts, generated SDK/schema artifacts, configuration manifests, API schemas and versioned references are implemented and exercised with compiled-WASM tests. Application journeys use the core treasury for approved settlement after module removal. Custom persistent Works/payroll policy settings, execution/committee extensions, module-host integrations and chain adapters remain incomplete. Core’s confirmed native authorization defect and missing runtime code pinning block production readiness.
+Check the three repositories out as siblings. Install from core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md). Core’s [operations guide](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations.md) names the account each contract is deployed to. In a local checkout that guide is `../daclify-backend-core/docs/operations.md`. The copy on `main` appears after that file is pushed.
 
-The canonical [master plan](https://github.com/Daclify/daclify-backend-core/blob/main/docs/superpowers/plans/2026-10-05-daclify-v2-master-plan.md), [work packages](https://github.com/Daclify/daclify-backend-core/blob/main/docs/superpowers/plans/2026-10-05-daclify-v2-work-packages.md) and [versioning, documentation, Pinata and test policy](https://github.com/Daclify/daclify-backend-core/blob/main/docs/superpowers/plans/2026-10-05-daclify-v2-release-docs-test-policy.md) live in the core repository. In the standard local layout, core is at `../daclify-backend-core/`.
+This is not a production release. Core’s `package:release` still refuses publication. The work-package register in core is the acceptance list.
 
-Consume core's pinned public protocol and bounded host capabilities. Do not import private authorization/database/custody code or add unrestricted signing/database access. Module UI components are reviewed source in the frontend repository; configuration metadata cannot load arbitrary remote executable UI.
+## Contracts in this repository
 
-Each module declares compatible core interfaces, versioned configuration and explicit grants. Add generated references and explanatory guides with the behavior, test accepted/rejected transitions and monetary invariants, and verify against supported core releases. Module removal/upgrades preserve pending ballots, obligations and document access.
+Decide (`contracts/decide`) opens a ballot with `kind` 0, 1, or 2.
 
-The user requests one continuous implementation session and reviews the complete code afterward. Internal tests and reviews continue throughout. Production deployment, authority changes and asset migration require separate express authorization after that review.
-Daclify V2 — governance, funding, payroll, and integration modules
+- Kind 0 snapshots active members and counts each vote as weight 1.
+- Kind 1 snapshots governance credits and counts the member’s credits.
+- Kind 2 snapshots deposited native stake and counts that stake.
 
-Install from the three sibling repositories using core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md). Run `npm run typecheck`, `npm run docs:check`, and `npm test`. The `--contracts` bootstrap option rebuilds artifacts and stages the core runtime used by the module harness; it does not deploy a chain.
+A ballot has 2 to 16 choices, a quorum and an approval threshold in basis points, and a duration from 60 seconds through 30 days. Closing and finalization are separate from execution. A passed ballot does not make an arbitrary contract call. An advisory poll is this ballot with no treasury movement. There is no separate poll contract.
+
+Works (`contracts/works`) funds a contributor through milestones. Acceptance reserves the DAO treasury and approves the obligation. Submission, review, and revision stay on the module. Settlement of an approved obligation goes through the core treasury. A separate dispute process is not implemented.
+
+Payroll (`contracts/payroll`) commits 1 to 12 installments of one native asset. One installment is the one-time payment. The full term is reserved and approved at commit. `settle` pays every installment that is already due, oldest first, and leaves a future installment unpaid. A paused schedule pays nothing until an administrator resumes it. The recipient, amount, interval, and start are not edited by the label or the pause. Direct core `payob` can still pay one approved obligation and does not apply the pause or the catch-up.
+
+All three call back into the runtime as the module account. The runtime pins `get_code_hash` while the module keeps any action. Replacing the wasm without updating that pin makes the next callback fail.
+
+## Deploy accounts
+
+The deploy profiles live in core. This repository does not create accounts.
+
+| Contract | Develop   | Testnet        | Production   |
+| -------- | --------- | -------------- | ------------ |
+| Decide   | `decide`  | `daclifydecid` | `decide.we`  |
+| Works    | `works`   | `daclifyworks` | `works.we`   |
+| Payroll  | `payroll` | `daclifypayr1` | `payroll.we` |
+
+Testnet names are ordinary 12-character accounts because the testnet creator does not own a premium suffix. The API reads them from `MODULE_DEPLOYMENTS`. If that variable is empty, core does not call these contracts and payroll settlement stays on `payob`.
+
+## Not in these contracts
+
+The product catalogue still needs separate reviewed contracts for memberships, bounties, vesting, inbound dues, and a budget cap. A hackathon module would be global and would belong to the project DAO, not to Hub control of other DAOs. Committee seat counts and terms are not chosen. The legacy elections module stays in `daclifymodules` and is not ported. The legacy hooks registry is a different contract and is not this module host.
+
+Custom persistent Works or payroll policy settings are not stored at install time. The guides in `docs/guides/topics.json` describe the fixed limits the contracts enforce today.
+
+## Checks
+
+Node 24.21 or later, and npm 11.19 or later.
+
+```sh
+npm run lint
+npm run typecheck
+npm run docs:check
+npm test
+npm run verify
+```
+
+`npm test` runs the compiled-WASM tests in this repository. It does not start a chain. Core’s `--contracts` bootstrap compiles these contracts and stages the runtime the harness links against. `npm run build:contracts` compiles only this repository when the toolchain image is already built.
+
+Generated references are produced by `npm run docs:generate` from the guides and the compiled ABI. `docs:check` fails when the generated files drift. Do not hand-edit `docs/generated/` or `protocol/generated/`.

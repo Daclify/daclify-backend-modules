@@ -79,8 +79,36 @@ describe('fixed-term funded payroll', () => {
       send(payroll, 'commit', commit('1.0000 TLOS', 13), 'daclifycore@active'),
     ).rejects.toThrow('PAYROLL_LIMIT');
     await expect(
+      send(payroll, 'commit', commit('1.0000 TLOS', 0), 'daclifycore@active'),
+    ).rejects.toThrow('PAYROLL_LIMIT');
+    await expect(
       send(payroll, 'commit', commit('1.0000 TLOS', 2, 1), 'daclifycore@active'),
     ).rejects.toThrow('PAYROLL_LIMIT');
+    await expect(
+      send(payroll, 'commit', commit('1.0000 TLOS', 1, 2678401), 'daclifycore@active'),
+    ).rejects.toThrow('PAYROLL_LIMIT');
+    chain.addTime(TimePointSec.from(120));
+    const now = Math.floor(chain.timestamp.toMilliseconds() / 1000);
+    const past = commit('1.0000 TLOS', 1);
+    past[8] = now - 1;
+    await expect(send(payroll, 'commit', past, 'daclifycore@active')).rejects.toThrow(
+      'PAYROLL_START',
+    );
+    const distant = commit('1.0000 TLOS', 1);
+    distant[8] = now + 2678401;
+    await expect(send(payroll, 'commit', distant, 'daclifycore@active')).rejects.toThrow(
+      'PAYROLL_START',
+    );
+  });
+  it('pays a one-time installment once the single period is due', async () => {
+    await send(payroll, 'commit', commit('1.0000 TLOS', 1, 2678400), 'daclifycore@active');
+    expect(totals()).toMatchObject({ available: 90000, reserved: 10000, claims: 0 });
+    chain.addTime(TimePointSec.from(61));
+    await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');
+    expect(totals()).toMatchObject({ available: 90000, reserved: 0, claims: 10000 });
+    await expect(send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active')).rejects.toThrow(
+      'NOT_PAYABLE',
+    );
   });
   it('cannot settle before the due date', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');
