@@ -33,6 +33,7 @@ export const ModuleStateSchema = z.strictObject({
   milestones: z.array(WorksTableSchemas.milestones),
   schedules: z.array(PayrollTableSchemas.schedules),
   entries: z.array(PayrollTableSchemas.entries),
+  controls: z.array(PayrollTableSchemas.controls),
 });
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;

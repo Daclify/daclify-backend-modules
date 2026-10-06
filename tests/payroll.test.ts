@@ -97,14 +97,82 @@ describe('fixed-term funded payroll', () => {
       'NOT_PAYABLE',
     );
   });
-  it('pays only the oldest missed period', async () => {
+  it('pays every due installment in one settlement and leaves a future one', async () => {
+    await send(payroll, 'commit', commit('1.0000 TLOS', 3), 'daclifycore@active');
+    chain.addTime(TimePointSec.from(61 + 86400));
+    await send(payroll, 'settle', ['daclifycore', 1, 3], 'bob@active');
+    expect(totals()).toMatchObject({ available: 70000, reserved: 10000, claims: 20000 });
+    await expect(send(payroll, 'settle', ['daclifycore', 1, 3], 'bob@active')).rejects.toThrow(
+      'NOT_PAYABLE',
+    );
+    chain.addTime(TimePointSec.from(86400));
+    await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');
+    expect(totals()).toMatchObject({ reserved: 0, claims: 30000 });
+  });
+  it('pauses every outstanding installment and keeps an editable label', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');
+    await expect(
+      send(payroll, 'edit', ['daclifycore', 1, 1, 1, 1, 'Contributor'], 'daclifycore@active'),
+    ).rejects.toThrow('MODULE_ACTION');
+    await send(
+      core,
+      'setmodule',
+      [1, 'payroll', 1, ['commit', 'edit'], ['reserve', 'approve'], payrollHash],
+      'alice@active',
+    );
+    const denied = ['daclifycore', 1, 2, 1, 1, 'Contributor'];
+    await expect(send(payroll, 'edit', denied, 'daclifycore@active')).rejects.toThrow(
+      'ADMIN_REQUIRED',
+    );
+    await send(payroll, 'edit', ['daclifycore', 1, 1, 1, 1, 'Contributor'], 'daclifycore@active');
     chain.addTime(TimePointSec.from(61 + 86400));
     await expect(send(payroll, 'settle', ['daclifycore', 1, 2], 'bob@active')).rejects.toThrow(
-      'PAYROLL_OLDEST',
+      'PAYROLL_PAUSED',
     );
-    await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');
+    expect(totals()).toMatchObject({ reserved: 20000, claims: 0 });
+    await send(payroll, 'edit', ['daclifycore', 1, 1, 1, 0, 'Contributor'], 'daclifycore@active');
     await send(payroll, 'settle', ['daclifycore', 1, 2], 'bob@active');
+    expect(totals()).toMatchObject({ reserved: 0, claims: 20000 });
+    const control = z
+      .object({ paused: z.number(), label: z.string(), last_payout: z.number() })
+      .parse(row(payroll, 'controls', core.toBigInt(), 1n));
+    expect(control).toMatchObject({ paused: 0, label: 'Contributor' });
+    expect(control.last_payout).toBeGreaterThan(0);
+    const schedule = z
+      .object({ quantity: z.string(), recipient: z.number() })
+      .parse(row(payroll, 'schedules', core.toBigInt(), 1n));
+    expect(schedule).toMatchObject({ quantity: '1.0000 TLOS', recipient: 2 });
+  });
+  it('rejects a pause flag or label outside the payroll bounds', async () => {
+    await send(payroll, 'commit', commit(), 'daclifycore@active');
+    await send(
+      core,
+      'setmodule',
+      [1, 'payroll', 1, ['commit', 'edit'], ['reserve', 'approve'], payrollHash],
+      'alice@active',
+    );
+    await expect(
+      send(payroll, 'edit', ['daclifycore', 1, 1, 1, 2, 'Contributor'], 'daclifycore@active'),
+    ).rejects.toThrow('PAYROLL_STATE');
+    await expect(
+      send(payroll, 'edit', ['daclifycore', 1, 1, 1, 0, 'x'.repeat(81)], 'daclifycore@active'),
+    ).rejects.toThrow('PAYROLL_LABEL');
+  });
+  it('keeps a pause after the module is removed', async () => {
+    await send(payroll, 'commit', commit(), 'daclifycore@active');
+    await send(
+      core,
+      'setmodule',
+      [1, 'payroll', 1, ['commit', 'edit'], ['reserve', 'approve'], payrollHash],
+      'alice@active',
+    );
+    await send(payroll, 'edit', ['daclifycore', 1, 1, 1, 1, 'Held'], 'daclifycore@active');
+    await send(core, 'setmodule', [1, 'payroll', 1, [], [], ZERO_CODE_HASH], 'alice@active');
+    chain.addTime(TimePointSec.from(61));
+    await expect(send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active')).rejects.toThrow(
+      'PAYROLL_PAUSED',
+    );
+    expect(totals().claims).toBe(0);
   });
   it('preserves due commitments after module removal and offboarding', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');

@@ -32,9 +32,9 @@ Committed installments are approved liabilities. They remain payable after modul
 
 This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.
 
-Choose a future first-installment time in UTC. The UI shows each installment’s due time and core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.
+Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.
 
-The payroll settle action pays one installment and refuses a later installment while an earlier installment in that schedule is unpaid. Settling again, in order, can still pay every installment that is already due, including several in one transaction. The treasury pay action pays an approved due obligation directly and does not apply this order. The schedule does not store a catch-up mode.
+One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. A paused schedule pays nothing until an administrator resumes it. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule.
 
 ## Read the matching module reference
 
@@ -209,7 +209,7 @@ Source ABI JSON SHA-256: `49776a429c3e77a0af5f534e7cfc7fb03784fc9ab8751e3be13a17
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `851a4e53ee8014e03d1e4ef6942d6430227cd6de0bb25ea7bbf3dd8e135a121c`.
+Source ABI JSON SHA-256: `eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6041d98a5a2`.
 
 ### Action: commit
 
@@ -225,6 +225,17 @@ Source ABI JSON SHA-256: `851a4e53ee8014e03d1e4ef6942d6430227cd6de0bb25ea7bbf3dd
 | interval | uint32 |
 | starts | uint32 |
 
+### Action: edit
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| schedule_id | uint64 |
+| paused | uint8 |
+| label | string |
+
 ### Action: settle
 
 | Field | ABI type |
@@ -232,6 +243,15 @@ Source ABI JSON SHA-256: `851a4e53ee8014e03d1e4ef6942d6430227cd6de0bb25ea7bbf3dd
 | runtime | name |
 | dao_id | uint64 |
 | entry_id | uint64 |
+
+### Table: controls
+
+| Field | ABI type |
+| --- | --- |
+| schedule_id | uint64 |
+| paused | uint8 |
+| last_payout | uint32 |
+| label | string |
 
 ### Table: entries
 
@@ -781,6 +801,39 @@ Response:
         ],
         "additionalProperties": false
       }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "paused": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "last_payout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "schedule_id",
+          "paused",
+          "last_payout",
+          "label"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [
@@ -791,7 +844,8 @@ Response:
     "projects",
     "milestones",
     "schedules",
-    "entries"
+    "entries",
+    "controls"
   ],
   "additionalProperties": false
 }
