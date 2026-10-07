@@ -1,6 +1,6 @@
 {
   "producer": "modules",
-  "packageVersion": "0.3.0-alpha.1",
+  "packageVersion": "0.4.0-alpha.1",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -21,7 +21,7 @@
         "A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.",
         "Submission and review are separate permissions. A contributor cannot approve their own work. A reviewer can request changes and the contributor can submit a revision. A separate dispute or arbitration process is not implemented in this release.",
         "Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.",
-        "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.",
+        "Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different active administrator or member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.",
         "When governed Works funding is enabled, direct administrator acceptance is rejected. An approved funding ballot reserves the pinned project; contributor submission and independent review are still required before payment."
       ]
     },
@@ -33,7 +33,7 @@
         "Committed installments are approved liabilities. They remain payable after module removal, account offboarding or subscription expiry. Settlement after its due time is separate from approval.",
         "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
         "Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.",
-        "One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. A paused schedule pays nothing until an administrator resumes it. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule."
+        "One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. Pausing a schedule stops the payroll settlement helper until an administrator resumes it. It does not stop direct Treasury payment of an approved, due obligation. Only the separate DAO guardian pause blocks those obligation payments. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule."
       ]
     },
     {
@@ -43,7 +43,8 @@
         "Each reference bundle identifies the module package and interface version it describes. The module read API reports deployment versions, configured permissions and code verification alongside current ballots, projects and payroll entries.",
         "The configuration reference is generated from the producer's validation schemas. Decide settings are selected for each ballot. Works currently uses a fixed limit of sixteen milestones and independent review; payroll uses a fixed limit of twelve installments. Installing a module does not yet persist custom Works or payroll settings.",
         "Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment.",
-        "Core now persists the DAO ballot policy and commitment limits. Module installation does not provide arbitrary custom Works or payroll policies. The executor supports only a specific Works project, not arbitrary contract calls."
+        "Core now persists the DAO ballot policy and commitment limits. Module installation does not provide arbitrary custom Works or payroll policies. The executor supports only a specific Works project, not arbitrary contract calls.",
+        "Module history is paged by DAO and related parent records. Continue using each non-null next cursor; use done for a collection that is complete. A continuation page can contain no records for your DAO while still providing an advancing cursor through shared primary rows. Votes are returned for the requested member, not all shared votes. Disabled installations remain readable so old obligations and ballot finalization are not lost. Signing controls require active membership, unlocked keys and the exact installed action grant."
       ]
     },
     {
@@ -811,6 +812,53 @@
     {
       "method": "GET",
       "path": "/v1/daos/:id/modules",
+      "query": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ballots": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "string",
+                "const": "done"
+              }
+            ]
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "string",
+                "const": "done"
+              }
+            ]
+          },
+          "schedules": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "string",
+                "const": "done"
+              }
+            ]
+          },
+          "memberId": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "additionalProperties": false
+      },
       "response": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -840,6 +888,55 @@
               "contract",
               "daoId",
               "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "next": {
+            "default": {
+              "ballots": null,
+              "projects": null,
+              "schedules": null
+            },
+            "type": "object",
+            "properties": {
+              "ballots": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "projects": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "schedules": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "ballots",
+              "projects",
+              "schedules"
             ],
             "additionalProperties": false
           },
@@ -938,6 +1035,10 @@
                 "enabled": {
                   "type": "boolean"
                 },
+                "installed": {
+                  "default": false,
+                  "type": "boolean"
+                },
                 "compatible": {
                   "type": "boolean"
                 },
@@ -963,6 +1064,7 @@
                 "deployment",
                 "manifest",
                 "enabled",
+                "installed",
                 "compatible",
                 "codeVerified",
                 "actions",
@@ -1422,6 +1524,7 @@
         },
         "required": [
           "dao",
+          "next",
           "modules",
           "ballots",
           "votes",
@@ -1609,8 +1712,8 @@
     {
       "manifest": {
         "id": "decide",
-        "version": "0.3.0-alpha.1",
-        "coreRange": "^0.3.0-alpha.1",
+        "version": "0.4.0-alpha.1",
+        "coreRange": "^0.4.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -1665,8 +1768,8 @@
     {
       "manifest": {
         "id": "works",
-        "version": "0.3.0-alpha.1",
-        "coreRange": "^0.3.0-alpha.1",
+        "version": "0.4.0-alpha.1",
+        "coreRange": "^0.4.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -1704,8 +1807,8 @@
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.3.0-alpha.1",
-        "coreRange": "^0.3.0-alpha.1",
+        "version": "0.4.0-alpha.1",
+        "coreRange": "^0.4.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

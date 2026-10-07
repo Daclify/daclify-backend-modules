@@ -5,6 +5,7 @@ import {
   ModuleManifestSchema,
   NativeAccountSchema,
   ChainIdSchema,
+  Uint64Schema,
 } from '@daclify/core-protocol';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { WorksTableSchemas } from '../sdk/generated/works-schemas.js';
@@ -19,13 +20,28 @@ export const ModuleStatusSchema = z.strictObject({
   deployment: ModuleDeploymentSchema,
   manifest: ModuleManifestSchema,
   enabled: z.boolean(),
+  installed: z.boolean().default(false),
   compatible: z.boolean(),
   codeVerified: z.boolean(),
   actions: z.array(NativeAccountSchema),
   grants: z.array(NativeAccountSchema),
 });
+export const ModulePageQuerySchema = z.strictObject({
+  ballots: z.union([Uint64Schema, z.literal('done')]).optional(),
+  projects: z.union([Uint64Schema, z.literal('done')]).optional(),
+  schedules: z.union([Uint64Schema, z.literal('done')]).optional(),
+  memberId: IdSchema.optional(),
+});
+export type ModulePageQuery = z.infer<typeof ModulePageQuerySchema>;
 export const ModuleStateSchema = z.strictObject({
   dao: DaoRefSchema,
+  next: z
+    .strictObject({
+      ballots: Uint64Schema.nullable(),
+      projects: Uint64Schema.nullable(),
+      schedules: Uint64Schema.nullable(),
+    })
+    .default({ ballots: null, projects: null, schedules: null }),
   modules: z.array(ModuleStatusSchema),
   ballots: z.array(DecideTableSchemas.ballots),
   votes: z.array(DecideTableSchemas.votes),
@@ -42,6 +58,7 @@ export const ModuleApiRoutes = {
   state: {
     method: 'GET',
     path: '/v1/daos/:id/modules',
+    query: ModulePageQuerySchema,
     response: ModuleStateSchema,
     helpTopic: 'module-reference',
   },
@@ -71,6 +88,7 @@ export const ModuleApiRoutes = {
     method: 'GET' | 'POST';
     path: string;
     input?: z.ZodType;
+    query?: z.ZodType;
     response: z.ZodType;
     helpTopic: string;
   }

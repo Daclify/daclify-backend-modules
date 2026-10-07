@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.3.0-alpha.1 · interface 1.
+Package 0.4.0-alpha.1 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -24,7 +24,7 @@ Submission and review are separate permissions. A contributor cannot approve the
 
 Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.
 
-Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.
+Publish the proposal document, propose work, and have an administrator accept its funded milestones. The contributor publishes evidence and submits its document reference. A different active administrator or member with reviewer permission publishes a review reference and approves or requests changes. Approved payments are settled separately. Cancelling a project releases unapproved reservations while preserving approved payments.
 
 When governed Works funding is enabled, direct administrator acceptance is rejected. An approved funding ballot reserves the pinned project; contributor submission and independent review are still required before payment.
 
@@ -38,7 +38,7 @@ This initial contract uses fixed terms of at most twelve installments. Renewal i
 
 Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.
 
-One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. A paused schedule pays nothing until an administrator resumes it. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule.
+One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. Pausing a schedule stops the payroll settlement helper until an administrator resumes it. It does not stop direct Treasury payment of an approved, due obligation. Only the separate DAO guardian pause blocks those obligation payments. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule.
 
 ## Read the matching module reference
 
@@ -49,6 +49,8 @@ The configuration reference is generated from the producer's validation schemas.
 Generated action and table fields describe serialized structure. They do not replace the contributor, reviewer, funding, timing and authorization rules in the explanatory guides. A code or version mismatch must be resolved before relying on a guide for an installed deployment.
 
 Core now persists the DAO ballot policy and commitment limits. Module installation does not provide arbitrary custom Works or payroll policies. The executor supports only a specific Works project, not arbitrary contract calls.
+
+Module history is paged by DAO and related parent records. Continue using each non-null next cursor; use done for a collection that is complete. A continuation page can contain no records for your DAO while still providing an advancing cursor through shared primary rows. Votes are returned for the requested member, not all shared votes. Disabled installations remain readable so old obligations and ballot finalization are not lost. Signing controls require active membership, unlocked keys and the exact installed action grant.
 
 ## Vote on a specific Works project
 
@@ -346,6 +348,58 @@ Guide: module-reference.
 
 No request body.
 
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ballots": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "string",
+          "const": "done"
+        }
+      ]
+    },
+    "projects": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "string",
+          "const": "done"
+        }
+      ]
+    },
+    "schedules": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "string",
+          "const": "done"
+        }
+      ]
+    },
+    "memberId": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false
+}
+```
+
 Response:
 
 ```json
@@ -378,6 +432,55 @@ Response:
         "contract",
         "daoId",
         "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "next": {
+      "default": {
+        "ballots": null,
+        "projects": null,
+        "schedules": null
+      },
+      "type": "object",
+      "properties": {
+        "ballots": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "projects": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schedules": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ballots",
+        "projects",
+        "schedules"
       ],
       "additionalProperties": false
     },
@@ -476,6 +579,10 @@ Response:
           "enabled": {
             "type": "boolean"
           },
+          "installed": {
+            "default": false,
+            "type": "boolean"
+          },
           "compatible": {
             "type": "boolean"
           },
@@ -501,6 +608,7 @@ Response:
           "deployment",
           "manifest",
           "enabled",
+          "installed",
           "compatible",
           "codeVerified",
           "actions",
@@ -960,6 +1068,7 @@ Response:
   },
   "required": [
     "dao",
+    "next",
     "modules",
     "ballots",
     "votes",
@@ -1162,7 +1271,7 @@ Response:
 
 ## decide configuration
 
-Module 0.3.0-alpha.1 · config 1 · core ^0.3.0-alpha.1.
+Module 0.4.0-alpha.1 · config 1 · core ^0.4.0-alpha.1.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -1214,7 +1323,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.3.0-alpha.1 · config 1 · core ^0.3.0-alpha.1.
+Module 0.4.0-alpha.1 · config 1 · core ^0.4.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -1250,7 +1359,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.3.0-alpha.1 · config 1 · core ^0.3.0-alpha.1.
+Module 0.4.0-alpha.1 · config 1 · core ^0.4.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 

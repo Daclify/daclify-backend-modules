@@ -37,6 +37,7 @@ const modules = Catalog.map((manifest) => {
 const api = Object.values(ModuleApiRoutes).map((endpoint) => ({
   method: endpoint.method,
   path: endpoint.path,
+  ...('query' in endpoint ? { query: z.toJSONSchema(endpoint.query, { io: 'input' }) } : {}),
   ...('input' in endpoint ? { input: z.toJSONSchema(endpoint.input, { io: 'input' }) } : {}),
   response: z.toJSONSchema(endpoint.response, { io: 'output' }),
   helpTopic: endpoint.helpTopic,
