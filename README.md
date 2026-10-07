@@ -38,7 +38,7 @@ Testnet names are ordinary 12-character accounts because the testnet creator doe
 
 ## Not in these contracts
 
-The product catalogue still needs separate reviewed contracts for memberships, bounties, vesting and inbound dues. Per-obligation and UTC-day commitment limits now belong to core's governance policy. A hackathon module would be global and would belong to the project DAO, not to Hub control of other DAOs. Committee seat counts and terms are not chosen. The legacy elections module stays in `daclifymodules` and is not ported. The legacy hooks registry is a different contract and is not this module host.
+The product catalogue still needs separate reviewed contracts for bounties, vesting and inbound dues. Per-obligation and UTC-day commitment limits belong to core's governance policy. A hackathon module would be global and would belong to the project DAO, not to Hub control of other DAOs. Decide representative elections support 1–8 seats, at most 15 candidates and terms up to one year; terms grant no administrative or spending powers. Endorsement admission is an optional membership policy. The legacy elections module stays in `daclifymodules` and is not ported. The legacy hooks registry is a different contract and is not this module host.
 
 Custom persistent Works or payroll policy settings are not stored at install time. The guides in `docs/guides/topics.json` describe the fixed limits the contracts enforce today.
 
