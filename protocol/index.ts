@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.6.0-alpha.1';
+export const VERSION = '0.7.0-alpha.1';
 export const ModulePermissions = Object.freeze({
   decide: {
     actions: [
@@ -76,7 +76,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: VERSION,
-    coreRange: '^0.6.0-alpha.1',
+    coreRange: '^0.7.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
@@ -85,7 +85,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'works',
     version: VERSION,
-    coreRange: '^0.6.0-alpha.1',
+    coreRange: '^0.7.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -94,7 +94,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: VERSION,
-    coreRange: '^0.6.0-alpha.1',
+    coreRange: '^0.7.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -103,7 +103,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'grants-rounds',
     version: VERSION,
-    coreRange: '^0.6.0-alpha.1',
+    coreRange: '^0.7.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create'],
@@ -112,7 +112,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'endorsement-admission',
     version: VERSION,
-    coreRange: '^0.6.0-alpha.1',
+    coreRange: '^0.7.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['member.manage'],

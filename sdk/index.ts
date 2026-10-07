@@ -1,4 +1,5 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
+export { ConnectedPaymentClient } from './connected-payments.js';
 import { endorseAbi, type EndorseActions } from './generated/endorse.js';
 import { EndorseActionSchemas } from './generated/endorse-schemas.js';
 export { endorseAbi, endorseAbiHash } from './generated/endorse.js';

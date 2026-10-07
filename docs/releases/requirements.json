@@ -1,8 +1,24 @@
 {
   "requirements": [
-    { "id": "DECIDE-TALLY", "tests": ["tests/decide.test.ts"] },
-    { "id": "WORKS-OBLIGATIONS", "tests": ["tests/works.test.ts"] },
-    { "id": "PAYROLL-SETTLEMENT", "tests": ["tests/payroll.test.ts"] },
-    { "id": "LINT-POLICY", "tests": ["tests/lint-policy.test.ts"] }
+    {
+      "id": "DECIDE-TALLY",
+      "tests": ["tests/decide.test.ts"]
+    },
+    {
+      "id": "WORKS-OBLIGATIONS",
+      "tests": ["tests/works.test.ts"]
+    },
+    {
+      "id": "PAYROLL-SETTLEMENT",
+      "tests": ["tests/payroll.test.ts"]
+    },
+    {
+      "id": "LINT-POLICY",
+      "tests": ["tests/lint-policy.test.ts"]
+    },
+    {
+      "id": "CONNECT-SERVER-CLIENT",
+      "tests": ["tests/connected-payments.test.ts"]
+    }
   ]
 }

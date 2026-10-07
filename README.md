@@ -4,7 +4,7 @@ Antelope C++ contracts for Decide, Works, Payroll, Grants rounds and Endorsement
 
 Check the three repositories out as siblings. Install from core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md). Core’s [operations guide](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations.md) names the account each contract is deployed to. In a local checkout that guide is `../daclify-backend-core/docs/operations.md`. Use the [documentation index](docs/README.md) for guide ownership and current compatibility.
 
-Current development version: **0.6.0-alpha.1**, requiring the matching 0.6 core protocol/SDK. This release updates service compatibility and documentation while retaining the tested 0.5 C++ code and contract interface 1. This is not a production release. Core’s `package:release` still refuses publication. The work-package register in core is the acceptance list.
+Current development version: **0.7.0-alpha.1**, requiring the matching 0.7 core protocol/SDK. Contract interface 1 and existing module WASM remain unchanged. The package adds a Node-only `ConnectedPaymentClient` for DAO-scoped central Connect calls. Core owns all Stripe configuration, accounting and authorization; this client never needs a platform Stripe key. Products create receipts, with module fulfillment explicit. See [operator payment integration](docs/connected-payments.md) and [core upgrade 0.7](../daclify-backend-core/docs/operations/upgrade-0.7.md). This development package is not a qualified production release.
 
 ## Contracts in this repository
 
