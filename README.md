@@ -46,6 +46,8 @@ Custom persistent Works or payroll policy settings are not stored at install tim
 
 Node 24.21 or later, and npm 11.19 or later.
 
+Build and test locally on the Mac. GitHub verification is manual-only: pushes and pull requests do not start builds or tests. Core's [development guide](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md) is the source for the shared local workflow.
+
 ```sh
 npm run lint
 npm run typecheck
