@@ -4,6 +4,8 @@
 
 Compatible core 0.6 protocol/SDK dependency and regenerated documentation. Contract code and serialized Antelope table/action formats remain at interface 1. This is a development package, not a qualified production release.
 
+Updated READMEs, documentation navigation, recovery/storage limits and coordinated 0.6 upgrade instructions. Generated help and development package integrities are refreshed together; older dated evidence remains historical.
+
 Development prerelease; production release gates remain in force.
 
 ## 0.2.0-alpha.1 — Governed Works funding
