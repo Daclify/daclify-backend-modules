@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 mkdirSync('.artifacts/contracts', { recursive: true });
-for (const name of ['decide', 'works', 'payroll'])
+for (const name of ['decide', 'works', 'payroll', 'grants', 'endorse'])
   execFileSync(
     'docker',
     [

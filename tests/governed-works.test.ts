@@ -62,11 +62,11 @@ const totals = () =>
   z
     .object({ available: z.number(), reserved: z.number() })
     .parse(row(core, 'daos', core.toBigInt(), 1n));
-async function open(ballotId = 1) {
+async function open(ballotId = 1, projectId = 1) {
   await act('decide', 'openwork', {
     ballot_id: ballotId,
     works: 'works',
-    project_id: 1,
+    project_id: projectId,
     duration: 300,
     quorum: 5000,
     approval: 5001,
@@ -117,7 +117,7 @@ beforeEach(async () => {
       1,
       'works',
       1,
-      ['propose', 'accept', 'submitwork', 'review', 'cancel'],
+      ['propose', 'accept', 'submitwork', 'review', 'cancel', 'offeragr', 'acceptagr'],
       ['reserve', 'approve', 'cancel'],
       wasmCodeHash('.artifacts/contracts/works.wasm'),
     ],
@@ -252,4 +252,53 @@ describe('vote-authorised Works funding', () => {
       'EXECUTION_EXPIRED',
     );
   });
+});
+
+it('requires contributor consent to exact agreement terms before an authorized funding vote can reserve', async () => {
+  const start = chain.timestamp.toMilliseconds() / 1000;
+  await act('daclifycore', 'setroles', { target: 3, admin: false, reviewer: true });
+  await act('works', 'propose', {
+    project_id: 2,
+    contributor: 3,
+    document_id: 1,
+    document_version: 1,
+    payments: ['1.0000 TLOS', '2.0000 TLOS'],
+    dues: [start + 10, start + 20],
+  });
+  await act('works', 'offeragr', { project_id: 2, term_start: start, term_end: start + 900 });
+  await expect(open(1, 2)).rejects.toThrow('AGREEMENT_CONSENT');
+  await expect(act('works', 'acceptagr', { project_id: 2 }, 2)).rejects.toThrow(
+    'CONTRIBUTOR_REQUIRED',
+  );
+  await act('works', 'acceptagr', { project_id: 2 }, 3);
+  await expect(act('works', 'acceptagr', { project_id: 2 }, 3)).rejects.toThrow(
+    'AGREEMENT_ACCEPTED',
+  );
+  await expect(
+    act('works', 'offeragr', { project_id: 2, term_start: start, term_end: start + 1000 }),
+  ).rejects.toThrow('AGREEMENT_EXISTS');
+  await open(1, 2);
+  await pass();
+  await send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active');
+  expect(totals()).toMatchObject({ available: 170000, reserved: 30000 });
+  await act('works', 'submitwork', { milestone_id: 3, document_id: 1, document_version: 1 }, 3);
+  await expect(
+    act(
+      'works',
+      'review',
+      { milestone_id: 3, approve: true, document_id: 1, document_version: 1 },
+      3,
+    ),
+  ).rejects.toThrow('SELF_REVIEW');
+  await act('works', 'review', {
+    milestone_id: 3,
+    approve: true,
+    document_id: 1,
+    document_version: 1,
+  });
+  await act('works', 'cancel', { project_id: 2 });
+  expect(totals()).toMatchObject({ available: 190000, reserved: 10000 });
+  await send(works, 'settle', ['daclifycore', 1, 3], 'relay@active');
+  expect(totals().reserved).toBe(0);
+  await expect(send(works, 'settle', ['daclifycore', 1, 3], 'relay@active')).rejects.toThrow();
 });

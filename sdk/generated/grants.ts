@@ -1,12 +1,12 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058f3d33b93b1';
-export const worksAbi = {
+export const grantsAbiHash = '6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb3700170f8070eab';
+export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
   "structs": [
     {
-      "name": "accept",
+      "name": "amend",
       "base": "",
       "fields": [
         {
@@ -19,288 +19,10 @@ export const worksAbi = {
         },
         {
           "name": "member_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "acceptagr",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "member_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "agreement_record",
-      "base": "",
-      "fields": [
-        {
-          "name": "project_id",
-          "type": "uint64"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "schema_version",
-          "type": "uint16"
-        },
-        {
-          "name": "term_start",
-          "type": "uint32"
-        },
-        {
-          "name": "term_end",
-          "type": "uint32"
-        },
-        {
-          "name": "terms",
-          "type": "checksum256"
-        },
-        {
-          "name": "accepted",
-          "type": "bool"
-        },
-        {
-          "name": "accepted_at",
-          "type": "uint32"
-        }
-      ]
-    },
-    {
-      "name": "cancel",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "member_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "govaccept",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        },
-        {
-          "name": "ballot_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "grantwork",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "grants",
-          "type": "name"
-        },
-        {
-          "name": "round_id",
           "type": "uint64"
         },
         {
           "name": "application_id",
-          "type": "uint64"
-        },
-        {
-          "name": "ballot_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "milestone_record",
-      "base": "",
-      "fields": [
-        {
-          "name": "id",
-          "type": "uint64"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        },
-        {
-          "name": "quantity",
-          "type": "asset"
-        },
-        {
-          "name": "due",
-          "type": "uint32"
-        },
-        {
-          "name": "status",
-          "type": "uint8"
-        },
-        {
-          "name": "submission_doc",
-          "type": "uint64"
-        },
-        {
-          "name": "submission_version",
-          "type": "uint32"
-        },
-        {
-          "name": "review_doc",
-          "type": "uint64"
-        },
-        {
-          "name": "review_version",
-          "type": "uint32"
-        },
-        {
-          "name": "reviewer",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "offeragr",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "member_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        },
-        {
-          "name": "term_start",
-          "type": "uint32"
-        },
-        {
-          "name": "term_end",
-          "type": "uint32"
-        }
-      ]
-    },
-    {
-      "name": "project_record",
-      "base": "",
-      "fields": [
-        {
-          "name": "id",
-          "type": "uint64"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "creator",
-          "type": "uint64"
-        },
-        {
-          "name": "contributor",
-          "type": "uint64"
-        },
-        {
-          "name": "document_id",
-          "type": "uint64"
-        },
-        {
-          "name": "document_version",
-          "type": "uint32"
-        },
-        {
-          "name": "milestones",
-          "type": "uint64[]"
-        },
-        {
-          "name": "status",
-          "type": "uint8"
-        }
-      ]
-    },
-    {
-      "name": "propose",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "member_id",
-          "type": "uint64"
-        },
-        {
-          "name": "project_id",
-          "type": "uint64"
-        },
-        {
-          "name": "contributor",
           "type": "uint64"
         },
         {
@@ -318,11 +40,19 @@ export const worksAbi = {
         {
           "name": "dues",
           "type": "uint32[]"
+        },
+        {
+          "name": "term_start",
+          "type": "uint32"
+        },
+        {
+          "name": "term_end",
+          "type": "uint32"
         }
       ]
     },
     {
-      "name": "review",
+      "name": "applygrant",
       "base": "",
       "fields": [
         {
@@ -338,11 +68,321 @@ export const worksAbi = {
           "type": "uint64"
         },
         {
-          "name": "milestone_id",
+          "name": "round_id",
           "type": "uint64"
         },
         {
-          "name": "approve",
+          "name": "application_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "payments",
+          "type": "asset[]"
+        },
+        {
+          "name": "dues",
+          "type": "uint32[]"
+        },
+        {
+          "name": "term_start",
+          "type": "uint32"
+        },
+        {
+          "name": "term_end",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "closeapp",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "application_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closeround",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "round_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "govaward",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "round_id",
+          "type": "uint64"
+        },
+        {
+          "name": "application_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "grant_application",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "round_id",
+          "type": "uint64"
+        },
+        {
+          "name": "contributor",
+          "type": "uint64"
+        },
+        {
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "payments",
+          "type": "asset[]"
+        },
+        {
+          "name": "dues",
+          "type": "uint32[]"
+        },
+        {
+          "name": "term_start",
+          "type": "uint32"
+        },
+        {
+          "name": "term_end",
+          "type": "uint32"
+        },
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "consent_at",
+          "type": "uint32"
+        },
+        {
+          "name": "decision_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "decision_version",
+          "type": "uint32"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "funding_ballot",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "grant_round",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "creator",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "rules_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "applications_close",
+          "type": "uint32"
+        },
+        {
+          "name": "review_close",
+          "type": "uint32"
+        },
+        {
+          "name": "awards_close",
+          "type": "uint32"
+        },
+        {
+          "name": "maximum",
+          "type": "asset"
+        },
+        {
+          "name": "awarded",
+          "type": "int64"
+        },
+        {
+          "name": "allow_agents",
+          "type": "bool"
+        },
+        {
+          "name": "works",
+          "type": "name"
+        },
+        {
+          "name": "closed",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "newround",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "round_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "applications_close",
+          "type": "uint32"
+        },
+        {
+          "name": "review_close",
+          "type": "uint32"
+        },
+        {
+          "name": "awards_close",
+          "type": "uint32"
+        },
+        {
+          "name": "maximum",
+          "type": "asset"
+        },
+        {
+          "name": "allow_agents",
+          "type": "bool"
+        },
+        {
+          "name": "works",
+          "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "reviewapp",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "application_id",
+          "type": "uint64"
+        },
+        {
+          "name": "eligible",
           "type": "bool"
         },
         {
@@ -356,25 +396,7 @@ export const worksAbi = {
       ]
     },
     {
-      "name": "settle",
-      "base": "",
-      "fields": [
-        {
-          "name": "runtime",
-          "type": "name"
-        },
-        {
-          "name": "dao_id",
-          "type": "uint64"
-        },
-        {
-          "name": "milestone_id",
-          "type": "uint64"
-        }
-      ]
-    },
-    {
-      "name": "submitwork",
+      "name": "submitapp",
       "base": "",
       "fields": [
         {
@@ -390,90 +412,65 @@ export const worksAbi = {
           "type": "uint64"
         },
         {
-          "name": "milestone_id",
+          "name": "application_id",
           "type": "uint64"
-        },
-        {
-          "name": "document_id",
-          "type": "uint64"
-        },
-        {
-          "name": "document_version",
-          "type": "uint32"
         }
       ]
     }
   ],
   "actions": [
     {
-      "name": "accept",
-      "type": "accept",
+      "name": "amend",
+      "type": "amend",
       "ricardian_contract": ""
     },
     {
-      "name": "acceptagr",
-      "type": "acceptagr",
+      "name": "applygrant",
+      "type": "applygrant",
       "ricardian_contract": ""
     },
     {
-      "name": "cancel",
-      "type": "cancel",
+      "name": "closeapp",
+      "type": "closeapp",
       "ricardian_contract": ""
     },
     {
-      "name": "govaccept",
-      "type": "govaccept",
+      "name": "closeround",
+      "type": "closeround",
       "ricardian_contract": ""
     },
     {
-      "name": "grantwork",
-      "type": "grantwork",
+      "name": "govaward",
+      "type": "govaward",
       "ricardian_contract": ""
     },
     {
-      "name": "offeragr",
-      "type": "offeragr",
+      "name": "newround",
+      "type": "newround",
       "ricardian_contract": ""
     },
     {
-      "name": "propose",
-      "type": "propose",
+      "name": "reviewapp",
+      "type": "reviewapp",
       "ricardian_contract": ""
     },
     {
-      "name": "review",
-      "type": "review",
-      "ricardian_contract": ""
-    },
-    {
-      "name": "settle",
-      "type": "settle",
-      "ricardian_contract": ""
-    },
-    {
-      "name": "submitwork",
-      "type": "submitwork",
+      "name": "submitapp",
+      "type": "submitapp",
       "ricardian_contract": ""
     }
   ],
   "tables": [
     {
-      "name": "agreements",
-      "type": "agreement_record",
+      "name": "applications",
+      "type": "grant_application",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
     },
     {
-      "name": "milestones",
-      "type": "milestone_record",
-      "index_type": "i64",
-      "key_names": [],
-      "key_types": []
-    },
-    {
-      "name": "projects",
-      "type": "project_record",
+      "name": "rounds",
+      "type": "grant_round",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -483,121 +480,121 @@ export const worksAbi = {
   "ricardian_clauses": [],
   "action_results": []
 } satisfies ABI.Def;
-export interface accept {
+export interface amend {
   runtime: string;
   dao_id: string;
   member_id: string;
-  project_id: string;
-}
-export interface acceptagr {
-  runtime: string;
-  dao_id: string;
-  member_id: string;
-  project_id: string;
-}
-export interface agreement_record {
-  project_id: string;
-  dao_id: string;
-  schema_version: number;
-  term_start: number;
-  term_end: number;
-  terms: string;
-  accepted: boolean;
-  accepted_at: number;
-}
-export interface cancel {
-  runtime: string;
-  dao_id: string;
-  member_id: string;
-  project_id: string;
-}
-export interface govaccept {
-  runtime: string;
-  dao_id: string;
-  project_id: string;
-  ballot_id: string;
-}
-export interface grantwork {
-  runtime: string;
-  dao_id: string;
-  grants: string;
-  round_id: string;
   application_id: string;
-  ballot_id: string;
-}
-export interface milestone_record {
-  id: string;
-  dao_id: string;
-  project_id: string;
-  quantity: string;
-  due: number;
-  status: number;
-  submission_doc: string;
-  submission_version: number;
-  review_doc: string;
-  review_version: number;
-  reviewer: string;
-}
-export interface offeragr {
-  runtime: string;
-  dao_id: string;
-  member_id: string;
-  project_id: string;
-  term_start: number;
-  term_end: number;
-}
-export interface project_record {
-  id: string;
-  dao_id: string;
-  creator: string;
-  contributor: string;
-  document_id: string;
-  document_version: number;
-  milestones: string[];
-  status: number;
-}
-export interface propose {
-  runtime: string;
-  dao_id: string;
-  member_id: string;
-  project_id: string;
-  contributor: string;
   document_id: string;
   document_version: number;
   payments: string[];
   dues: number[];
+  term_start: number;
+  term_end: number;
 }
-export interface review {
+export interface applygrant {
   runtime: string;
   dao_id: string;
   member_id: string;
-  milestone_id: string;
-  approve: boolean;
+  round_id: string;
+  application_id: string;
   document_id: string;
   document_version: number;
+  payments: string[];
+  dues: number[];
+  term_start: number;
+  term_end: number;
 }
-export interface settle {
-  runtime: string;
-  dao_id: string;
-  milestone_id: string;
-}
-export interface submitwork {
+export interface closeapp {
   runtime: string;
   dao_id: string;
   member_id: string;
-  milestone_id: string;
+  application_id: string;
+}
+export interface closeround {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  round_id: string;
+}
+export interface govaward {
+  runtime: string;
+  dao_id: string;
+  round_id: string;
+  application_id: string;
+  ballot_id: string;
+}
+export interface grant_application {
+  id: string;
+  dao_id: string;
+  round_id: string;
+  contributor: string;
+  revision: string;
+  document_id: string;
+  document_version: number;
+  payments: string[];
+  dues: number[];
+  term_start: number;
+  term_end: number;
+  status: number;
+  consent_at: number;
+  decision_doc: string;
+  decision_version: number;
+  project_id: string;
+  funding_ballot: string;
+}
+export interface grant_round {
+  id: string;
+  dao_id: string;
+  creator: string;
+  document_id: string;
+  document_version: number;
+  rules_revision: string;
+  applications_close: number;
+  review_close: number;
+  awards_close: number;
+  maximum: string;
+  awarded: string;
+  allow_agents: boolean;
+  works: string;
+  closed: boolean;
+}
+export interface newround {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  round_id: string;
+  document_id: string;
+  document_version: number;
+  applications_close: number;
+  review_close: number;
+  awards_close: number;
+  maximum: string;
+  allow_agents: boolean;
+  works: string;
+}
+export interface reviewapp {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  application_id: string;
+  eligible: boolean;
   document_id: string;
   document_version: number;
 }
-export interface WorksActions {
-  accept: accept;
-  acceptagr: acceptagr;
-  cancel: cancel;
-  govaccept: govaccept;
-  grantwork: grantwork;
-  offeragr: offeragr;
-  propose: propose;
-  review: review;
-  settle: settle;
-  submitwork: submitwork;
+export interface submitapp {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  application_id: string;
+}
+export interface GrantsActions {
+  amend: amend;
+  applygrant: applygrant;
+  closeapp: closeapp;
+  closeround: closeround;
+  govaward: govaward;
+  newround: newround;
+  reviewapp: reviewapp;
+  submitapp: submitapp;
 }

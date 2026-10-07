@@ -7,12 +7,14 @@ import {
   WorksConfigSchema,
   PayrollConfigSchema,
   VERSION,
+  GrantsConfigSchema,
+  EndorsementConfigSchema,
 } from '../../protocol/index.js';
 import { ModuleApiRoutes } from '../../protocol/api.js';
 
 const topics: unknown = JSON.parse(await readFile('docs/guides/topics.json', 'utf8'));
 const contracts = await Promise.all(
-  ['decide', 'works', 'payroll'].map(async (name) => ({
+  ['decide', 'works', 'payroll', 'grants', 'endorse'].map(async (name) => ({
     name,
     abi: await readFile(`.artifacts/contracts/${name}.abi`, 'utf8'),
   })),
@@ -30,7 +32,11 @@ const modules = Catalog.map((manifest) => {
         ? configurations.works
         : manifest.id === 'payroll'
           ? configurations.payroll
-          : undefined;
+          : manifest.id === 'grants-rounds'
+            ? GrantsConfigSchema
+            : manifest.id === 'endorsement-admission'
+              ? EndorsementConfigSchema
+              : undefined;
   if (!schema) throw new Error('Missing documented module configuration');
   return { manifest, configuration: z.toJSONSchema(schema, { io: 'input' }) };
 });

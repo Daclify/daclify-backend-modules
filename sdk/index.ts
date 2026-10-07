@@ -1,4 +1,34 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
+import { endorseAbi, type EndorseActions } from './generated/endorse.js';
+import { EndorseActionSchemas } from './generated/endorse-schemas.js';
+export { endorseAbi, endorseAbiHash } from './generated/endorse.js';
+export { EndorseActionSchemas, EndorseTableSchemas } from './generated/endorse-schemas.js';
+export type { EndorseActions };
+export function encodeEndorse<K extends keyof EndorseActions>(
+  name: K,
+  data: EndorseActions[K],
+): Uint8Array {
+  return Serializer.encode({
+    abi: ABI.from(endorseAbi),
+    type: name,
+    object: EndorseActionSchemas[name].parse(data),
+  }).array;
+}
+import { grantsAbi, type GrantsActions } from './generated/grants.js';
+import { GrantsActionSchemas } from './generated/grants-schemas.js';
+export { grantsAbi, grantsAbiHash } from './generated/grants.js';
+export { GrantsActionSchemas, GrantsTableSchemas } from './generated/grants-schemas.js';
+export type { GrantsActions };
+export function encodeGrants<K extends keyof GrantsActions>(
+  name: K,
+  data: GrantsActions[K],
+): Uint8Array {
+  return Serializer.encode({
+    abi: ABI.from(grantsAbi),
+    type: name,
+    object: GrantsActionSchemas[name].parse(data),
+  }).array;
+}
 import { decideAbi, type DecideActions } from './generated/decide.js';
 import { worksAbi, type WorksActions } from './generated/works.js';
 import { payrollAbi, type PayrollActions } from './generated/payroll.js';

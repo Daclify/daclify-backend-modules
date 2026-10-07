@@ -7,11 +7,13 @@ import {
   ChainIdSchema,
   Uint64Schema,
 } from '@daclify/core-protocol';
+import { EndorseTableSchemas } from '../sdk/generated/endorse-schemas.js';
+import { GrantsTableSchemas } from '../sdk/generated/grants-schemas.js';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { WorksTableSchemas } from '../sdk/generated/works-schemas.js';
 import { PayrollTableSchemas } from '../sdk/generated/payroll-schemas.js';
 export const ModuleDeploymentSchema = z.strictObject({
-  id: z.enum(['decide', 'works', 'payroll']),
+  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission']),
   account: NativeAccountSchema,
   version: z.string(),
   codeHash: ChainIdSchema,
@@ -30,6 +32,11 @@ export const ModulePageQuerySchema = z.strictObject({
   ballots: z.union([Uint64Schema, z.literal('done')]).optional(),
   projects: z.union([Uint64Schema, z.literal('done')]).optional(),
   schedules: z.union([Uint64Schema, z.literal('done')]).optional(),
+  elections: z.union([Uint64Schema, z.literal('done')]).optional(),
+  terms: z.union([Uint64Schema, z.literal('done')]).optional(),
+  joinApplications: z.union([Uint64Schema, z.literal('done')]).optional(),
+  rounds: z.union([Uint64Schema, z.literal('done')]).optional(),
+  applications: z.union([Uint64Schema, z.literal('done')]).optional(),
   memberId: IdSchema.optional(),
 });
 export type ModulePageQuery = z.infer<typeof ModulePageQuerySchema>;
@@ -40,16 +47,38 @@ export const ModuleStateSchema = z.strictObject({
       ballots: Uint64Schema.nullable(),
       projects: Uint64Schema.nullable(),
       schedules: Uint64Schema.nullable(),
+      elections: Uint64Schema.nullable().default(null),
+      terms: Uint64Schema.nullable().default(null),
+      joinApplications: Uint64Schema.nullable().default(null),
+      rounds: Uint64Schema.nullable().default(null),
+      applications: Uint64Schema.nullable().default(null),
     })
-    .default({ ballots: null, projects: null, schedules: null }),
+    .default({
+      ballots: null,
+      projects: null,
+      schedules: null,
+      rounds: null,
+      applications: null,
+      joinApplications: null,
+      elections: null,
+      terms: null,
+    }),
   modules: z.array(ModuleStatusSchema),
   ballots: z.array(DecideTableSchemas.ballots),
   votes: z.array(DecideTableSchemas.votes),
   projects: z.array(WorksTableSchemas.projects),
   milestones: z.array(WorksTableSchemas.milestones),
+  agreements: z.array(WorksTableSchemas.agreements).default([]),
   schedules: z.array(PayrollTableSchemas.schedules),
   entries: z.array(PayrollTableSchemas.entries),
   controls: z.array(PayrollTableSchemas.controls),
+  elections: z.array(DecideTableSchemas.elections).default([]),
+  nominations: z.array(DecideTableSchemas.nominations).default([]),
+  terms: z.array(DecideTableSchemas.terms).default([]),
+  joinApplications: z.array(EndorseTableSchemas.joinapps).default([]),
+  rounds: z.array(GrantsTableSchemas.rounds).default([]),
+  applications: z.array(GrantsTableSchemas.applications).default([]),
+  grantPlans: z.array(DecideTableSchemas.grantplans).default([]),
   executions: z.array(DecideTableSchemas.executions).default([]),
 });
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;

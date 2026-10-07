@@ -28,7 +28,7 @@
       "A payroll commitment names a DAO contributor, exact native-token amount, start date, payment interval and a bounded number of installments. The full term must be funded before commitment.",
       "Committed installments are approved liabilities. They remain payable after module removal, account offboarding or subscription expiry. Settlement after its due time is separate from approval.",
       "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
-      "Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.",
+      "Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment\u2019s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.",
       "One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. Pausing a schedule stops the payroll settlement helper until an administrator resumes it. It does not stop direct Treasury payment of an approved, due obligation. Only the separate DAO guardian pause blocks those obligation payments. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule."
     ]
   },
@@ -52,6 +52,53 @@
       "Execution expires seven days after the scheduled closing time. Changed or cancelled projects, a changed policy revision, missing modules, replaced code, a guardian pause or insufficient funding prevent execution. A second passed ballot for an already funded project cannot reserve it again.",
       "Funding approval does not approve a deliverable. The contributor submits evidence and a different administrator or reviewer accepts it before settlement. Distinct member keys do not prove different operators; admission and review policy must address conflicts. Existing approved liabilities remain payable after module removal, subject to a temporary guardian pause.",
       "Advisory ballots cannot be repurposed as funding authority. There is no arbitrary-action executor, game-result oracle, secret ballot or independent-operator verification in this release."
+    ]
+  },
+  {
+    "id": "contribution-agreements",
+    "title": "Contribution agreements and member services",
+    "paragraphs": [
+      "Start in Documents: publish a scope/deliverables document, encrypted for a private DAO. Propose a Works project with contributor, native milestone amounts and due dates. Offer a contribution agreement on that proposed project and set a term containing every milestone due date (maximum one year).",
+      "The designated active contributor must sign agreement acceptance. Consent commits the exact document version/content commitment, project/contributor, native milestone amounts/dues and term. A funding vote or administrator acceptance cannot reserve an unaccepted agreement. Funding still requires the DAO policy and full backing.",
+      "Review belongs to the actual DAO reviewer/admin team. Contributors cannot review their own work, even if they hold a reviewer role. Cancellation preserves already approved obligations; use a successor project and fresh consent for changed terms. Existing ordinary Works projects need no new agreement record.",
+      "A version 1 contribution-agreement document includes type, dao reference, contributor, title, scope, deliverables, optional roleTitle, term {start,end} in native epoch seconds, native asset reference, milestones [{amount,due}] in integer base units, reviewPolicy dao-review-team and cancellationPolicy preserve-approved-liabilities. Terms shown on chain govern the enforced money flow. Narrative role titles grant no privileges and this is not legal contract certification.",
+      "A public version 1 service-offer document includes type service-offer, dao reference, memberId matching its author, title, summary and skills. The catalogue reads the latest authored public JSON document from active members. Choose an offer to prefill a Works contributor. Encrypted narratives stay in Documents; a service listing holds no funds and is separate from the platform module Marketplace.",
+      "Milestone agreements and Payroll are separate compensation lifecycles. Do not fund both for the same work period. Basic proposal, consent, evidence, review, claim and export remain free; optional hosted reminders and dashboards cannot revoke approved liabilities.",
+      "An upgrade changes a module code hash. Existing project/milestone rows and liabilities are preserved. A pending code-pinned funding plan needs renewed authorization against the reviewed upgrade; a preserved document commitment alone does not authorize a changed executable."
+    ]
+  },
+  {
+    "id": "grants-rounds",
+    "title": "Apply for a fully backed grant",
+    "paragraphs": [
+      "An administrator freezes rules and document versions, native-asset lifetime award cap, participant eligibility and application/review/award deadlines. A cap reserves no Treasury funds. Matching and donor pots are not part of these rounds.",
+      "The applicant creates or amends their own application with exact document version, native milestone payments and due dates, and a bounded contribution term. Submit application is explicit consent to those terms. Amendment increments revision and removes consent and eligibility; submit and review again.",
+      "An administrator reviews eligibility using a decision document. Eligibility authorizes no spending. A Decide award vote pins the application revision/commitment, DAO policy and grant/Works code. Only a passed finalized vote can execute before the award cutoff.",
+      "Execution atomically checks the round cap, creates a Works agreement accepted by the applicant submission and reserves every milestone from real Treasury funds. If any cap, backing, identity, policy or code check fails, nothing is awarded or reserved. Delivery, independent review, cancellation and once-only settlement then use Works and Treasury.",
+      "Awarded is the cumulative committed award amount, not a current cash balance. Cancellation does not reopen the lifetime cap. Private narrative belongs in encrypted Documents; on-chain terms, membership, votes and asset amounts remain public. Changing the application or review invalidates its earlier vote."
+    ]
+  },
+  {
+    "id": "endorsement-admission",
+    "title": "Join with member endorsements",
+    "paragraphs": [
+      "Administrator admission remains the default. Enable the endorsement module, then an administrator explicitly sets the core admission policy, threshold (1\u201320), whether agents may endorse and an optional administrator override. The override is disabled by default. Owners and signed administrator admission cannot bypass a policy without that disclosed override.",
+      "A current member sponsors the applicant\u2019s public join identity and exact application document version, kind/operator and expiry. Verify the public keys through a trusted channel. Applications last at most 30 days. Sponsoring is not proof of unique personhood; multiple paired credentials add no endorsement weight.",
+      "Distinct current eligible member IDs endorse an exact revision; they can withdraw their endorsement before admission. Amending or renewing by the same sponsor increments the revision and clears old endorsements. A policy revision invalidates earlier applications. At most 64 endorsements are stored; amend to reset a stale list if needed.",
+      "Admission rechecks current active, guardian-revoked and self-endorsement status, threshold, expiry, source code pin and complete identity. The authenticated module callback adds one ordinary member once. It cannot assign roles, issue credits or reserve assets. Native or EVM wallet governance authorization is activated separately after joining.",
+      "DAO administrators may change the admission policy or explicitly enable administrator override. Member endorsement is a configurable admission rule, not a unique-human guarantee. Private membership grants and history access remain separate approvals; admission itself decrypts no documents."
+    ]
+  },
+  {
+    "id": "representative-elections",
+    "title": "Elect representatives for a fixed term",
+    "paragraphs": [
+      "An administrator creates a named representative election, exact rules document version, future nomination cutoff, one to eight seats and a term of at most one year. The term must allow the saved DAO voting duration after nominations close. Candidate and voter identities are stable member IDs; paired logins add no votes.",
+      "Each active member nominates only themselves or withdraws before the cutoff. At most fifteen current eligible candidates plus the abstention choice enter voting. Withdrawal removes a nomination slot. Inactive or guardian-revoked nominations can be cleared when another member nominates. There is no random group assignment or meeting attendance oracle.",
+      "After nominations close, any active member may start the election before the term\u2019s start. A changed policy revision prevents starting; schedule a successor election with reviewed rules. Starting freezes the sorted candidate IDs, exact DAO quorum/weight and normal voting denominator/highest member snapshot. One member votes once for one candidate or explicit abstention.",
+      "Finalization requires the frozen quorum; the yes/no approval majority is not used to rank candidates. Positive candidate tallies rank by weight. A tied group is installed only when the whole group fits remaining seats; a tie crossing the seat boundary leaves those seats vacant. No quorum or abstention-only voting creates no terms. Inactive or revoked winners leave their ranked seats vacant, without promoting a runner-up. Finalizing after the term ends creates no terms.",
+      "A durable term records its exact start/end and recall. The term window starts no earlier than that date; actual membership must remain eligible. An administrator can recall a term with a reason document. Titles grant no administrator flag, reviewer permission, module power, credit issuance or Treasury authority. Permanent roles and approved liabilities remain separate and survive term expiry.",
+      "Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release."
     ]
   }
 ]

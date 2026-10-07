@@ -1,6 +1,6 @@
 # Daclify V2 backend modules
 
-Antelope C++ contracts for Decide, Works, and payroll, plus the generated module protocol, configuration schemas, and guides. This repository does not own the runtime, the API, the database, or custody. Those live in [daclify-backend-core](https://github.com/Daclify/daclify-backend-core). The screens live in [daclify-frontend](https://github.com/Daclify/daclify-frontend).
+Antelope C++ contracts for Decide, Works, Payroll, Grants rounds and Endorsement admission, plus the generated module protocol, configuration schemas, and guides. This repository does not own the runtime, the API, the database, or custody. Those live in [daclify-backend-core](https://github.com/Daclify/daclify-backend-core). The screens live in [daclify-frontend](https://github.com/Daclify/daclify-frontend).
 
 Check the three repositories out as siblings. Install from core’s [development bootstrap](https://github.com/Daclify/daclify-backend-core/blob/main/docs/development.md). Core’s [operations guide](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations.md) names the account each contract is deployed to. In a local checkout that guide is `../daclify-backend-core/docs/operations.md`. The copy on `main` appears after that file is pushed.
 
@@ -22,7 +22,7 @@ Works (`contracts/works`) funds a contributor through milestones. Acceptance res
 
 Payroll (`contracts/payroll`) commits 1 to 12 installments of one native asset. One installment is the one-time payment. The full term is reserved and approved at commit. `settle` pays every installment that is already due, oldest first, and leaves a future installment unpaid. A paused schedule pays nothing until an administrator resumes it. The recipient, amount, interval, and start are not edited by the label or the pause. Direct core `payob` can still pay one approved obligation and does not apply the pause or the catch-up.
 
-All three call back into the runtime as the module account. The runtime pins `get_code_hash` while the module keeps any action. Replacing the wasm without updating that pin makes the next callback fail.
+Privileged module callbacks call back into the runtime as the module account. The runtime pins `get_code_hash` while the module keeps any action. Replacing the wasm without updating that pin makes the next callback fail.
 
 ## Deploy accounts
 
@@ -57,3 +57,9 @@ npm run verify
 `npm test` runs the compiled-WASM tests in this repository. It does not start a chain. Core’s `--contracts` bootstrap compiles these contracts and stages the runtime the harness links against. `npm run build:contracts` compiles only this repository when the toolchain image is already built.
 
 Generated references are produced by `npm run docs:generate` from the guides and the compiled ABI. `docs:check` fails when the generated files drift. Do not hand-edit `docs/generated/` or `protocol/generated/`.
+
+## 0.5 research modules
+
+Works adds exact frozen contribution terms and contributor consent while retaining the existing Treasury ledger. Grants rounds binds eligible applications to passed Decide award votes and fully reserved Works milestones; caps are cumulative lifetime limits, without matching or donor pots. Endorsement admission enforces an opt-in runtime policy using distinct current member witnesses and once-only ordinary enrollment. Decide representative elections freeze candidates, votes and term/recall records without granting administrative or spending powers.
+
+Modules require reviewed runtime action links and code pins. Existing liabilities survive module removal/upgrades. See core’s [0.5 upgrade runbook](../daclify-backend-core/docs/operations/upgrade-0.5.md) and [execution ledger](../daclify-backend-core/docs/evidence/2026-10-07-research-execution.md) for checks and external qualification gates.

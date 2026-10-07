@@ -1,11 +1,47 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.4.0-alpha.1';
+export const VERSION = '0.5.0-alpha.1';
 export const ModulePermissions = Object.freeze({
-  decide: { actions: ['open', 'vote', 'openwork'] as const, grants: ['govlock'] as const },
+  decide: {
+    actions: [
+      'open',
+      'vote',
+      'openwork',
+      'openaward',
+      'newelect',
+      'nominate',
+      'startelect',
+      'recall',
+    ] as const,
+    grants: ['govlock'] as const,
+  },
   works: {
-    actions: ['propose', 'accept', 'submitwork', 'review', 'cancel'] as const,
+    actions: [
+      'propose',
+      'accept',
+      'submitwork',
+      'review',
+      'cancel',
+      'offeragr',
+      'acceptagr',
+    ] as const,
     grants: ['reserve', 'approve', 'cancel'] as const,
+  },
+  'endorsement-admission': {
+    actions: ['applyjoin', 'witness', 'unwitness', 'admit'] as const,
+    grants: ['admit'] as const,
+  },
+  'grants-rounds': {
+    actions: [
+      'newround',
+      'applygrant',
+      'amend',
+      'submitapp',
+      'reviewapp',
+      'closeapp',
+      'closeround',
+    ] as const,
+    grants: ['awardwork'] as const,
   },
   payroll: { actions: ['commit', 'edit'] as const, grants: ['reserve', 'approve'] as const },
 });
@@ -26,11 +62,21 @@ export const PayrollConfigSchema = z.strictObject({
   maxPeriods: z.int().min(1).max(12),
   minIntervalSeconds: z.int().min(86400).max(2678400),
 });
+export const GrantsConfigSchema = z.strictObject({
+  configVersion: z.literal(1),
+  assetRail: z.literal('native'),
+  maxMilestones: z.literal(16),
+  matching: z.literal(false),
+});
+export const EndorsementConfigSchema = z.strictObject({
+  configVersion: z.literal(1),
+  witnessLimit: z.literal(64),
+});
 export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: VERSION,
-    coreRange: '^0.4.0-alpha.1',
+    coreRange: '^0.5.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
@@ -39,7 +85,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'works',
     version: VERSION,
-    coreRange: '^0.4.0-alpha.1',
+    coreRange: '^0.5.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -48,11 +94,29 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: VERSION,
-    coreRange: '^0.4.0-alpha.1',
+    coreRange: '^0.5.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
     helpTopic: 'payroll',
+  }),
+  ModuleManifestSchema.parse({
+    id: 'grants-rounds',
+    version: VERSION,
+    coreRange: '^0.5.0-alpha.1',
+    interfaceVersion: 1,
+    configVersion: 1,
+    capabilities: ['obligation.create'],
+    helpTopic: 'grants-rounds',
+  }),
+  ModuleManifestSchema.parse({
+    id: 'endorsement-admission',
+    version: VERSION,
+    coreRange: '^0.5.0-alpha.1',
+    interfaceVersion: 1,
+    configVersion: 1,
+    capabilities: ['member.manage'],
+    helpTopic: 'endorsement-admission',
   }),
 ]);
 export const ModuleInstallationSchema = z.discriminatedUnion('id', [
@@ -65,6 +129,11 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal(ModulePermissions.decide.actions[0]),
       z.literal(ModulePermissions.decide.actions[1]),
       z.literal(ModulePermissions.decide.actions[2]),
+      z.literal(ModulePermissions.decide.actions[3]),
+      z.literal(ModulePermissions.decide.actions[4]),
+      z.literal(ModulePermissions.decide.actions[5]),
+      z.literal(ModulePermissions.decide.actions[6]),
+      z.literal(ModulePermissions.decide.actions[7]),
     ]),
     grants: z.tuple([z.literal('govlock')]),
   }),
@@ -79,6 +148,8 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal('submitwork'),
       z.literal('review'),
       z.literal('cancel'),
+      z.literal('offeragr'),
+      z.literal('acceptagr'),
     ]),
     grants: z.tuple([z.literal('reserve'), z.literal('approve'), z.literal('cancel')]),
   }),
@@ -93,7 +164,37 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
     ]),
     grants: z.tuple([z.literal('reserve'), z.literal('approve')]),
   }),
+  z.strictObject({
+    id: z.literal('grants-rounds'),
+    account: NativeAccountSchema,
+    version: z.literal(VERSION),
+    config: GrantsConfigSchema,
+    actions: z.tuple([
+      z.literal('newround'),
+      z.literal('applygrant'),
+      z.literal('amend'),
+      z.literal('submitapp'),
+      z.literal('reviewapp'),
+      z.literal('closeapp'),
+      z.literal('closeround'),
+    ]),
+    grants: z.tuple([z.literal('awardwork')]),
+  }),
+  z.strictObject({
+    id: z.literal('endorsement-admission'),
+    account: NativeAccountSchema,
+    version: z.literal(VERSION),
+    config: EndorsementConfigSchema,
+    actions: z.tuple([
+      z.literal('applyjoin'),
+      z.literal('witness'),
+      z.literal('unwitness'),
+      z.literal('admit'),
+    ]),
+    grants: z.tuple([z.literal('admit')]),
+  }),
 ]);
 export type ModuleInstallation = z.infer<typeof ModuleInstallationSchema>;
 
 export * from './api.js';
+export * from './agreements.js';

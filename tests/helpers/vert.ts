@@ -45,6 +45,23 @@ export function load(chain: Blockchain, name: string, path: string): Account {
       },
     }),
   ]);
+  // VERT 0.3.24 omits the parent transaction on inline contexts. Inherit its
+  // actual encoded transaction for receipt intrinsics; native checks compare real IDs.
+  const recreate = account.recreateVm.bind(account);
+  account.recreateVm = async () => {
+    await recreate();
+    const vm = account.vm;
+    if (!vm) throw new Error('VERT_VM_REQUIRED');
+    const apply = vm.apply.bind(vm);
+    vm.apply = (context) => {
+      if (!context.transaction) {
+        const transaction = chain.actionTraces.find((trace) => trace.transaction)?.transaction;
+        if (!transaction) throw new Error('VERT_TRANSACTION_REQUIRED');
+        context.transaction = transaction;
+      }
+      return apply(context);
+    };
+  };
   return account;
 }
 export async function send(
@@ -70,12 +87,12 @@ export async function listFirstParty(core: Account, module: string, codeHash: st
     core,
     'setfees',
     [500, 10000, 'alice', 'eosio.token', '4,TLOS', ''],
-    'daclifycore@active',
+    `${core.name}@active`,
   );
   await send(
     core,
     'listmod',
     [module, 'alice', 0, 1, '0.0000 TLOS', codeHash, 'First-party fixture'],
-    'daclifycore@active',
+    `${core.name}@active`,
   );
 }
