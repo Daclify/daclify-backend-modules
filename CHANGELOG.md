@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.1 — Wallet disaster recovery
+
+Compatible core 0.6 protocol/SDK dependency and regenerated documentation. Contract code and serialized Antelope table/action formats remain at interface 1. This is a development package, not a qualified production release.
+
+Development prerelease; production release gates remain in force.
+
 ## 0.2.0-alpha.1 — Governed Works funding
 
 - Decide policies read from the core runtime; funding votes pin a Works project.
