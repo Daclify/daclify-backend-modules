@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const endorseAbiHash = 'b7ed7d2ca049178ef0af2cec9a280884c70c0e327c0214dbf9f06db7d79fbdaa';
+export const endorseAbiHash = '86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13';
 export const endorseAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -160,6 +160,26 @@ export const endorseAbi = {
       ]
     },
     {
+      "name": "bindrampool",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "ram_payer_owner",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
       "name": "unwitness",
       "base": "",
       "fields": [
@@ -224,6 +244,11 @@ export const endorseAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "bindrampool",
+      "type": "bindrampool",
+      "ricardian_contract": ""
+    },
+    {
       "name": "unwitness",
       "type": "unwitness",
       "ricardian_contract": ""
@@ -238,6 +263,13 @@ export const endorseAbi = {
     {
       "name": "joinapps",
       "type": "admission_application",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "rampayer",
+      "type": "ram_payer_owner",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -287,6 +319,12 @@ export interface applyjoin {
   document_version: number;
   expires: number;
 }
+export interface bindrampool {
+  runtime: string;
+}
+export interface ram_payer_owner {
+  runtime: string;
+}
 export interface unwitness {
   runtime: string;
   dao_id: string;
@@ -304,6 +342,7 @@ export interface witness {
 export interface EndorseActions {
   admit: admit;
   applyjoin: applyjoin;
+  bindrampool: bindrampool;
   unwitness: unwitness;
   witness: witness;
 }

@@ -18,6 +18,9 @@ import {
 } from '../protocol/archive.js';
 import { decodeArchiveManifest, verifyArchiveChunks } from './manifest.js';
 import { previousPollRelease } from './releases/ordinary-polls-observer.js';
+import { pruningPollRelease } from './releases/ordinary-polls-pruning.js';
+import { previousDocumentRelease } from './releases/document-versions-before-pools.js';
+import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
   'ordinary-poll-votes': {
     abi: ABI.from(decideAbi),
@@ -65,13 +68,22 @@ function releasedSource(
     schemaHash === current.schemaHash
   )
     return { abi: sources[kind].abi, rowType: current.rowType };
-  if (
-    kind === 'ordinary-poll-votes' &&
-    codeHash === previousPollRelease.identity.codeHash &&
-    rawAbiHash === previousPollRelease.identity.rawAbiHash &&
-    schemaHash === previousPollRelease.identity.schemaHash
-  )
-    return { abi: ABI.from(previousPollRelease.abi), rowType: 'vote_record' };
+  if (kind === 'ordinary-poll-votes')
+    for (const release of [previousPollRelease, pruningPollRelease])
+      if (
+        codeHash === release.identity.codeHash &&
+        rawAbiHash === release.identity.rawAbiHash &&
+        schemaHash === release.identity.schemaHash
+      )
+        return { abi: ABI.from(release.abi), rowType: 'vote_record' };
+  if (kind === 'document-versions')
+    for (const identity of [previousDocumentRelease.identity, documentPoolsIdentity])
+      if (
+        codeHash === identity.codeHash &&
+        rawAbiHash === identity.rawAbiHash &&
+        schemaHash === identity.schemaHash
+      )
+        return { abi: ABI.from(previousDocumentRelease.abi), rowType: 'document_record' };
   throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
 }
 export function decodeReleasedArchiveRow(
@@ -111,7 +123,7 @@ export function decodeReleasedArchiveRow(
       row.packed
     )
       throw new RangeError('ARCHIVE_ROW_CANONICAL');
-    return { kind, value: vote, original: row };
+    return { kind, value: vote, original: row } as const;
   }
   const document = RuntimeTableSchemas.documents.parse(decoded);
   if (document.id !== row.primaryKey || document.document_id !== parent)
@@ -121,7 +133,7 @@ export function decodeReleasedArchiveRow(
     row.packed
   )
     throw new RangeError('ARCHIVE_ROW_CANONICAL');
-  return { kind, value: document, original: row };
+  return { kind, value: document, original: row } as const;
 }
 // Standalone verification uses no server database or decryption keys; original files are separate.
 export function verifyArchiveBundle(value: unknown, expectedManifestCommitment: string) {

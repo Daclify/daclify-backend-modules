@@ -325,6 +325,11 @@ export const ArchiveHistoryBundleRequestSchema = z.strictObject({
   dao: DaoRefSchema,
   manifestCommitment: ChainIdSchema,
 });
+export const ArchiveLiveVotesRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  parentId: IdSchema,
+});
+export const ArchiveLiveVotesSchema = z.array(DecideTableSchemas.votes).max(MAX_ARCHIVE_LEAVES);
 export const ArchiveHistoryPageRequestSchema = z.strictObject({
   dao: DaoRefSchema,
   manifestCommitment: ChainIdSchema,
@@ -337,7 +342,7 @@ export const ArchiveHistoryPageSchema = z.strictObject({
   records: z.array(DecideTableSchemas.votes).max(25),
   next: Uint64Schema.nullable(),
   coverage: z.literal('verified-archive'),
-  liveRowsIncluded: z.literal(false),
+  liveRowsIncluded: z.boolean().default(false),
 });
 export const ArchiveRoutes = {
   history: {

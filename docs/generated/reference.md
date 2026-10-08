@@ -138,7 +138,13 @@ Resources offers a separate signed archive approval after independent backup ver
 
 ## decide contract
 
-Source ABI JSON SHA-256: `9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb232212793d50033`.
+Source ABI JSON SHA-256: `6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7`.
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ### Action: execute
 
@@ -376,6 +382,12 @@ Source ABI JSON SHA-256: `9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb23221
 | completed_at | uint32 |
 | legacy | bool |
 
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
 ### Table: terms
 
 | Field | ABI type |
@@ -412,7 +424,7 @@ Source ABI JSON SHA-256: `9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb23221
 
 ## works contract
 
-Source ABI JSON SHA-256: `cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058f3d33b93b1`.
+Source ABI JSON SHA-256: `ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc`.
 
 ### Action: accept
 
@@ -431,6 +443,12 @@ Source ABI JSON SHA-256: `cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058
 | dao_id | uint64 |
 | member_id | uint64 |
 | project_id | uint64 |
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ### Action: cancel
 
@@ -559,9 +577,21 @@ Source ABI JSON SHA-256: `cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058
 | milestones | uint64[] |
 | status | uint8 |
 
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
 ## payroll contract
 
-Source ABI JSON SHA-256: `eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6041d98a5a2`.
+Source ABI JSON SHA-256: `e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8`.
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ### Action: commit
 
@@ -614,6 +644,12 @@ Source ABI JSON SHA-256: `eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6
 | schedule_id | uint64 |
 | due | uint32 |
 
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
 ### Table: schedules
 
 | Field | ABI type |
@@ -630,7 +666,7 @@ Source ABI JSON SHA-256: `eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6
 
 ## grants contract
 
-Source ABI JSON SHA-256: `6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb3700170f8070eab`.
+Source ABI JSON SHA-256: `594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393`.
 
 ### Action: amend
 
@@ -662,6 +698,12 @@ Source ABI JSON SHA-256: `6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb37001
 | dues | uint32[] |
 | term_start | uint32 |
 | term_end | uint32 |
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ### Action: closeapp
 
@@ -751,6 +793,12 @@ Source ABI JSON SHA-256: `6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb37001
 | project_id | uint64 |
 | funding_ballot | uint64 |
 
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
 ### Table: rounds
 
 | Field | ABI type |
@@ -772,7 +820,7 @@ Source ABI JSON SHA-256: `6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb37001
 
 ## endorse contract
 
-Source ABI JSON SHA-256: `b7ed7d2ca049178ef0af2cec9a280884c70c0e327c0214dbf9f06db7d79fbdaa`.
+Source ABI JSON SHA-256: `86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13`.
 
 ### Action: admit
 
@@ -800,6 +848,12 @@ Source ABI JSON SHA-256: `b7ed7d2ca049178ef0af2cec9a280884c70c0e327c0214dbf9f06d
 | document_id | uint64 |
 | document_version | uint32 |
 | expires | uint32 |
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ### Action: unwitness
 
@@ -842,6 +896,12 @@ Source ABI JSON SHA-256: `b7ed7d2ca049178ef0af2cec9a280884c70c0e327c0214dbf9f06d
 | witnesses | uint64[] |
 | admitted | bool |
 | member_id | uint64 |
+
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
 
 ## GET /v1/daos/:id/modules
 
@@ -3617,8 +3677,8 @@ Response:
       "const": "verified-archive"
     },
     "liveRowsIncluded": {
-      "type": "boolean",
-      "const": false
+      "default": false,
+      "type": "boolean"
     }
   },
   "required": [

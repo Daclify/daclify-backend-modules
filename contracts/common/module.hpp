@@ -7,11 +7,19 @@
 #define JSON_HAS_EXPERIMENTAL_FILESYSTEM 0
 #include "json.hpp"
 namespace daclify {
+inline void bind_ram_pool(name payer,name runtime){
+ require_auth(payer);check(is_account(runtime),"RUNTIME_ACCOUNT");ram_payer_binding binding(payer,payer.value);
+ if(binding.exists()){check(binding.get().runtime==runtime,"RAM_PAYER_RUNTIME");return;}
+ ram_observer_settings observer(runtime,runtime.value);check(observer.exists()&&observer.get().runtime_hash==get_code_hash(runtime),"RAM_OBSERVER_REQUIRED");
+ ram_sources sources(runtime,runtime.value);check(sources.get(payer.value,"RAM_SOURCE_UNKNOWN").code_hash==get_code_hash(payer),"RAM_SOURCE_CODE");
+ const ram_payer_owner owner{runtime};binding.set(owner,payer);observe_ram(runtime,0,payer,"rampayer"_n,pack_size(owner)+224,0);
+}
 inline void pinned_module(name runtime,uint64_t dao_id,name account){
  modules rows(runtime,dao_id);const auto& installed=rows.get(account.value,"MODULE_DISABLED");
  check(!installed.actions.empty()&&installed.code_hash!=checksum256()&&get_code_hash(account)==installed.code_hash,"MODULE_CODE");
 }
 inline member_record module_actor(name runtime,uint64_t dao_id,uint64_t member_id,name module_account,name action_name,bool admin=false,bool reviewer=false) {
+ check_ram_payer_runtime(module_account,runtime);
  gov_policies policies(runtime,runtime.value);if(policies.find(dao_id)!=policies.end())check(get_sender()==runtime,"ACTOR_SENDER");check_agent_authority(runtime,dao_id,member_id);
  if(get_sender().value){check(get_sender()==runtime,"ACTOR_SENDER");require_auth(permission_level{runtime,"execctx"_n});}else require_auth(runtime);check(is_account(runtime),"RUNTIME_ACCOUNT");daos communities(runtime,runtime.value);communities.get(dao_id,"DAO_UNKNOWN");modules installed(runtime,dao_id);const auto& grant=installed.get(module_account.value,"MODULE_DISABLED");check(grant.version==1&&std::find(grant.actions.begin(),grant.actions.end(),action_name)!=grant.actions.end(),"MODULE_ACTION");members people(runtime,dao_id);const auto& person=people.get(member_id,"MEMBER_UNKNOWN");check(person.active,"MEMBER_INACTIVE");check(!admin||person.admin,"ADMIN_REQUIRED");check(!reviewer||person.admin||person.reviewer,"REVIEWER_REQUIRED");return person;
 }

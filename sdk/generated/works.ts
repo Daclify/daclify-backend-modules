@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058f3d33b93b1';
+export const worksAbiHash = 'ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -84,6 +84,16 @@ export const worksAbi = {
         {
           "name": "accepted_at",
           "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "bindrampool",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
         }
       ]
     },
@@ -322,6 +332,16 @@ export const worksAbi = {
       ]
     },
     {
+      "name": "ram_payer_owner",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
       "name": "review",
       "base": "",
       "fields": [
@@ -416,6 +436,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "bindrampool",
+      "type": "bindrampool",
+      "ricardian_contract": ""
+    },
+    {
       "name": "cancel",
       "type": "cancel",
       "ricardian_contract": ""
@@ -477,6 +502,13 @@ export const worksAbi = {
       "index_type": "i64",
       "key_names": [],
       "key_types": []
+    },
+    {
+      "name": "rampayer",
+      "type": "ram_payer_owner",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
     }
   ],
   "variants": [],
@@ -504,6 +536,9 @@ export interface agreement_record {
   terms: string;
   accepted: boolean;
   accepted_at: number;
+}
+export interface bindrampool {
+  runtime: string;
 }
 export interface cancel {
   runtime: string;
@@ -567,6 +602,9 @@ export interface propose {
   payments: string[];
   dues: number[];
 }
+export interface ram_payer_owner {
+  runtime: string;
+}
 export interface review {
   runtime: string;
   dao_id: string;
@@ -592,6 +630,7 @@ export interface submitwork {
 export interface WorksActions {
   accept: accept;
   acceptagr: acceptagr;
+  bindrampool: bindrampool;
   cancel: cancel;
   govaccept: govaccept;
   grantwork: grantwork;

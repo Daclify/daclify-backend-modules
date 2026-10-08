@@ -16,7 +16,6 @@ Archived files remain pinned and count toward the same approved per-DAO storage 
 
 The independent fixture in `tests/fixtures/archive-v1.json` was calculated with Python `struct`/`hashlib`, including Antelope name and varuint packing. TypeScript and compiled C++ on the owned Spring/Telos-system fixture match its domain, leaves, root and proofs. Property tests use seed 20261008; boundary tests include the 5 MiB wire limit and 65,536 leaves. These results qualify the tested format, not a production Archive service.
 
-
 ## Canonical manifests and recovery verification
 
 `createArchiveManifest` validates a complete descriptor body and computes its descriptor commitment. `encodeArchiveManifest` checks that commitment and encodes canonical UTF-8 JSON, at most 5 MiB. `decodeArchiveManifest` requires the SHA-256 commitment of those exact uploaded bytes, rejects invalid UTF-8/noncanonical JSON and validates domains, ordered families/chunks, counts and file-version references. The manifest contains no hash or CID of itself.
@@ -27,13 +26,11 @@ A manifest names one source deployment, its code and raw ABI hashes, the full DA
 
 `verifyArchiveChunkDescriptor` verifies one chunk’s exact byte length/commitment, domain, Merkle root and primary-key boundaries. `verifyArchiveChunks` additionally verifies complete bundle coverage and rejects duplicate original table/scope/primary keys. Its full-memory convenience path is capped at 64 MiB; larger recovery must use bounded per-chunk verification. These helpers preserve original packed bytes and do not accept an arbitrary downloaded ABI. Released schema selection, original-file retrieval, backup attestation, index restoration and source eligibility remain separate required checks. Neither helper declares original referenced files available merely because the manifest contains their CIDs.
 
-
 ## Schema decoding and host persistence
 
 `archiveSourceSchema` exposes the code, binary ABI and schema hashes for the compiled vote/document models in this development packet. `decodeReleasedArchiveRow` accepts only those whitelisted models, validates source/scope, original primary key and parent ballot/document, rejects trailing/noncanonical row bytes and returns the original packed bytes alongside producer-typed values. Document ciphertext and key-epoch metadata stay unchanged. This is not a historic-release catalogue: retain and qualify older immutable schema packets before pruning or claiming upgrade-safe history recovery. Other record families remain opaque export data and are not decoded or pruned by this helper.
 
 The Node host imports `ArchiveMigrations` from `@daclify/modules/archive/migrations`. Its URLs resolve to the SQL bytes included in the installed producer tarball. Core applies these under the separate `archive` namespace using its existing transaction, migration lock and immutable source-hash checks, after core migrations. The first migration creates resumable export/chunk records and freezes their request/source/snapshot/coverage domain and pinned manifest. It requires verification and backup/anchor metadata before advanced phases. SQL metadata and constraints do not establish provider availability or native pruning authority; the coordinator must prove both before acting. No export worker, approval route or pruning operation is enabled by applying this migration.
-
 
 ## Terminal markers and ordinary-poll planning
 
@@ -49,7 +46,7 @@ The core host exposes the producer-owned `POST /v1/archive/preview` route. It re
 
 The native adapter pins the current core/source code and raw ABI, installed source identity and exact last irreversible block ID/number. It rejects source code newer than that block and checks the pins again after reading. `get_table_rows` reads head state; it does not accept an invented historical-block parameter. This limited preview relies on the reviewed source's immutable terminal polls/votes and the conservative terminal-age condition to relate the covered rows to the irreversible snapshot. It is not a general historical-state reader. Financial/election families remain protected, and complete vote weights/tallies are checked before eligible plans are returned.
 
-Resources shows eligibility, the original delay, blocked reasons, snapshot and gross RAM estimate. Changing the selected ballot clears preview consent. Administrators may approve a resumable export using existing hosting capacity. Independent backup attestation, native approval/anchor, pruning and historic browsing remain unavailable. No preview or export can be used as deletion authorization.
+Resources shows eligibility, the original delay, blocked reasons, snapshot and gross RAM estimate. Changing the selected ballot clears preview consent. Administrators may approve a resumable export using existing hosting capacity, create a verified independent encrypted backup, obtain a native anchor and sign exact approval or revocation. Each enabled ordinary-poll prune batch is explicit and source-owned. Preview or export alone never authorizes deletion. Production pruning remains off until allocation, migration, restore and provider gates pass.
 
 ## Resumable exports and standalone recovery
 
@@ -64,3 +61,9 @@ This bundle does not contain vault/recovery/decryption keys, social pairings, or
 ## Independent backup receipts
 
 The host's optional encrypted backup action binds the exact displayed manifest, export and DAO to an authenticated encrypted recovery bundle. Producer-owned `ArchiveBackupReceiptSchema`, backup route/status fields and immutable namespaced `003_backups.sql` preserve its file commitment and verification event. The core host verifies a complete independent restore before saving the receipt and rechecks administrator access. Backup bytes and their secret key stay outside public API status. The host can fall back from failed primary retrieval to the matching saved copy. Native availability attestation, approval and pruning remain separate; the operator must qualify the backup store's physical independence and durability. See the core export operations runbook for offline keys and database-free verification.
+
+## Source binding and historical readers
+
+All five modules expose owner-only `bindrampool` for physically allocated payer pools. A bound payer accepts writes for exactly one runtime; another runtime or rebind is rejected. Unbound modules retain independent-runtime support without funded pools. Do not bind an already shared module until other runtimes' work has been drained or migrated with authorization. This is not automatic quota enforcement or a completion guarantee.
+
+The package retains trusted pre-pruning and pre-binding vote readers and the pre-pool document ABI/code identity. Code upgrades do not grant arbitrary downloaded ABIs decoder authority. The live/archive merger orders canonical vote IDs, deduplicates identical rows and rejects changed payloads for an existing ID or another parent. The host obtains irreversible-stable live rows without SQL and exposes when live coverage is unavailable. Original document ciphertext can be decoded from verified chunks and opened with recovered original keys/grants; original file blobs are separate. An owned native ordinary-vote database-loss drill plus original-kit recovery of a retained private file passed. Protected document pruning/selective restoration, legacy upgrade and live-provider qualification remain release work.

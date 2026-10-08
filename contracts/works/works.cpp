@@ -1,8 +1,10 @@
+#define DACLIFY_RAM_PAYER_CONTRACT "works"
 #include "grants_records.hpp"
 using namespace daclify;
 CONTRACT works:public contract {
 public:
  using contract::contract;
+ ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  using projects=works_projects;
  using milestones=works_milestones;
  ACTION propose(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id,uint64_t contributor,uint64_t document_id,uint32_t document_version,std::vector<asset> payments,std::vector<uint32_t> dues){
@@ -67,4 +69,4 @@ public:
 private:
  void check_document(name runtime,uint64_t dao_id,uint64_t id,uint32_t version){documents rows(runtime,dao_id);auto index=rows.get_index<"byversion"_n>();index.get((uint128_t(id)<<32)|version,"DOCUMENT_UNKNOWN");}
 };
-EOSIO_DISPATCH(works,(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))
+EOSIO_DISPATCH(works,(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))

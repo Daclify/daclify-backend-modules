@@ -1,10 +1,20 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = 'eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6041d98a5a2';
+export const payrollAbiHash = 'e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
   "structs": [
+    {
+      "name": "bindrampool",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
     {
       "name": "commit",
       "base": "",
@@ -122,6 +132,16 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "ram_payer_owner",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
       "name": "schedule_record",
       "base": "",
       "fields": [
@@ -184,6 +204,11 @@ export const payrollAbi = {
   ],
   "actions": [
     {
+      "name": "bindrampool",
+      "type": "bindrampool",
+      "ricardian_contract": ""
+    },
+    {
       "name": "commit",
       "type": "commit",
       "ricardian_contract": ""
@@ -215,6 +240,13 @@ export const payrollAbi = {
       "key_types": []
     },
     {
+      "name": "rampayer",
+      "type": "ram_payer_owner",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
       "name": "schedules",
       "type": "schedule_record",
       "index_type": "i64",
@@ -226,6 +258,9 @@ export const payrollAbi = {
   "ricardian_clauses": [],
   "action_results": []
 } satisfies ABI.Def;
+export interface bindrampool {
+  runtime: string;
+}
 export interface commit {
   runtime: string;
   dao_id: string;
@@ -257,6 +292,9 @@ export interface entry_record {
   schedule_id: string;
   due: number;
 }
+export interface ram_payer_owner {
+  runtime: string;
+}
 export interface schedule_record {
   id: string;
   dao_id: string;
@@ -274,6 +312,7 @@ export interface settle {
   entry_id: string;
 }
 export interface PayrollActions {
+  bindrampool: bindrampool;
   commit: commit;
   edit: edit;
   settle: settle;

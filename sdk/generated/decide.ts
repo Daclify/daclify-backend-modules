@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb232212793d50033';
+export const decideAbiHash = '6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -82,6 +82,16 @@ export const decideAbi = {
         {
           "name": "metadata",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "bindrampool",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
         }
       ]
     },
@@ -578,6 +588,16 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "ram_payer_owner",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
       "name": "recall",
       "base": "",
       "fields": [
@@ -794,6 +814,11 @@ export const decideAbi = {
   ],
   "actions": [
     {
+      "name": "bindrampool",
+      "type": "bindrampool",
+      "ricardian_contract": ""
+    },
+    {
       "name": "execute",
       "type": "execute",
       "ricardian_contract": ""
@@ -903,6 +928,13 @@ export const decideAbi = {
       "key_types": []
     },
     {
+      "name": "rampayer",
+      "type": "ram_payer_owner",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
       "name": "terms",
       "type": "term_record",
       "index_type": "i64",
@@ -948,6 +980,9 @@ export interface ballot_record {
   status: number;
   winner: number;
   metadata: string;
+}
+export interface bindrampool {
+  runtime: string;
 }
 export interface election_record {
   id: string;
@@ -1079,6 +1114,9 @@ export interface prunevotes {
   start: number;
   proofs: archive_prune_proof[];
 }
+export interface ram_payer_owner {
+  runtime: string;
+}
 export interface recall {
   runtime: string;
   dao_id: string;
@@ -1137,6 +1175,7 @@ export interface work_execution_record {
   executed: boolean;
 }
 export interface DecideActions {
+  bindrampool: bindrampool;
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;

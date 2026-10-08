@@ -126,3 +126,66 @@ it('decodes the retained trusted pre-pruning schema after a contract update', as
     ),
   ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
 });
+it('retains the pruning release decoder across a payer-binding code and ABI upgrade', async () => {
+  const { pruningPollRelease } = await import('../archive/releases/ordinary-polls-pruning.js');
+  const current = input(),
+    old = pruningPollRelease.identity;
+  const domain = {
+    ...current.domain,
+    code_hash: old.codeHash,
+    abi_hash: old.rawAbiHash,
+    schema_hash: old.schemaHash,
+  };
+  const packed = Serializer.encode({
+    abi: ABI.from(pruningPollRelease.abi),
+    type: 'vote_record',
+    object: row,
+  }).hexString;
+  expect(decodeReleasedArchiveRow(domain, { primaryKey: '3', packed }, '7').value).toEqual(row);
+});
+it.each(['before-pools', 'pool-checkpoint'])(
+  'reads original encrypted document records from retained %s core schema',
+  async (checkpoint) => {
+    const { previousDocumentRelease: release } =
+      await import('../archive/releases/document-versions-before-pools.js');
+    const { documentPoolsIdentity } =
+      await import('../archive/releases/document-versions-pools.js');
+    const old = checkpoint === 'before-pools' ? release.identity : documentPoolsIdentity,
+      domain = {
+        ...input().domain,
+        source: 'daclifycore',
+        table: 'documents',
+        scope: '2',
+        code_hash: old.codeHash,
+        abi_hash: old.rawAbiHash,
+        schema_hash: old.schemaHash,
+      };
+    const document = RuntimeTableSchemas.documents.parse({
+      id: '5',
+      document_id: '6',
+      version: 2,
+      author: '1',
+      cid: '',
+      metadata: '{"encrypted":"original"}',
+      commitment: 'ab'.repeat(32),
+      bytes: 24,
+      envelope_version: 1,
+      key_epoch: '3',
+    });
+    const packed = Serializer.encode({
+      abi: ABI.from(release.abi),
+      type: 'document_record',
+      object: document,
+    }).hexString;
+    expect(decodeReleasedArchiveRow(domain, { primaryKey: '5', packed }, '6').value).toEqual(
+      document,
+    );
+    expect(() =>
+      decodeReleasedArchiveRow(
+        { ...domain, code_hash: archiveSourceSchema('document-versions').codeHash },
+        { primaryKey: '5', packed },
+        '6',
+      ),
+    ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
+  },
+);

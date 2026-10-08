@@ -1,9 +1,11 @@
+#define DACLIFY_RAM_PAYER_CONTRACT "endorse"
 #include "module.hpp"
 #include "admission.hpp"
 using namespace daclify;
 CONTRACT endorse:public contract {
 public:
  using contract::contract;
+ ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  ACTION applyjoin(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,public_key signing_key,std::string encryption_key,uint8_t custody,uint8_t kind,std::string operator_label,uint64_t document_id,uint32_t document_version,uint32_t expires){
   module_actor(runtime,dao_id,member_id,get_self(),"applyjoin"_n);const auto policy=current_policy(runtime,dao_id);check(application_id>0,"APPLICATION_ID");check(kind<=1&&custody<=1,"PARTICIPANT_MODE");check(!encryption_key.empty()&&encryption_key.size()<=1024,"ENCRYPTION_KEY");check(operator_label.size()<=64,"AGENT_OPERATOR");if(kind==1){check(!operator_label.empty(),"AGENT_OPERATOR");for(unsigned char c:operator_label)check(c>=0x20&&c<=0x7e,"AGENT_OPERATOR");}
   const auto now=current_time_point().sec_since_epoch();check(expires>now&&uint64_t(expires)<=uint64_t(now)+2592000,"APPLICATION_EXPIRED");documents docs(runtime,dao_id);const auto index=docs.get_index<"byversion"_n>();const auto& document=index.get((uint128_t(document_id)<<32)|document_version,"DOCUMENT_UNKNOWN");
@@ -27,4 +29,4 @@ private:
  admission_policy current_policy(name runtime,uint64_t dao_id){admission_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"ADMISSION_POLICY_UNKNOWN");check(policy.mode==1&&policy.source==get_self(),"ADMISSION_POLICY_CHANGED");pinned_module(runtime,dao_id,get_self());return policy;}
  void validate(const admission_application& app,uint64_t dao_id,uint64_t revision,const admission_policy& policy){check(app.dao_id==dao_id,"APPLICATION_DOMAIN");check(!app.admitted,"APPLICATION_FROZEN");check(app.revision==revision,"APPLICATION_REVISION");check(app.policy_revision==policy.revision,"ADMISSION_POLICY_CHANGED");check(current_time_point().sec_since_epoch()<app.expires,"APPLICATION_EXPIRED");}
 };
-EOSIO_DISPATCH(endorse,(applyjoin)(witness)(unwitness)(admit))
+EOSIO_DISPATCH(endorse,(bindrampool)(applyjoin)(witness)(unwitness)(admit))

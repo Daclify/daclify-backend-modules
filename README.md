@@ -6,7 +6,7 @@ Check the three repositories out as siblings. Install from core’s [development
 
 Current development version: **0.7.0-alpha.1**, requiring the matching 0.7 core protocol/SDK. Contract interface 1 and existing serialized rows remain unchanged. This resource-billing-archives development branch changes the five module WASM builds for opt-in RAM observation; migration/backfill and resource enforcement are not qualified. A separate release and upgrade packet are required before deploying this branch. The package adds a Node-only `ConnectedPaymentClient` for DAO-scoped central Connect calls. Core owns all Stripe configuration, accounting and authorization; this client never needs a platform Stripe key. Products create receipts, with module fulfillment explicit. See [operator payment integration](docs/connected-payments.md) and [core upgrade 0.7](../daclify-backend-core/docs/operations/upgrade-0.7.md). This development package is not a qualified production release.
 
-The Archive service provides terminal markers, a bounded ordinary-poll planner, export consent/manifest assembly and standalone recovery verification through `@daclify/modules/archive`. Core hosts resumable uploads, reservations and downloads; see the [Archive format and operations boundary](docs/archive-format.md). Independent backup attestation, native approval/pruning and historic browsing remain unfinished. Archive uses normal core storage subscriptions.
+The Archive service provides terminal markers, a bounded ordinary-poll planner, export consent/manifest assembly and standalone recovery verification through `@daclify/modules/archive`. Core hosts resumable uploads, reservations and downloads; see the [Archive format and operations boundary](docs/archive-format.md). The branch implements independent encrypted backups, native attestation/approval/revocation, bounded ordinary-poll pruning, and verified history merged with live votes. Production destructive use, legacy migration and the complete recovery drill remain gated. Archive uses normal core storage subscriptions.
 
 ## Contracts in this repository
 
@@ -72,14 +72,14 @@ Modules require reviewed runtime action links and code pins. Existing liabilitie
 
 Module records remain on chain through service loss. Recovering an existing member restores only their current permissions, adds no voting weight and does not recreate agreements or obligations. Each member recovers independently. Approved liabilities survive module removal; historical private content still needs the original decryption key, encrypted grant and surviving bytes. Login pairings and jobs are core PostgreSQL state. Modules do not store or recover user private keys. Follow core’s [disaster recovery runbook](https://github.com/Daclify/daclify-backend-core/blob/main/docs/disaster-recovery.md).
 
+## Archive development branch
+
+The public Archive package owns deterministic bounded bundles/Merkle proofs, schema identities, eligibility planning, retained historical vote/document decoders, merged history and namespaced immutable migrations. Core hosts verified exports, encrypted independent backups, native availability/approval/revocation and manual source-owned ordinary-poll pruning. The owned native database-loss drill recovered vote history plus a retained private file with original client keys; document pruning and selective restoration remain disabled. See [Archive format](docs/archive-format.md) and core's [execution evidence](../daclify-backend-core/docs/evidence/2026-10-08-resource-execution.md).
+
+All five compiled module payers support an immutable exclusive runtime binding before receiving a funded payer pool. An existing shared module must drain/migrate its old executable work first; binding does not rewrite approvals or provide completion reserves. Manual pool qualification does not replace automatic allowances, legacy migration, backed enforcement, live-provider checks or independent release verification. Production pruning/cleanup require separate reviewed enablement.
+
 ## License
 
 First-party code, contracts, SDKs and documentation are licensed under
 **AGPL-3.0-only**. See [LICENSE](LICENSE) and [licensing and source obligations](LICENSING.md).
 Third-party files retain their own licenses. Contributions remain owned by their authors.
-
-Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native approval/attestation, pruning and historic index rebuild remain separate launch gates. See the Archive format and core export operations guides.
-
-The resource-billing-archives development branch supports exact native Archive availability attestation and signed administrator approval/revocation. Destructive pruning remains disabled pending source-owned eligibility and recovery qualification. This is development-branch functionality, not a production deployment.
-
-The development branch now includes bounded source-owned ordinary-poll vote pruning, trusted prior source-schema reads, on-chain archive discovery/recovery without the SQL export index, and administrator whole-file retention priorities. The guarded cleanup engine has local race/recovery tests but is not enabled at application startup. Backed RAM enforcement, legacy migration, full private/history restoration and live-provider/release qualification remain open.

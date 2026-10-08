@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const grantsAbiHash = '6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb3700170f8070eab';
+export const grantsAbiHash = '594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393';
 export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -98,6 +98,16 @@ export const grantsAbi = {
         {
           "name": "term_end",
           "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "bindrampool",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
         }
       ]
     },
@@ -362,6 +372,16 @@ export const grantsAbi = {
       ]
     },
     {
+      "name": "ram_payer_owner",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        }
+      ]
+    },
+    {
       "name": "reviewapp",
       "base": "",
       "fields": [
@@ -430,6 +450,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "bindrampool",
+      "type": "bindrampool",
+      "ricardian_contract": ""
+    },
+    {
       "name": "closeapp",
       "type": "closeapp",
       "ricardian_contract": ""
@@ -464,6 +489,13 @@ export const grantsAbi = {
     {
       "name": "applications",
       "type": "grant_application",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "rampayer",
+      "type": "ram_payer_owner",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -504,6 +536,9 @@ export interface applygrant {
   dues: number[];
   term_start: number;
   term_end: number;
+}
+export interface bindrampool {
+  runtime: string;
 }
 export interface closeapp {
   runtime: string;
@@ -573,6 +608,9 @@ export interface newround {
   allow_agents: boolean;
   works: string;
 }
+export interface ram_payer_owner {
+  runtime: string;
+}
 export interface reviewapp {
   runtime: string;
   dao_id: string;
@@ -591,6 +629,7 @@ export interface submitapp {
 export interface GrantsActions {
   amend: amend;
   applygrant: applygrant;
+  bindrampool: bindrampool;
   closeapp: closeapp;
   closeround: closeround;
   govaward: govaward;

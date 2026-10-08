@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { IdSchema } from '@daclify/core-protocol';
+import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
 import {
   ArchiveHistoryPageRequestSchema,
@@ -21,7 +24,21 @@ export function verifyAnchoredArchive(value: unknown, anchorValue: unknown) {
     throw new RangeError('ARCHIVE_DOMAIN');
   return bundle;
 }
-export function archiveHistoryPage(value: unknown, inputValue: unknown) {
+export function mergeArchiveVotes(liveValue: unknown, archiveValue: unknown, parentValue: unknown) {
+  const parent = IdSchema.parse(parentValue),
+    live = z.array(DecideTableSchemas.votes).max(65536).parse(liveValue),
+    archived = z.array(DecideTableSchemas.votes).max(65536).parse(archiveValue),
+    byId = new Map<string, z.infer<typeof DecideTableSchemas.votes>>();
+  for (const row of [...archived, ...live]) {
+    if (row.ballot !== parent) throw new RangeError('ARCHIVE_ROW_DOMAIN');
+    const existing = byId.get(row.id);
+    if (existing && JSON.stringify(existing) !== JSON.stringify(row))
+      throw new RangeError('ARCHIVE_HISTORY_CONFLICT');
+    byId.set(row.id, row);
+  }
+  return [...byId.values()].sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1));
+}
+export function archiveHistoryPage(value: unknown, inputValue: unknown, liveValue?: unknown) {
   const input = ArchiveHistoryPageRequestSchema.parse(inputValue),
     bundle = ArchiveBundleSchema.parse(value);
   verifyArchiveBundle(bundle, input.manifestCommitment);
@@ -56,7 +73,7 @@ export function archiveHistoryPage(value: unknown, inputValue: unknown) {
     return row.value;
   });
   const after = BigInt(input.cursor ?? '0'),
-    page = decoded
+    page = mergeArchiveVotes(liveValue ?? [], decoded, family.parentId)
       .filter((r) => BigInt(r.id) > after)
       .sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1))
       .slice(0, 26);
@@ -67,6 +84,6 @@ export function archiveHistoryPage(value: unknown, inputValue: unknown) {
     records: page.slice(0, 25),
     next: page.length > 25 ? page[24]?.id : null,
     coverage: 'verified-archive',
-    liveRowsIncluded: false,
+    liveRowsIncluded: liveValue !== undefined,
   });
 }

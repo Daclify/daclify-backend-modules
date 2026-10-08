@@ -1,8 +1,10 @@
+#define DACLIFY_RAM_PAYER_CONTRACT "grants"
 #include "grants_records.hpp"
 using namespace daclify;
 CONTRACT grants:public contract {
 public:
  using contract::contract;
+ ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  ACTION newround(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t round_id,uint64_t document_id,uint32_t document_version,uint32_t applications_close,uint32_t review_close,uint32_t awards_close,asset maximum,bool allow_agents,name works){
   module_actor(runtime,dao_id,member_id,get_self(),"newround"_n,true);check(round_id>0,"ROUND_ID");check_doc(runtime,dao_id,document_id,document_version);const auto now=current_time_point().sec_since_epoch();check(now<applications_close&&applications_close<review_close&&review_close<awards_close&&uint64_t(awards_close)-now<=31536000,"ROUND_DEADLINES");
   daos communities(runtime,runtime.value);const auto& dao=communities.get(dao_id);check(maximum.is_valid()&&maximum.amount>0&&maximum.symbol==dao.token_symbol,"ASSET_QUANTITY");pinned_module(runtime,dao_id,works);grant_rounds rounds(get_self(),runtime.value);check(rounds.find(round_id)==rounds.end(),"ROUND_EXISTS");
@@ -42,4 +44,4 @@ private:
   check_doc(runtime,dao_id,doc,version);check(!payments.empty()&&payments.size()<=16&&payments.size()==dues.size(),"MILESTONE_LIMIT");check(end>start&&uint64_t(end)-start<=31536000&&end>current_time_point().sec_since_epoch(),"AGREEMENT_TERM");int64_t total=0;for(size_t i=0;i<payments.size();i++){const auto& payment=payments[i];check(payment.is_valid()&&payment.amount>0&&payment.symbol==round.maximum.symbol,"ASSET_QUANTITY");check(dues[i]>=start&&dues[i]<=end,"AGREEMENT_DUE");total=add_amount(total,payment.amount);}check(total<=round.maximum.amount,"ROUND_CAP");
  }
 };
-EOSIO_DISPATCH(grants,(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))
+EOSIO_DISPATCH(grants,(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))

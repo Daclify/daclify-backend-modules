@@ -127,8 +127,17 @@ export const ModulesHelpBundle={
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb232212793d50033",
+      "sourceAbiHash": "6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7",
       "actions": [
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
         {
           "name": "execute",
           "fields": [
@@ -791,6 +800,15 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
+        {
           "name": "terms",
           "fields": [
             {
@@ -886,7 +904,7 @@ export const ModulesHelpBundle={
     {
       "name": "works",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "cf94bbfde89949656dadbfe80bca5cd27b9dddfff479e66aca3058f3d33b93b1",
+      "sourceAbiHash": "ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc",
       "actions": [
         {
           "name": "accept",
@@ -927,6 +945,15 @@ export const ModulesHelpBundle={
             {
               "name": "project_id",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
             }
           ]
         },
@@ -1274,14 +1301,32 @@ export const ModulesHelpBundle={
               "type": "uint8"
             }
           ]
+        },
+        {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
         }
       ]
     },
     {
       "name": "payroll",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "eba6046a954cba2281f8edc73fbac92198096892e9f58a1092b1c6041d98a5a2",
+      "sourceAbiHash": "e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8",
       "actions": [
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
         {
           "name": "commit",
           "fields": [
@@ -1414,6 +1459,15 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
+        {
           "name": "schedules",
           "fields": [
             {
@@ -1459,7 +1513,7 @@ export const ModulesHelpBundle={
     {
       "name": "grants",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "6f7d79a48eae2559dd6b3b907c18e5d5ea6b98879ff5126bb3700170f8070eab",
+      "sourceAbiHash": "594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393",
       "actions": [
         {
           "name": "amend",
@@ -1552,6 +1606,15 @@ export const ModulesHelpBundle={
             {
               "name": "term_end",
               "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
             }
           ]
         },
@@ -1805,6 +1868,15 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
+        {
           "name": "rounds",
           "fields": [
             {
@@ -1870,7 +1942,7 @@ export const ModulesHelpBundle={
     {
       "name": "endorse",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "b7ed7d2ca049178ef0af2cec9a280884c70c0e327c0214dbf9f06db7d79fbdaa",
+      "sourceAbiHash": "86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13",
       "actions": [
         {
           "name": "admit",
@@ -1947,6 +2019,15 @@ export const ModulesHelpBundle={
             {
               "name": "expires",
               "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
             }
           ]
         },
@@ -2072,6 +2153,15 @@ export const ModulesHelpBundle={
             {
               "name": "member_id",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
             }
           ]
         }
@@ -4797,8 +4887,8 @@ export const ModulesHelpBundle={
             "const": "verified-archive"
           },
           "liveRowsIncluded": {
-            "type": "boolean",
-            "const": false
+            "default": false,
+            "type": "boolean"
           }
         },
         "required": [
