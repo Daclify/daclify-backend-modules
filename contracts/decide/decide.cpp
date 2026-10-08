@@ -1,5 +1,6 @@
 #include "grants_records.hpp"
 #include "admission.hpp"
+#include "archive_state.hpp"
 using namespace daclify;
 CONTRACT decide:public contract {
 public:
@@ -18,6 +19,12 @@ public:
   EOSLIB_SERIALIZE(poll_end,(ballot_id)(dao_id)(completed_at)(legacy))
  };
  using poll_ends=ram_table<"pollends"_n,poll_end>;
+ TABLE vote_identity {
+  uint64_t id=0,dao_id=0,high_water=0;
+  uint64_t primary_key()const{return id;}
+  EOSLIB_SERIALIZE(vote_identity,(id)(dao_id)(high_water))
+ };
+ using vote_identities=ram_table<"voteids"_n,vote_identity>;
  TABLE election_record {
   uint64_t id;uint64_t dao_id;uint64_t creator;std::string title;uint64_t document_id;uint32_t document_version;checksum256 document_commitment;uint64_t policy_revision;uint32_t nomination_close;uint32_t term_start;uint32_t term_end;uint8_t seats;uint8_t status=0;std::vector<uint64_t> candidates;
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
@@ -105,12 +112,27 @@ private:
   elections rows(get_self(),runtime.value);rows.modify(rows.get(election.id),same_payer,[](auto& r){r.status=2;});ballots votes_table(get_self(),runtime.value);votes_table.modify(votes_table.get(ballot.id),same_payer,[&](auto& r){r.status=issued?1:2;r.winner=-1;});
  }
 public:
+ ACTION prunevotes(name runtime,uint64_t dao_id,uint64_t archive_id,uint32_t chunk_ordinal,uint32_t start,std::vector<archive_prune_proof> proofs){
+  check(action_data_size()<=16384&&proofs.size()>0&&proofs.size()<=25,"ARCHIVE_PRUNE_BOUNDS");pinned_module(runtime,dao_id,get_self());check(!dao_paused(runtime,dao_id),"DAO_PAUSED");
+  const auto anchor=approved_archive(runtime,dao_id,archive_id,get_self());check(anchor.manifest.families.size()==1&&anchor.manifest.files.empty(),"ARCHIVE_FAMILY_PROTECTED");const auto& family=anchor.manifest.families.front();
+  check(family.kind=="ordinary-poll-votes"&&family.table=="votes"_n&&family.scope==runtime.value&&chunk_ordinal<family.chunks.size(),"ARCHIVE_FAMILY_PROTECTED");
+  const auto& chunk=family.chunks[chunk_ordinal];check(chunk.domain.runtime==runtime&&chunk.domain.dao_id==dao_id&&chunk.domain.source==get_self()&&chunk.domain.table=="votes"_n&&chunk.domain.scope==runtime.value&&chunk.domain.chunk_ordinal==chunk_ordinal,"ARCHIVE_DOMAIN");
+  archive_positions positions(runtime,dao_id);const auto& progress=positions.get(archive_id*archive_anchor_max_chunks+chunk_ordinal,"ARCHIVE_PROGRESS_UNKNOWN");
+  check(uint64_t(start)+proofs.size()<=chunk.domain.leaf_count,"ARCHIVE_PRUNE_BOUNDS");if(uint64_t(start)+proofs.size()<=progress.pruned)return;check(start==progress.pruned,"ARCHIVE_PROGRESS");
+  ballots polls(get_self(),runtime.value);const auto& poll=polls.get(family.parent_id,"BALLOT_UNKNOWN");check(poll.dao_id==dao_id&&poll.status!=0&&ordinary(runtime,poll.id),"ARCHIVE_FAMILY_PROTECTED");
+  poll_ends ends(get_self(),runtime.value);const auto& end=ends.get(poll.id,"POLL_END_UNKNOWN");check(end.dao_id==dao_id&&end.completed_at&&uint64_t(end.completed_at)+anchor.retention_seconds<=current_time_point().sec_since_epoch(),"ARCHIVE_RETENTION");
+  preserve_vote_ids(runtime);votes cast(get_self(),runtime.value);uint64_t previous=0;
+  for(uint32_t i=0;i<proofs.size();i++){const auto& proof=proofs[i];check(proof.primary_key>=chunk.first_key&&proof.primary_key<=chunk.last_key&&(!i||proof.primary_key>previous),"ARCHIVE_ROW_ORDER");
+    auto found=cast.find(proof.primary_key);check(found!=cast.end()&&found->ballot==poll.id,"ARCHIVE_ROW_DOMAIN");check(verify_archive_proof(chunk.domain,start+i,proof.primary_key,pack(*found),proof.siblings,chunk.root),"ARCHIVE_PROOF");previous=proof.primary_key;cast.erase(found);
+  }
+  core_action(runtime,get_self(),"archstep"_n,pack(std::make_tuple(dao_id,get_self(),archive_id,chunk_ordinal,start,uint32_t(proofs.size()))));
+ }
  ACTION markpoll(name runtime,uint64_t dao_id,uint64_t ballot_id){
   require_auth(get_self());pinned_module(runtime,dao_id,get_self());ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status!=0,"BALLOT_OPEN");check(ordinary(runtime,ballot_id),"ARCHIVE_FAMILY_PROTECTED");record_end(runtime,dao_id,ballot_id,true);
  }
  ACTION vote(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t choice){
   const auto person=module_actor(runtime,dao_id,member_id,get_self(),"vote"_n);ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status==0&&current_time_point().sec_since_epoch()<b.closes,"BALLOT_CLOSED");check(member_id<=b.max_member,"SNAPSHOT_MEMBER");check(choice<b.choices,"CHOICE");
-  votes cast(get_self(),runtime.value);auto index=cast.get_index<"bymember"_n>();check(index.find((uint128_t(ballot_id)<<64)|member_id)==index.end(),"ALREADY_VOTED");uint64_t weight=b.kind==0?1:b.kind==1?person.credits:uint64_t(person.stake);check(weight>0,"NO_VOTING_WEIGHT");check(weight<=b.denominator-b.cast,"VOTE_WEIGHT_RANGE");auto id=cast.available_primary_key();if(!id)id=1;
+  votes cast(get_self(),runtime.value);auto index=cast.get_index<"bymember"_n>();check(index.find((uint128_t(ballot_id)<<64)|member_id)==index.end(),"ALREADY_VOTED");uint64_t weight=b.kind==0?1:b.kind==1?person.credits:uint64_t(person.stake);check(weight>0,"NO_VOTING_WEIGHT");check(weight<=b.denominator-b.cast,"VOTE_WEIGHT_RANGE");auto id=next_vote_id(runtime);
   cast.emplace(get_self(),[&](auto& r){r.id=id;r.ballot=ballot_id;r.member=member_id;r.weight=weight;r.choice=choice;});rows.modify(b,same_payer,[&](auto& r){r.cast=add64(r.cast,weight);r.tallies[choice]=add64(r.tallies[choice],weight);});
  }
  ACTION finalize(name runtime,uint64_t dao_id,uint64_t ballot_id){
@@ -126,6 +148,13 @@ public:
   governance_locks locks(runtime,dao_id);auto index=locks.get_index<"bysource"_n>();auto packed=pack(std::make_tuple(get_self(),ballot_id));const auto& lock=index.get(sha256(packed.data(),packed.size()),"LOCK_UNKNOWN");if(lock.active)core_action(runtime,get_self(),"govunlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id)));
  }
 private:
+ void preserve_vote_ids(name runtime){
+  vote_identities ids(get_self(),runtime.value);if(ids.find(0)!=ids.end())return;votes cast(get_self(),runtime.value);uint64_t maximum=0;if(cast.begin()!=cast.end()){auto last=cast.end();--last;maximum=last->id;}
+  ids.emplace(get_self(),[&](auto& r){r.high_water=maximum;});
+ }
+ uint64_t next_vote_id(name runtime){
+  preserve_vote_ids(runtime);vote_identities ids(get_self(),runtime.value);const auto& current=ids.get(0);check(current.high_water<std::numeric_limits<uint64_t>::max(),"VOTE_ID_LIMIT");const auto id=current.high_water+1;ids.modify(current,same_payer,[&](auto& r){r.high_water=id;});return id;
+ }
  bool ordinary(name runtime,uint64_t ballot_id){
   elections election_rows(get_self(),runtime.value);work_executions works(get_self(),runtime.value);grant_executions grants(get_self(),runtime.value);return election_rows.find(ballot_id)==election_rows.end()&&works.find(ballot_id)==works.end()&&grants.find(ballot_id)==grants.end();
  }
@@ -135,4 +164,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(open)(openwork)(vote)(finalize)(markpoll)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

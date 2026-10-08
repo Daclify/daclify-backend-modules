@@ -5,3 +5,5 @@ export * from './restore.js';
 export * from './planner.js';
 export * from './export.js';
 export * from './attestation.js';
+export * from './pruning.js';
+export * from './recovery.js';

@@ -290,7 +290,7 @@ export const ArchiveExportStatusSchema = z.strictObject({
   anchor: RuntimeTableSchemas.archives.nullable().default(null),
   backup: ArchiveBackupReceiptSchema.nullable().default(null),
   backupSupported: z.boolean().default(false),
-  pruningAuthorized: z.literal(false),
+  pruningAuthorized: z.boolean().default(false),
 });
 export const ArchiveBundleSchema = z.strictObject({
   id: z.uuid(),
@@ -312,7 +312,55 @@ export const ArchiveExportListSchema = z.strictObject({
   exports: z.array(ArchiveExportStatusSchema).max(20),
   next: z.uuid().nullable(),
 });
+export const ArchiveHistoryRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  cursor: IdSchema.optional(),
+});
+export const ArchiveHistoryListSchema = z.strictObject({
+  dao: DaoRefSchema,
+  anchors: z.array(RuntimeTableSchemas.archives).max(20),
+  next: IdSchema.nullable(),
+});
+export const ArchiveHistoryBundleRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  manifestCommitment: ChainIdSchema,
+});
+export const ArchiveHistoryPageRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  manifestCommitment: ChainIdSchema,
+  cursor: Uint64Schema.optional(),
+});
+export const ArchiveHistoryPageSchema = z.strictObject({
+  dao: DaoRefSchema,
+  manifestCommitment: ChainIdSchema,
+  parentId: IdSchema,
+  records: z.array(DecideTableSchemas.votes).max(25),
+  next: Uint64Schema.nullable(),
+  coverage: z.literal('verified-archive'),
+  liveRowsIncluded: z.literal(false),
+});
 export const ArchiveRoutes = {
+  history: {
+    method: 'GET',
+    path: '/v1/archive/history',
+    input: ArchiveHistoryRequestSchema,
+    response: ArchiveHistoryListSchema,
+    helpTopic: 'archive',
+  },
+  recover: {
+    method: 'POST',
+    path: '/v1/archive/history/recover',
+    input: ArchiveHistoryBundleRequestSchema,
+    response: ArchiveBundleSchema,
+    helpTopic: 'archive',
+  },
+  historyPage: {
+    method: 'POST',
+    path: '/v1/archive/history/page',
+    input: ArchiveHistoryPageRequestSchema,
+    response: ArchiveHistoryPageSchema,
+    helpTopic: 'archive',
+  },
   preview: {
     method: 'POST',
     path: '/v1/archive/preview',
@@ -363,6 +411,13 @@ export const ArchiveRoutes = {
     method: 'GET',
     path: '/v1/archive/exports/:id/bundle',
     response: ArchiveBundleSchema,
+    helpTopic: 'archive',
+  },
+  prune: {
+    method: 'POST',
+    path: '/v1/archive/exports/:id/prune',
+    input: z.strictObject({ expectedManifestCommitment: ChainIdSchema }),
+    response: ArchiveExportStatusSchema,
     helpTopic: 'archive',
   },
   list: {

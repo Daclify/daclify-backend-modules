@@ -101,3 +101,28 @@ it('preserves original document ciphertext and epoch metadata under its qualifie
     'ARCHIVE_SCHEMA_UNSUPPORTED',
   );
 });
+
+it('decodes the retained trusted pre-pruning schema after a contract update', async () => {
+  const { previousPollRelease } = await import('../archive/releases/ordinary-polls-observer.js');
+  const value = input(),
+    old = previousPollRelease.identity;
+  const domain = {
+    ...value.domain,
+    code_hash: old.codeHash,
+    abi_hash: old.rawAbiHash,
+    schema_hash: old.schemaHash,
+  };
+  const packed = Serializer.encode({
+    abi: ABI.from(previousPollRelease.abi),
+    type: 'vote_record',
+    object: row,
+  }).hexString;
+  expect(decodeReleasedArchiveRow(domain, { primaryKey: '3', packed }, '7').value).toEqual(row);
+  expect(() =>
+    decodeReleasedArchiveRow(
+      { ...domain, schema_hash: value.domain.schema_hash },
+      { primaryKey: '3', packed },
+      '7',
+    ),
+  ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
+});

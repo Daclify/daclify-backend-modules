@@ -17,6 +17,7 @@ import {
   ArchiveBundleSchema,
 } from '../protocol/archive.js';
 import { decodeArchiveManifest, verifyArchiveChunks } from './manifest.js';
+import { previousPollRelease } from './releases/ordinary-polls-observer.js';
 const sources = {
   'ordinary-poll-votes': {
     abi: ABI.from(decideAbi),
@@ -51,7 +52,28 @@ export function archiveSourceSchema(kind: keyof typeof sources) {
     rowType,
   };
 }
-// Only this development packet's compiled schemas are accepted; retain qualified historic releases before pruning ships.
+function releasedSource(
+  kind: keyof typeof sources,
+  codeHash: string,
+  rawAbiHash: string,
+  schemaHash: string,
+) {
+  const current = archiveSourceSchema(kind);
+  if (
+    codeHash === current.codeHash &&
+    rawAbiHash === current.rawAbiHash &&
+    schemaHash === current.schemaHash
+  )
+    return { abi: sources[kind].abi, rowType: current.rowType };
+  if (
+    kind === 'ordinary-poll-votes' &&
+    codeHash === previousPollRelease.identity.codeHash &&
+    rawAbiHash === previousPollRelease.identity.rawAbiHash &&
+    schemaHash === previousPollRelease.identity.schemaHash
+  )
+    return { abi: ABI.from(previousPollRelease.abi), rowType: 'vote_record' };
+  throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
+}
 export function decodeReleasedArchiveRow(
   value: ArchiveDomain,
   original: ArchiveRow,
@@ -67,21 +89,17 @@ export function decodeReleasedArchiveRow(
         ? 'document-versions'
         : undefined;
   if (!kind) throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
-  const source = sources[kind],
-    schema = archiveSourceSchema(kind);
+  const source = releasedSource(kind, domain.code_hash, domain.abi_hash, domain.schema_hash);
   if (
-    domain.code_hash !== schema.codeHash ||
-    domain.abi_hash !== schema.rawAbiHash ||
-    domain.schema_hash !== schema.schemaHash ||
-    (kind === 'document-versions'
+    kind === 'document-versions'
       ? domain.source !== domain.runtime || domain.scope !== domain.dao_id
       : domain.source === domain.runtime ||
-        domain.scope !== Name.from(domain.runtime).value.toString())
+        domain.scope !== Name.from(domain.runtime).value.toString()
   )
     throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
   const reader = new ABIDecoder(Bytes.from(row.packed).array);
   const decoded: unknown = JSON.parse(
-    JSON.stringify(Serializer.decode({ abi: source.abi, type: schema.rowType, data: reader })),
+    JSON.stringify(Serializer.decode({ abi: source.abi, type: source.rowType, data: reader })),
   );
   if (reader.canRead()) throw new RangeError('ARCHIVE_ROW_TRAILING');
   if (kind === 'ordinary-poll-votes') {
@@ -89,7 +107,7 @@ export function decodeReleasedArchiveRow(
     if (vote.id !== row.primaryKey || vote.ballot !== parent)
       throw new RangeError('ARCHIVE_ROW_DOMAIN');
     if (
-      Serializer.encode({ abi: source.abi, type: schema.rowType, object: vote }).hexString !==
+      Serializer.encode({ abi: source.abi, type: source.rowType, object: vote }).hexString !==
       row.packed
     )
       throw new RangeError('ARCHIVE_ROW_CANONICAL');
@@ -99,7 +117,7 @@ export function decodeReleasedArchiveRow(
   if (document.id !== row.primaryKey || document.document_id !== parent)
     throw new RangeError('ARCHIVE_ROW_DOMAIN');
   if (
-    Serializer.encode({ abi: source.abi, type: schema.rowType, object: document }).hexString !==
+    Serializer.encode({ abi: source.abi, type: source.rowType, object: document }).hexString !==
     row.packed
   )
     throw new RangeError('ARCHIVE_ROW_CANONICAL');
@@ -121,11 +139,13 @@ export function verifyArchiveBundle(value: unknown, expectedManifestCommitment: 
     throw new RangeError('ARCHIVE_BUNDLE_METADATA');
   for (const family of manifest.families) {
     if (family.kind === 'protected-export') throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
-    const schema = archiveSourceSchema(family.kind);
+    releasedSource(
+      family.kind,
+      manifest.source.codeHash,
+      manifest.source.abiHash,
+      family.schemaHash,
+    );
     if (
-      manifest.source.codeHash !== schema.codeHash ||
-      manifest.source.abiHash !== schema.rawAbiHash ||
-      family.schemaHash !== schema.schemaHash ||
       family.table !== sources[family.kind].table ||
       (family.kind === 'document-versions'
         ? manifest.source.account !== manifest.dao.contract || family.scope !== manifest.dao.daoId

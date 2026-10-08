@@ -1,8 +1,8 @@
 // Generated build hashes; deployed code must match before enabling the release.
 export const ModuleCodeHashes={
-  "decide": "def994f232e0f7a3caa46df396541f7800a190fe925ff96383bb7561fa3dcfe1",
-  "works": "a32a23b832290583aed78920b064ef0645fc01a869eb573ba9d625cd2c22482a",
-  "payroll": "b0a83442527d117f857124b6f093272a1e20f6ac4fdf21facdfbf7065d9d4576",
-  "grants-rounds": "8bf8738d07434c576ced882a3f969adb38228a90b3042fff3513a4ea5efdcd4f",
-  "endorsement-admission": "179ca9ee94c155e94b4f4a0c77911d937b9e2e158c4bc4b89f78ec18f59610dc"
+  "decide": "9e941cea5b7c43a2b4e4c69f52f74fdd5a616999f36b8a3edecc9460ac2006ac",
+  "works": "600ab46a1909337afa65918f7b0d76352e523b8d3c4b8398bc51d42db05fc406",
+  "payroll": "f1ead67f3d579f723219436015cb66c70632fd575f58db1d76159f972101c691",
+  "grants-rounds": "a1a0bf3d90f19dc958a29273ecfd883af249cd94ee2d30e1f5dbb4123f009291",
+  "endorsement-admission": "d0cf06e1ca48844d19082af3eea04c3796d593f1079e230a84231a334a3b29ee"
 };

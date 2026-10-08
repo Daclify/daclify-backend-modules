@@ -1,10 +1,24 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '16a77a90c557e61aef2336b36edb6f30a4690c189883332ed09eeab288214029';
+export const decideAbiHash = '9a414ea13b9d0a644cc0404b733aa146fa2f26606a977cedb232212793d50033';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
   "structs": [
+    {
+      "name": "archive_prune_proof",
+      "base": "",
+      "fields": [
+        {
+          "name": "primary_key",
+          "type": "uint64"
+        },
+        {
+          "name": "siblings",
+          "type": "checksum256[]"
+        }
+      ]
+    },
     {
       "name": "ballot_record",
       "base": "",
@@ -534,6 +548,36 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "prunevotes",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "archive_id",
+          "type": "uint64"
+        },
+        {
+          "name": "chunk_ordinal",
+          "type": "uint32"
+        },
+        {
+          "name": "start",
+          "type": "uint32"
+        },
+        {
+          "name": "proofs",
+          "type": "archive_prune_proof[]"
+        }
+      ]
+    },
+    {
       "name": "recall",
       "base": "",
       "fields": [
@@ -662,6 +706,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "vote_identity",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "high_water",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "vote_record",
       "base": "",
       "fields": [
@@ -777,6 +839,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "prunevotes",
+      "type": "prunevotes",
+      "ricardian_contract": ""
+    },
+    {
       "name": "recall",
       "type": "recall",
       "ricardian_contract": ""
@@ -843,6 +910,13 @@ export const decideAbi = {
       "key_types": []
     },
     {
+      "name": "voteids",
+      "type": "vote_identity",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
       "name": "votes",
       "type": "vote_record",
       "index_type": "i64",
@@ -854,6 +928,10 @@ export const decideAbi = {
   "ricardian_clauses": [],
   "action_results": []
 } satisfies ABI.Def;
+export interface archive_prune_proof {
+  primary_key: string;
+  siblings: string[];
+}
 export interface ballot_record {
   id: string;
   dao_id: string;
@@ -993,6 +1071,14 @@ export interface poll_end {
   completed_at: number;
   legacy: boolean;
 }
+export interface prunevotes {
+  runtime: string;
+  dao_id: string;
+  archive_id: string;
+  chunk_ordinal: number;
+  start: number;
+  proofs: archive_prune_proof[];
+}
 export interface recall {
   runtime: string;
   dao_id: string;
@@ -1027,6 +1113,11 @@ export interface vote {
   ballot_id: string;
   choice: number;
 }
+export interface vote_identity {
+  id: string;
+  dao_id: string;
+  high_water: string;
+}
 export interface vote_record {
   id: string;
   ballot: string;
@@ -1055,6 +1146,7 @@ export interface DecideActions {
   open: open;
   openaward: openaward;
   openwork: openwork;
+  prunevotes: prunevotes;
   recall: recall;
   startelect: startelect;
   vote: vote;
