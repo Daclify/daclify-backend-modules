@@ -69,3 +69,9 @@ Works adds exact frozen contribution terms and contributor consent while retaini
 Modules require reviewed runtime action links and code pins. Existing liabilities survive module removal/upgrades. See core’s [0.5 upgrade runbook](../daclify-backend-core/docs/operations/upgrade-0.5.md) and [execution ledger](../daclify-backend-core/docs/evidence/2026-10-07-research-execution.md) for the earlier contract changes. Use the [0.6 upgrade guide](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations/upgrade-0.6.md) for current service compatibility and external qualification gates.
 
 Module records remain on chain through service loss. Recovering an existing member restores only their current permissions, adds no voting weight and does not recreate agreements or obligations. Each member recovers independently. Approved liabilities survive module removal; historical private content still needs the original decryption key, encrypted grant and surviving bytes. Login pairings and jobs are core PostgreSQL state. Modules do not store or recover user private keys. Follow core’s [disaster recovery runbook](https://github.com/Daclify/daclify-backend-core/blob/main/docs/disaster-recovery.md).
+
+## License
+
+First-party code, contracts, SDKs and documentation are licensed under
+**AGPL-3.0-only**. See [LICENSE](LICENSE) and [licensing and source obligations](LICENSING.md).
+Third-party files retain their own licenses. Contributions remain owned by their authors.
