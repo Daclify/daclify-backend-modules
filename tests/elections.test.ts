@@ -219,6 +219,12 @@ it('preserves withdrawn slots, excludes ineligible winners and records an admini
     act('decide', 'recall', { term_id: 1, document_id: 1, document_version: 1 }, 2),
   ).rejects.toThrow('ADMIN_REQUIRED');
   await act('decide', 'recall', { term_id: 1, document_id: 1, document_version: 1 });
+  const refs = core.tables.docrefs;
+  if (!refs) throw new Error('DOCUMENT_REFERENCE_LEDGER_MISSING');
+  expect(refs(1n).getTableRows()).toEqual([
+    expect.objectContaining({ table: 'elections', source: 'decide', document_id: 1, version: 1 }),
+    expect.objectContaining({ table: 'terms', source_id: 1, document_id: 1, version: 1 }),
+  ]);
   expect(
     z.object({ recalled: z.boolean() }).parse(row(decide, 'terms', core.toBigInt(), 1n)).recalled,
   ).toBe(true);

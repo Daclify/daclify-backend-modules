@@ -21,11 +21,13 @@ export function archivePruneBatch(value: unknown, anchorValue: unknown, progress
     throw new RangeError('ARCHIVE_DOMAIN');
   if (
     manifest.families.length !== 1 ||
-    manifest.families[0]?.kind !== 'ordinary-poll-votes' ||
-    manifest.files.length
+    !['ordinary-poll-votes', 'document-versions'].includes(manifest.families[0]?.kind ?? '') ||
+    (manifest.families[0]?.kind === 'ordinary-poll-votes' && manifest.files.length > 0)
   )
     throw new RangeError('ARCHIVE_FAMILY_PROTECTED');
-  const chunk = manifest.families[0].chunks[progress.chunk_ordinal];
+  const family = manifest.families[0];
+  if (!family) throw new RangeError('ARCHIVE_FAMILY_PROTECTED');
+  const chunk = family.chunks[progress.chunk_ordinal];
   if (!chunk) throw new RangeError('ARCHIVE_PROGRESS');
   const asset = bundle.chunks.find((c) => c.cid === chunk.cid);
   if (!asset) throw new RangeError('ARCHIVE_CONTENTS_INCOMPLETE');
@@ -37,7 +39,7 @@ export function archivePruneBatch(value: unknown, anchorValue: unknown, progress
   if (progress.pruned > rows.length) throw new RangeError('ARCHIVE_PROGRESS');
   if (progress.pruned === rows.length) return null;
   const tree = buildArchiveTree(chunk.domain, rows);
-  return DecideActionSchemas.prunevotes.parse({
+  const data = DecideActionSchemas.prunevotes.parse({
     runtime: manifest.dao.contract,
     dao_id: anchor.dao_id,
     archive_id: anchor.id,
@@ -48,6 +50,7 @@ export function archivePruneBatch(value: unknown, anchorValue: unknown, progress
       siblings: tree.proof(progress.pruned + i),
     })),
   });
+  return data;
 }
 export type ArchivePruneBatch = NonNullable<ReturnType<typeof archivePruneBatch>>;
 export const ArchivePruneBatchSchema = DecideActionSchemas.prunevotes;

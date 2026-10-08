@@ -127,8 +127,29 @@ export const ModulesHelpBundle={
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7",
+      "sourceAbiHash": "e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df",
       "actions": [
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
         {
           "name": "bindrampool",
           "fields": [
@@ -904,7 +925,7 @@ export const ModulesHelpBundle={
     {
       "name": "works",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc",
+      "sourceAbiHash": "808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd",
       "actions": [
         {
           "name": "accept",
@@ -945,6 +966,27 @@ export const ModulesHelpBundle={
             {
               "name": "project_id",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
             }
           ]
         },
@@ -1316,8 +1358,21 @@ export const ModulesHelpBundle={
     {
       "name": "payroll",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8",
+      "sourceAbiHash": "e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226",
       "actions": [
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
         {
           "name": "bindrampool",
           "fields": [
@@ -1513,7 +1568,7 @@ export const ModulesHelpBundle={
     {
       "name": "grants",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393",
+      "sourceAbiHash": "b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e",
       "actions": [
         {
           "name": "amend",
@@ -1605,6 +1660,27 @@ export const ModulesHelpBundle={
             },
             {
               "name": "term_end",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
               "type": "uint32"
             }
           ]
@@ -1942,7 +2018,7 @@ export const ModulesHelpBundle={
     {
       "name": "endorse",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13",
+      "sourceAbiHash": "19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a",
       "actions": [
         {
           "name": "admit",
@@ -2018,6 +2094,27 @@ export const ModulesHelpBundle={
             },
             {
               "name": "expires",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
               "type": "uint32"
             }
           ]
@@ -4909,57 +5006,114 @@ export const ModulesHelpBundle={
       "path": "/v1/archive/preview",
       "input": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": {
-          "dao": {
+        "anyOf": [
+          {
             "type": "object",
             "properties": {
-              "chainId": {
-                "type": "string",
-                "pattern": "^[0-9a-f]{64}$"
+              "dao": {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "contract": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  },
+                  "daoId": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "interfaceVersion": {
+                    "type": "number",
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "chainId",
+                  "contract",
+                  "daoId",
+                  "interfaceVersion"
+                ],
+                "additionalProperties": false
               },
-              "contract": {
-                "type": "string",
-                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              "ballotIds": {
+                "minItems": 1,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 20
+                }
               },
-              "daoId": {
-                "type": "string",
-                "maxLength": 20
-              },
-              "interfaceVersion": {
-                "type": "number",
-                "const": 1
+              "retentionSeconds": {
+                "type": "integer",
+                "minimum": 7776000,
+                "maximum": 315360000
               }
             },
             "required": [
-              "chainId",
-              "contract",
-              "daoId",
-              "interfaceVersion"
+              "dao",
+              "ballotIds",
+              "retentionSeconds"
             ],
             "additionalProperties": false
           },
-          "ballotIds": {
-            "minItems": 1,
-            "maxItems": 64,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "maxLength": 20
-            }
-          },
-          "retentionSeconds": {
-            "type": "integer",
-            "minimum": 7776000,
-            "maximum": 315360000
+          {
+            "type": "object",
+            "properties": {
+              "dao": {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "contract": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  },
+                  "daoId": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "interfaceVersion": {
+                    "type": "number",
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "chainId",
+                  "contract",
+                  "daoId",
+                  "interfaceVersion"
+                ],
+                "additionalProperties": false
+              },
+              "documentRows": {
+                "minItems": 1,
+                "maxItems": 25,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "retentionSeconds": {
+                "type": "integer",
+                "minimum": 7776000,
+                "maximum": 315360000
+              }
+            },
+            "required": [
+              "dao",
+              "documentRows",
+              "retentionSeconds"
+            ],
+            "additionalProperties": false
           }
-        },
-        "required": [
-          "dao",
-          "ballotIds",
-          "retentionSeconds"
-        ],
-        "additionalProperties": false
+        ]
       },
       "response": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5075,7 +5229,10 @@ export const ModulesHelpBundle={
                     "ballot-active",
                     "terminal-marker-required",
                     "terminal-not-irreversible",
-                    "retention"
+                    "retention",
+                    "reference-backfill-required",
+                    "latest-version",
+                    "referenced-version"
                   ]
                 }
               },
@@ -5094,7 +5251,10 @@ export const ModulesHelpBundle={
               "properties": {
                 "kind": {
                   "type": "string",
-                  "const": "ordinary-poll-votes"
+                  "enum": [
+                    "ordinary-poll-votes",
+                    "document-versions"
+                  ]
                 },
                 "parentId": {
                   "type": "string",
@@ -5260,57 +5420,114 @@ export const ModulesHelpBundle={
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
           "selection": {
-            "type": "object",
-            "properties": {
-              "dao": {
+            "anyOf": [
+              {
                 "type": "object",
                 "properties": {
-                  "chainId": {
-                    "type": "string",
-                    "pattern": "^[0-9a-f]{64}$"
+                  "dao": {
+                    "type": "object",
+                    "properties": {
+                      "chainId": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "contract": {
+                        "type": "string",
+                        "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                      },
+                      "daoId": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "interfaceVersion": {
+                        "type": "number",
+                        "const": 1
+                      }
+                    },
+                    "required": [
+                      "chainId",
+                      "contract",
+                      "daoId",
+                      "interfaceVersion"
+                    ],
+                    "additionalProperties": false
                   },
-                  "contract": {
-                    "type": "string",
-                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  "ballotIds": {
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
                   },
-                  "daoId": {
-                    "type": "string",
-                    "maxLength": 20
-                  },
-                  "interfaceVersion": {
-                    "type": "number",
-                    "const": 1
+                  "retentionSeconds": {
+                    "type": "integer",
+                    "minimum": 7776000,
+                    "maximum": 315360000
                   }
                 },
                 "required": [
-                  "chainId",
-                  "contract",
-                  "daoId",
-                  "interfaceVersion"
+                  "dao",
+                  "ballotIds",
+                  "retentionSeconds"
                 ],
                 "additionalProperties": false
               },
-              "ballotIds": {
-                "minItems": 1,
-                "maxItems": 64,
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "maxLength": 20
-                }
-              },
-              "retentionSeconds": {
-                "type": "integer",
-                "minimum": 7776000,
-                "maximum": 315360000
+              {
+                "type": "object",
+                "properties": {
+                  "dao": {
+                    "type": "object",
+                    "properties": {
+                      "chainId": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "contract": {
+                        "type": "string",
+                        "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                      },
+                      "daoId": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "interfaceVersion": {
+                        "type": "number",
+                        "const": 1
+                      }
+                    },
+                    "required": [
+                      "chainId",
+                      "contract",
+                      "daoId",
+                      "interfaceVersion"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "documentRows": {
+                    "minItems": 1,
+                    "maxItems": 25,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
+                  },
+                  "retentionSeconds": {
+                    "type": "integer",
+                    "minimum": 7776000,
+                    "maximum": 315360000
+                  }
+                },
+                "required": [
+                  "dao",
+                  "documentRows",
+                  "retentionSeconds"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": [
-              "dao",
-              "ballotIds",
-              "retentionSeconds"
-            ],
-            "additionalProperties": false
+            ]
           },
           "selectionCommitment": {
             "type": "string",

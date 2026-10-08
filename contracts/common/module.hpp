@@ -2,6 +2,7 @@
 #define DACLIFY_MODULE_METERING
 #include "records.hpp"
 #include "governance.hpp"
+#include "document_refs.hpp"
 #define JSON_NOEXCEPTION
 #define JSON_HAS_FILESYSTEM 0
 #define JSON_HAS_EXPERIMENTAL_FILESYSTEM 0
@@ -25,4 +26,18 @@ inline member_record module_actor(name runtime,uint64_t dao_id,uint64_t member_i
 }
 inline void json_metadata(const std::string& metadata){check(metadata.size()>0&&metadata.size()<=4096,"METADATA_SIZE");check(nlohmann::json::accept(metadata),"METADATA_JSON");}
 inline void core_action(name runtime,name module_account,name action_name,const std::vector<char>& bytes){action outgoing;outgoing.account=runtime;outgoing.name=action_name;outgoing.authorization={{module_account,"active"_n}};outgoing.data=bytes;outgoing.send();}
+inline void register_document_source(name runtime,uint64_t dao_id,name source){
+ std::vector<name> tables=DACLIFY_DOCUMENT_TABLES;std::sort(tables.begin(),tables.end(),[](name a,name b){return a.value<b.value;});core_action(runtime,source,"docsrc"_n,pack(std::make_tuple(dao_id,source,tables)));
+}
+inline void document_ref(name runtime,uint64_t dao_id,name source,name table,uint64_t id,uint8_t slot,uint64_t doc,uint32_t version){
+ register_document_source(runtime,dao_id,source);core_action(runtime,source,"docref"_n,pack(std::make_tuple(dao_id,source,table,id,slot,doc,version)));
+}
+template<typename Table,typename Visit>void backfill_document_refs(name runtime,uint64_t dao_id,name source,name table,uint32_t limit,Visit visit){
+ require_auth(runtime);pinned_module(runtime,dao_id,source);register_document_source(runtime,dao_id,source);check(limit>0&&limit<=25,"DOCUMENT_SCAN_BOUNDS");
+ document_scans scans(runtime,dao_id);auto index=scans.get_index<"bysource"_n>();auto data=pack(std::make_tuple(source,table));auto found=index.find(sha256(data.data(),data.size()));
+ const bool current=found!=index.end()&&found->code_hash==get_code_hash(source);if(current&&found->complete)return;const auto start=current?found->cursor:0;auto next=start;
+ Table rows(source,runtime.value);auto it=rows.upper_bound(start);uint32_t count=0;
+ for(;it!=rows.end()&&count<limit;++it,++count){next=it->primary_key();if(it->dao_id==dao_id)visit(*it);}
+ core_action(runtime,source,"docscanstep"_n,pack(std::make_tuple(dao_id,source,table,start,next,it==rows.end(),count)));
+}
 }

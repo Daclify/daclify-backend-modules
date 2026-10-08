@@ -138,7 +138,16 @@ Resources offers a separate signed archive approval after independent backup ver
 
 ## decide contract
 
-Source ABI JSON SHA-256: `6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7`.
+Source ABI JSON SHA-256: `e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df`.
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| table | name |
+| limit | uint32 |
 
 ### Action: bindrampool
 
@@ -424,7 +433,7 @@ Source ABI JSON SHA-256: `6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcf
 
 ## works contract
 
-Source ABI JSON SHA-256: `ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc`.
+Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd`.
 
 ### Action: accept
 
@@ -443,6 +452,15 @@ Source ABI JSON SHA-256: `ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642
 | dao_id | uint64 |
 | member_id | uint64 |
 | project_id | uint64 |
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| table | name |
+| limit | uint32 |
 
 ### Action: bindrampool
 
@@ -585,7 +603,14 @@ Source ABI JSON SHA-256: `ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8`.
+Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226`.
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: bindrampool
 
@@ -666,7 +691,7 @@ Source ABI JSON SHA-256: `e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b0
 
 ## grants contract
 
-Source ABI JSON SHA-256: `594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393`.
+Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e`.
 
 ### Action: amend
 
@@ -698,6 +723,15 @@ Source ABI JSON SHA-256: `594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e27
 | dues | uint32[] |
 | term_start | uint32 |
 | term_end | uint32 |
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| table | name |
+| limit | uint32 |
 
 ### Action: bindrampool
 
@@ -820,7 +854,7 @@ Source ABI JSON SHA-256: `594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e27
 
 ## endorse contract
 
-Source ABI JSON SHA-256: `86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13`.
+Source ABI JSON SHA-256: `19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a`.
 
 ### Action: admit
 
@@ -848,6 +882,15 @@ Source ABI JSON SHA-256: `86beab601f29ab425b9aa85d526379497e7c9f392a4ab229629703
 | document_id | uint64 |
 | document_version | uint32 |
 | expires | uint32 |
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| table | name |
+| limit | uint32 |
 
 ### Action: bindrampool
 
@@ -3703,57 +3746,114 @@ Request:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "dao": {
+  "anyOf": [
+    {
       "type": "object",
       "properties": {
-        "chainId": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+        "dao": {
+          "type": "object",
+          "properties": {
+            "chainId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "contract": {
+              "type": "string",
+              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            },
+            "daoId": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "interfaceVersion": {
+              "type": "number",
+              "const": 1
+            }
+          },
+          "required": [
+            "chainId",
+            "contract",
+            "daoId",
+            "interfaceVersion"
+          ],
+          "additionalProperties": false
         },
-        "contract": {
-          "type": "string",
-          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        "ballotIds": {
+          "minItems": 1,
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 20
+          }
         },
-        "daoId": {
-          "type": "string",
-          "maxLength": 20
-        },
-        "interfaceVersion": {
-          "type": "number",
-          "const": 1
+        "retentionSeconds": {
+          "type": "integer",
+          "minimum": 7776000,
+          "maximum": 315360000
         }
       },
       "required": [
-        "chainId",
-        "contract",
-        "daoId",
-        "interfaceVersion"
+        "dao",
+        "ballotIds",
+        "retentionSeconds"
       ],
       "additionalProperties": false
     },
-    "ballotIds": {
-      "minItems": 1,
-      "maxItems": 64,
-      "type": "array",
-      "items": {
-        "type": "string",
-        "maxLength": 20
-      }
-    },
-    "retentionSeconds": {
-      "type": "integer",
-      "minimum": 7776000,
-      "maximum": 315360000
+    {
+      "type": "object",
+      "properties": {
+        "dao": {
+          "type": "object",
+          "properties": {
+            "chainId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "contract": {
+              "type": "string",
+              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            },
+            "daoId": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "interfaceVersion": {
+              "type": "number",
+              "const": 1
+            }
+          },
+          "required": [
+            "chainId",
+            "contract",
+            "daoId",
+            "interfaceVersion"
+          ],
+          "additionalProperties": false
+        },
+        "documentRows": {
+          "minItems": 1,
+          "maxItems": 25,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "retentionSeconds": {
+          "type": "integer",
+          "minimum": 7776000,
+          "maximum": 315360000
+        }
+      },
+      "required": [
+        "dao",
+        "documentRows",
+        "retentionSeconds"
+      ],
+      "additionalProperties": false
     }
-  },
-  "required": [
-    "dao",
-    "ballotIds",
-    "retentionSeconds"
-  ],
-  "additionalProperties": false
+  ]
 }
 ```
 
@@ -3874,7 +3974,10 @@ Response:
               "ballot-active",
               "terminal-marker-required",
               "terminal-not-irreversible",
-              "retention"
+              "retention",
+              "reference-backfill-required",
+              "latest-version",
+              "referenced-version"
             ]
           }
         },
@@ -3893,7 +3996,10 @@ Response:
         "properties": {
           "kind": {
             "type": "string",
-            "const": "ordinary-poll-votes"
+            "enum": [
+              "ordinary-poll-votes",
+              "document-versions"
+            ]
           },
           "parentId": {
             "type": "string",
@@ -4063,57 +4169,114 @@ Request:
       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
     },
     "selection": {
-      "type": "object",
-      "properties": {
-        "dao": {
+      "anyOf": [
+        {
           "type": "object",
           "properties": {
-            "chainId": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+            "dao": {
+              "type": "object",
+              "properties": {
+                "chainId": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "contract": {
+                  "type": "string",
+                  "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                },
+                "daoId": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "interfaceVersion": {
+                  "type": "number",
+                  "const": 1
+                }
+              },
+              "required": [
+                "chainId",
+                "contract",
+                "daoId",
+                "interfaceVersion"
+              ],
+              "additionalProperties": false
             },
-            "contract": {
-              "type": "string",
-              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            "ballotIds": {
+              "minItems": 1,
+              "maxItems": 64,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 20
+              }
             },
-            "daoId": {
-              "type": "string",
-              "maxLength": 20
-            },
-            "interfaceVersion": {
-              "type": "number",
-              "const": 1
+            "retentionSeconds": {
+              "type": "integer",
+              "minimum": 7776000,
+              "maximum": 315360000
             }
           },
           "required": [
-            "chainId",
-            "contract",
-            "daoId",
-            "interfaceVersion"
+            "dao",
+            "ballotIds",
+            "retentionSeconds"
           ],
           "additionalProperties": false
         },
-        "ballotIds": {
-          "minItems": 1,
-          "maxItems": 64,
-          "type": "array",
-          "items": {
-            "type": "string",
-            "maxLength": 20
-          }
-        },
-        "retentionSeconds": {
-          "type": "integer",
-          "minimum": 7776000,
-          "maximum": 315360000
+        {
+          "type": "object",
+          "properties": {
+            "dao": {
+              "type": "object",
+              "properties": {
+                "chainId": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "contract": {
+                  "type": "string",
+                  "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                },
+                "daoId": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "interfaceVersion": {
+                  "type": "number",
+                  "const": 1
+                }
+              },
+              "required": [
+                "chainId",
+                "contract",
+                "daoId",
+                "interfaceVersion"
+              ],
+              "additionalProperties": false
+            },
+            "documentRows": {
+              "minItems": 1,
+              "maxItems": 25,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 20
+              }
+            },
+            "retentionSeconds": {
+              "type": "integer",
+              "minimum": 7776000,
+              "maximum": 315360000
+            }
+          },
+          "required": [
+            "dao",
+            "documentRows",
+            "retentionSeconds"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "dao",
-        "ballotIds",
-        "retentionSeconds"
-      ],
-      "additionalProperties": false
+      ]
     },
     "selectionCommitment": {
       "type": "string",

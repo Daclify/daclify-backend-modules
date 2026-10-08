@@ -28,4 +28,4 @@ See core [payment operations](../../daclify-backend-core/docs/operations/connect
 
 See [Archive format v1](archive-format.md) for the bounded development library, tested integrity rules and pending service behavior.
 
-Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native approval/attestation, pruning and historic index rebuild remain separate launch gates. See the Archive format and core export operations guides.
+Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native availability, signed approval and each prune remain separate actions. Full RAM migration/enforcement and live-provider rollout remain launch gates. See the Archive format and core export operations guides.

@@ -1,10 +1,24 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = 'e3488ccc9705efac2bd25f0ae0fa5628fa8dfcee86d932c58386b087172027f8';
+export const payrollAbiHash = 'e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
   "structs": [
+    {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
     {
       "name": "bindrampool",
       "base": "",
@@ -204,6 +218,11 @@ export const payrollAbi = {
   ],
   "actions": [
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -258,6 +277,10 @@ export const payrollAbi = {
   "ricardian_clauses": [],
   "action_results": []
 } satisfies ABI.Def;
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
+}
 export interface bindrampool {
   runtime: string;
 }
@@ -312,6 +335,7 @@ export interface settle {
   entry_id: string;
 }
 export interface PayrollActions {
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   commit: commit;
   edit: edit;

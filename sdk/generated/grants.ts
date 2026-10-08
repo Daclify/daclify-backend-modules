@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const grantsAbiHash = '594c4aeeb20a5889fc8b49148f9910c3a24f8cec380f7ce3631e2709a8f6c393';
+export const grantsAbiHash = 'b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e';
 export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -97,6 +97,28 @@ export const grantsAbi = {
         },
         {
           "name": "term_end",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
           "type": "uint32"
         }
       ]
@@ -450,6 +472,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -536,6 +563,12 @@ export interface applygrant {
   dues: number[];
   term_start: number;
   term_end: number;
+}
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
+  table: string;
+  limit: number;
 }
 export interface bindrampool {
   runtime: string;
@@ -629,6 +662,7 @@ export interface submitapp {
 export interface GrantsActions {
   amend: amend;
   applygrant: applygrant;
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   closeapp: closeapp;
   closeround: closeround;

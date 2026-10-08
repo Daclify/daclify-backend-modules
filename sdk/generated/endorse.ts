@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const endorseAbiHash = '86beab601f29ab425b9aa85d526379497e7c9f392a4ab22962970367a6885e13';
+export const endorseAbiHash = '19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a';
 export const endorseAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -160,6 +160,28 @@ export const endorseAbi = {
       ]
     },
     {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "bindrampool",
       "base": "",
       "fields": [
@@ -244,6 +266,11 @@ export const endorseAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -319,6 +346,12 @@ export interface applyjoin {
   document_version: number;
   expires: number;
 }
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
+  table: string;
+  limit: number;
+}
 export interface bindrampool {
   runtime: string;
 }
@@ -342,6 +375,7 @@ export interface witness {
 export interface EndorseActions {
   admit: admit;
   applyjoin: applyjoin;
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   unwitness: unwitness;
   witness: witness;

@@ -22,8 +22,13 @@ const hash = (bytes: Uint8Array) => Checksum256.hash(bytes).toString();
 
 export function archiveManifestForPlan(value: OrdinaryPollArchivePlan, values: readonly Receipt[]) {
   const plan = OrdinaryPollArchivePlanSchema.parse(value),
-    schema = archiveSourceSchema('ordinary-poll-votes'),
-    scope = Name.from(plan.dao.contract).value.toString();
+    kind = plan.families[0]?.kind;
+  if (plan.blocked.length || !plan.families.length) throw new RangeError('ARCHIVE_NOT_ELIGIBLE');
+  if (!kind || plan.families.some((f) => f.kind !== kind))
+    throw new RangeError('ARCHIVE_FAMILY_PROTECTED');
+  const schema = archiveSourceSchema(kind),
+    scope =
+      kind === 'document-versions' ? plan.dao.daoId : Name.from(plan.dao.contract).value.toString();
   if (plan.blocked.length || !plan.families.length) throw new RangeError('ARCHIVE_NOT_ELIGIBLE');
   if (plan.source.codeHash !== schema.codeHash || plan.source.abiHash !== schema.rawAbiHash)
     throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
@@ -33,7 +38,7 @@ export function archiveManifestForPlan(value: OrdinaryPollArchivePlan, values: r
   const families = plan.families.map((family) => ({
     kind: family.kind,
     parentId: family.parentId,
-    table: 'votes',
+    table: kind === 'document-versions' ? 'documents' : 'votes',
     scope,
     schemaHash: schema.schemaHash,
     records: String(family.chunks.reduce((n, c) => n + c.rows.length, 0)),
@@ -63,7 +68,34 @@ export function archiveManifestForPlan(value: OrdinaryPollArchivePlan, values: r
     source: plan.source,
     snapshot: plan.snapshot,
     families,
-    files: [],
+    files: plan.families
+      .flatMap((f) =>
+        f.chunks.flatMap((c) =>
+          c.rows.flatMap((r) => {
+            const decoded = decodeReleasedArchiveRow(c.domain, r, f.parentId);
+            if (decoded.kind !== 'document-versions' || !decoded.value.cid) return [];
+            const d = decoded.value;
+            return [
+              {
+                document_id: d.document_id,
+                version: d.version,
+                cid: d.cid,
+                bytes: String(d.bytes),
+                commitment: d.commitment,
+                envelope_version: d.envelope_version,
+                key_epoch: d.key_epoch,
+              },
+            ];
+          }),
+        ),
+      )
+      .sort((a, b) =>
+        BigInt(a.document_id) < BigInt(b.document_id)
+          ? -1
+          : BigInt(a.document_id) > BigInt(b.document_id)
+            ? 1
+            : a.version - b.version,
+      ),
   });
 }
 

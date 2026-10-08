@@ -60,8 +60,8 @@ export function archiveAttestation(value: unknown, savedBackup: unknown, retenti
     throw new RangeError('ARCHIVE_DESCRIPTOR_COMMITMENT');
   if (
     m.families.length !== 1 ||
-    m.families[0]?.kind !== 'ordinary-poll-votes' ||
-    m.files.length ||
+    !['ordinary-poll-votes', 'document-versions'].includes(m.families[0]?.kind ?? '') ||
+    (m.families[0]?.kind === 'ordinary-poll-votes' && m.files.length > 0) ||
     (m.families[0]?.chunks.length ?? 0) > 32
   )
     throw new RangeError('ARCHIVE_NATIVE_FAMILY_UNSUPPORTED');

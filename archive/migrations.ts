@@ -20,4 +20,9 @@ export const ArchiveMigrations = Object.freeze([
     name: '004_anchor_binding.sql',
     url: new URL('../../migrations/archive/004_anchor_binding.sql', import.meta.url),
   },
+  {
+    namespace: 'archive',
+    name: '005_retention_groups.sql',
+    url: new URL('../../migrations/archive/005_retention_groups.sql', import.meta.url),
+  },
 ]);

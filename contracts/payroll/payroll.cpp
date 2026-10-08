@@ -1,9 +1,11 @@
+#define DACLIFY_DOCUMENT_TABLES {}
 #define DACLIFY_RAM_PAYER_CONTRACT "payroll"
 #include "module.hpp"
 using namespace daclify;
 CONTRACT payroll:public contract {
 public:
  using contract::contract;
+ ACTION backfillrefs(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());register_document_source(runtime,dao_id,get_self());}
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  TABLE schedule_record {uint64_t id;uint64_t dao_id;uint64_t creator;uint64_t recipient;asset quantity;uint8_t periods;uint32_t interval;uint32_t starts;std::vector<uint64_t> entries;uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}EOSLIB_SERIALIZE(schedule_record,(id)(dao_id)(creator)(recipient)(quantity)(periods)(interval)(starts)(entries))};
  using schedules=ram_table<"schedules"_n,schedule_record,indexed_by<"bydao"_n,const_mem_fun<schedule_record,uint64_t,&schedule_record::by_dao>>>;
@@ -34,4 +36,4 @@ public:
   if(flag==flags.end())flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule.id;r.paused=0;r.last_payout=now;r.label="";});else flags.modify(*flag,same_payer,[&](auto& r){r.last_payout=now;});
  }
 };
-EOSIO_DISPATCH(payroll,(bindrampool)(commit)(edit)(settle))
+EOSIO_DISPATCH(payroll,(backfillrefs)(bindrampool)(commit)(edit)(settle))

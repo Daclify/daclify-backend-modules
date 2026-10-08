@@ -1,9 +1,14 @@
+#define DACLIFY_DOCUMENT_TABLES {"projects"_n,"milestones"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "works"
 #include "grants_records.hpp"
 using namespace daclify;
 CONTRACT works:public contract {
 public:
  using contract::contract;
+ ACTION backfillrefs(name runtime,uint64_t dao_id,name table,uint32_t limit){
+  if(table=="projects"_n)backfill_document_refs<projects>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_project(runtime,r);});
+  else if(table=="milestones"_n)backfill_document_refs<milestones>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_milestone(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
+ }
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  using projects=works_projects;
  using milestones=works_milestones;
@@ -11,11 +16,14 @@ public:
   module_actor(runtime,dao_id,member_id,get_self(),"propose"_n);create_project(runtime,dao_id,member_id,project_id,contributor,document_id,document_version,payments,dues);
  }
 private:
+ void sync_project(name runtime,const project_record& r){document_ref(runtime,r.dao_id,get_self(),"projects"_n,r.id,0,r.document_id,r.document_version);}
+ void sync_milestone(name runtime,const milestone_record& r){document_ref(runtime,r.dao_id,get_self(),"milestones"_n,r.id,0,r.submission_doc,r.submission_version);document_ref(runtime,r.dao_id,get_self(),"milestones"_n,r.id,1,r.review_doc,r.review_version);}
+
  void create_project(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id,uint64_t contributor,uint64_t document_id,uint32_t document_version,const std::vector<asset>& payments,const std::vector<uint32_t>& dues){
   check(project_id>0,"PROJECT_ID");check(payments.size()>0&&payments.size()<=16&&dues.size()==payments.size(),"MILESTONE_LIMIT");check_document(runtime,dao_id,document_id,document_version);members people(runtime,dao_id);check(people.get(contributor,"MEMBER_UNKNOWN").active,"MEMBER_INACTIVE");daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);int64_t total=0;
   for(const auto& payment:payments){check(payment.is_valid()&&payment.amount>0&&payment.symbol==d.token_symbol,"ASSET_QUANTITY");total=add_amount(total,payment.amount);}projects rows(get_self(),runtime.value);check(rows.find(project_id)==rows.end(),"PROJECT_EXISTS");milestones items(get_self(),runtime.value);std::vector<uint64_t> ids;
   for(size_t i=0;i<payments.size();i++){auto id=items.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"MILESTONE_LIMIT");ids.push_back(id);items.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.project_id=project_id;r.quantity=payments[i];r.due=dues[i];});}
-  rows.emplace(get_self(),[&](auto& r){r.id=project_id;r.dao_id=dao_id;r.creator=member_id;r.contributor=contributor;r.document_id=document_id;r.document_version=document_version;r.milestones=ids;});
+  rows.emplace(get_self(),[&](auto& r){r.id=project_id;r.dao_id=dao_id;r.creator=member_id;r.contributor=contributor;r.document_id=document_id;r.document_version=document_version;r.milestones=ids;});sync_project(runtime,rows.get(project_id));
  }
 public:
  ACTION accept(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id){
@@ -53,11 +61,11 @@ private:
  }
 public:
  ACTION submitwork(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t milestone_id,uint64_t document_id,uint32_t document_version){
-  module_actor(runtime,dao_id,member_id,get_self(),"submitwork"_n);milestones items(get_self(),runtime.value);const auto& m=items.get(milestone_id,"MILESTONE_UNKNOWN");check(m.dao_id==dao_id,"MILESTONE_DOMAIN");projects rows(get_self(),runtime.value);const auto& p=rows.get(m.project_id);check(p.contributor==member_id,"CONTRIBUTOR_REQUIRED");check(p.status==1&&(m.status==1||m.status==3),"MILESTONE_STATE");check_document(runtime,dao_id,document_id,document_version);items.modify(m,same_payer,[&](auto& r){r.status=2;r.submission_doc=document_id;r.submission_version=document_version;});
+  module_actor(runtime,dao_id,member_id,get_self(),"submitwork"_n);milestones items(get_self(),runtime.value);const auto& m=items.get(milestone_id,"MILESTONE_UNKNOWN");check(m.dao_id==dao_id,"MILESTONE_DOMAIN");projects rows(get_self(),runtime.value);const auto& p=rows.get(m.project_id);check(p.contributor==member_id,"CONTRIBUTOR_REQUIRED");check(p.status==1&&(m.status==1||m.status==3),"MILESTONE_STATE");check_document(runtime,dao_id,document_id,document_version);items.modify(m,same_payer,[&](auto& r){r.status=2;r.submission_doc=document_id;r.submission_version=document_version;});sync_milestone(runtime,items.get(milestone_id));
  }
  ACTION review(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t milestone_id,bool approve,uint64_t document_id,uint32_t document_version){
   module_actor(runtime,dao_id,member_id,get_self(),"review"_n,false,true);milestones items(get_self(),runtime.value);const auto& m=items.get(milestone_id,"MILESTONE_UNKNOWN");check(m.dao_id==dao_id,"MILESTONE_DOMAIN");projects rows(get_self(),runtime.value);const auto& p=rows.get(m.project_id);check(member_id!=p.contributor,"SELF_REVIEW");check(p.status==1&&m.status==2,"MILESTONE_STATE");check_document(runtime,dao_id,document_id,document_version);
-  items.modify(m,same_payer,[&](auto& r){r.status=approve?4:3;r.review_doc=document_id;r.review_version=document_version;r.reviewer=member_id;});if(approve)core_action(runtime,get_self(),"approveob"_n,pack(std::make_tuple(dao_id,get_self(),milestone_id)));
+  items.modify(m,same_payer,[&](auto& r){r.status=approve?4:3;r.review_doc=document_id;r.review_version=document_version;r.reviewer=member_id;});sync_milestone(runtime,items.get(milestone_id));if(approve)core_action(runtime,get_self(),"approveob"_n,pack(std::make_tuple(dao_id,get_self(),milestone_id)));
  }
  ACTION cancel(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id){
   module_actor(runtime,dao_id,member_id,get_self(),"cancel"_n,true);projects rows(get_self(),runtime.value);const auto& p=rows.get(project_id,"PROJECT_UNKNOWN");check(p.dao_id==dao_id,"PROJECT_DOMAIN");check(p.status<=1,"PROJECT_CLOSED");milestones items(get_self(),runtime.value);
@@ -69,4 +77,4 @@ public:
 private:
  void check_document(name runtime,uint64_t dao_id,uint64_t id,uint32_t version){documents rows(runtime,dao_id);auto index=rows.get_index<"byversion"_n>();index.get((uint128_t(id)<<32)|version,"DOCUMENT_UNKNOWN");}
 };
-EOSIO_DISPATCH(works,(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))
+EOSIO_DISPATCH(works,(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))

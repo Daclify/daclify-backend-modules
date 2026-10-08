@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '6f77d2d6bf34e494d7babff5ca57029e99c004809542045c25ebcfc27909e5f7';
+export const decideAbiHash = 'e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -16,6 +16,28 @@ export const decideAbi = {
         {
           "name": "siblings",
           "type": "checksum256[]"
+        }
+      ]
+    },
+    {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
         }
       ]
     },
@@ -814,6 +836,11 @@ export const decideAbi = {
   ],
   "actions": [
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -963,6 +990,12 @@ export const decideAbi = {
 export interface archive_prune_proof {
   primary_key: string;
   siblings: string[];
+}
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
+  table: string;
+  limit: number;
 }
 export interface ballot_record {
   id: string;
@@ -1175,6 +1208,7 @@ export interface work_execution_record {
   executed: boolean;
 }
 export interface DecideActions {
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   execute: execute;
   executeaward: executeaward;

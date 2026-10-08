@@ -207,6 +207,9 @@ export const OrdinaryPollArchivePlanSchema = z.strictObject({
           'terminal-marker-required',
           'terminal-not-irreversible',
           'retention',
+          'reference-backfill-required',
+          'latest-version',
+          'referenced-version',
         ]),
       }),
     )
@@ -214,7 +217,7 @@ export const OrdinaryPollArchivePlanSchema = z.strictObject({
   families: z
     .array(
       z.strictObject({
-        kind: z.literal('ordinary-poll-votes'),
+        kind: z.enum(['ordinary-poll-votes', 'document-versions']),
         parentId: IdSchema,
         grossRamBytes: Uint64Schema,
         chunks: z
@@ -242,9 +245,37 @@ export const ArchivePreviewRequestSchema = z.strictObject({
   retentionSeconds: OrdinaryPollArchiveInputSchema.shape.retentionSeconds,
 });
 export type ArchivePreviewRequest = z.infer<typeof ArchivePreviewRequestSchema>;
+export const DocumentArchiveRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  documentRows: z
+    .array(IdSchema)
+    .min(1)
+    .max(25)
+    .refine((ids) => new Set(ids).size === ids.length),
+  retentionSeconds: OrdinaryPollArchiveInputSchema.shape.retentionSeconds,
+});
+export const ArchiveSelectionSchema = z.union([
+  ArchivePreviewRequestSchema,
+  DocumentArchiveRequestSchema,
+]);
+export type ArchiveSelection = z.infer<typeof ArchiveSelectionSchema>;
+export const DocumentArchiveInputSchema = z.strictObject({
+  dao: DaoRefSchema,
+  source: ManifestBody.shape.source,
+  snapshot: ManifestBody.shape.snapshot,
+  sourceUpdatedAt: StorageInstantSchema,
+  retentionSeconds: OrdinaryPollArchiveInputSchema.shape.retentionSeconds,
+  coverageComplete: z.boolean(),
+  documents: z.array(RuntimeTableSchemas.documents).min(1).max(25),
+  heads: z.array(RuntimeTableSchemas.docheads).max(25),
+  clocks: z.array(RuntimeTableSchemas.docclocks).max(25),
+  references: z
+    .array(RuntimeTableSchemas.docrefs.pick({ document_id: true, version: true }))
+    .max(25),
+});
 export const ArchiveExportRequestSchema = z.strictObject({
   requestId: z.uuid(),
-  selection: ArchivePreviewRequestSchema,
+  selection: ArchiveSelectionSchema,
   selectionCommitment: ChainIdSchema,
   maximumStoredBytes: Uint64Schema.refine((v) => BigInt(v) > 0n && BigInt(v) <= (1n << 63n) - 1n),
 });
@@ -369,7 +400,7 @@ export const ArchiveRoutes = {
   preview: {
     method: 'POST',
     path: '/v1/archive/preview',
-    input: ArchivePreviewRequestSchema,
+    input: ArchiveSelectionSchema,
     response: OrdinaryPollArchivePlanSchema,
     helpTopic: 'archive',
   },

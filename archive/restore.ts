@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import { ABI, ABIDecoder, Bytes, Checksum256, Name, Serializer } from '@wharfkit/antelope';
 import { IdSchema, ChainIdSchema } from '@daclify/core-protocol';
 import {
@@ -15,11 +16,13 @@ import {
   type ArchiveDomain,
   type ArchiveRow,
   ArchiveBundleSchema,
+  ArchiveFileReferenceSchema,
 } from '../protocol/archive.js';
 import { decodeArchiveManifest, verifyArchiveChunks } from './manifest.js';
 import { previousPollRelease } from './releases/ordinary-polls-observer.js';
 import { pruningPollRelease } from './releases/ordinary-polls-pruning.js';
 import { previousDocumentRelease } from './releases/document-versions-before-pools.js';
+import { qualifiedResourceCheckpoint, documentReferencesIdentity, documentReferencePollIdentity } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
   'ordinary-poll-votes': {
@@ -69,7 +72,12 @@ function releasedSource(
   )
     return { abi: sources[kind].abi, rowType: current.rowType };
   if (kind === 'ordinary-poll-votes')
-    for (const release of [previousPollRelease, pruningPollRelease])
+    for (const release of [
+      previousPollRelease,
+      pruningPollRelease,
+      { identity: qualifiedResourceCheckpoint.poll, abi: pruningPollRelease.abi },
+      { identity: documentReferencePollIdentity, abi: pruningPollRelease.abi },
+    ])
       if (
         codeHash === release.identity.codeHash &&
         rawAbiHash === release.identity.rawAbiHash &&
@@ -77,7 +85,12 @@ function releasedSource(
       )
         return { abi: ABI.from(release.abi), rowType: 'vote_record' };
   if (kind === 'document-versions')
-    for (const identity of [previousDocumentRelease.identity, documentPoolsIdentity])
+    for (const identity of [
+      previousDocumentRelease.identity,
+      documentPoolsIdentity,
+      qualifiedResourceCheckpoint.document,
+      documentReferencesIdentity,
+    ])
       if (
         codeHash === identity.codeHash &&
         rawAbiHash === identity.rawAbiHash &&
@@ -174,6 +187,7 @@ export function verifyArchiveBundle(value: unknown, expectedManifestCommitment: 
     manifest,
     bundle.chunks.map((c) => ({ cid: c.cid, bytes: decode(c.content) })),
   );
+  const expectedFiles: z.infer<typeof ArchiveFileReferenceSchema>[] = [];
   for (const row of rows) {
     const family = manifest.families[row.family],
       chunk = family?.chunks.find(
@@ -182,11 +196,34 @@ export function verifyArchiveBundle(value: unknown, expectedManifestCommitment: 
           BigInt(row.primaryKey) <= BigInt(c.lastKey),
       );
     if (!family || !chunk) throw new RangeError('ARCHIVE_CONTENTS_INCOMPLETE');
-    decodeReleasedArchiveRow(
+    const decoded = decodeReleasedArchiveRow(
       chunk.domain,
       { primaryKey: row.primaryKey, packed: row.packed },
       family.parentId,
     );
+    if (decoded.kind === 'document-versions' && decoded.value.cid) {
+      const d = decoded.value;
+      expectedFiles.push(
+        ArchiveFileReferenceSchema.parse({
+          document_id: d.document_id,
+          version: d.version,
+          cid: d.cid,
+          bytes: String(d.bytes),
+          commitment: d.commitment,
+          envelope_version: d.envelope_version,
+          key_epoch: d.key_epoch,
+        }),
+      );
+    }
   }
+  expectedFiles.sort((a, b) =>
+    BigInt(a.document_id) < BigInt(b.document_id)
+      ? -1
+      : BigInt(a.document_id) > BigInt(b.document_id)
+        ? 1
+        : a.version - b.version,
+  );
+  if (JSON.stringify(expectedFiles) !== JSON.stringify(manifest.files))
+    throw new RangeError('ARCHIVE_FILE_COVERAGE');
   return bundle;
 }

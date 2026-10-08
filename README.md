@@ -74,9 +74,13 @@ Module records remain on chain through service loss. Recovering an existing memb
 
 ## Archive development branch
 
-The public Archive package owns deterministic bounded bundles/Merkle proofs, schema identities, eligibility planning, retained historical vote/document decoders, merged history and namespaced immutable migrations. Core hosts verified exports, encrypted independent backups, native availability/approval/revocation and manual source-owned ordinary-poll pruning. The owned native database-loss drill recovered vote history plus a retained private file with original client keys; document pruning and selective restoration remain disabled. See [Archive format](docs/archive-format.md) and core's [execution evidence](../daclify-backend-core/docs/evidence/2026-10-08-resource-execution.md).
+The public Archive package owns deterministic bounded bundles/Merkle proofs, schema identities, eligibility planning, old-version document/ordinary-poll readers, merged history and namespaced immutable migrations. Core hosts verified exports, encrypted independent backups, native availability/approval/revocation, manual source-owned pruning and exact document restoration. Original row serialization and old poll request JSON are preserved. Host migration 029 and Archive migration 005 record whole manifest/chunk retention groups. See [Archive format](docs/archive-format.md) and core’s [execution evidence](../daclify-backend-core/docs/evidence/2026-10-08-resource-execution.md).
 
-All five compiled module payers support an immutable exclusive runtime binding before receiving a funded payer pool. An existing shared module must drain/migrate its old executable work first; binding does not rewrite approvals or provide completion reserves. Manual pool qualification does not replace automatic allowances, legacy migration, backed enforcement, live-provider checks or independent release verification. Production pruning/cleanup require separate reviewed enablement.
+The owned native encrypted-document drill verified pruning, database-loss accounting reconstruction, original-kit decryption and exact signed restoration. Production pruning/cleanup require separate reviewed enablement. All five module payers support immutable exclusive runtime binding before receiving a funded pool. Existing shared payers must drain or explicitly migrate old executable work first; a binding does not rewrite old approvals or provide completion holds.
+
+Custom C++ module authors must declare `DACLIFY_DOCUMENT_TABLES` before including `module.hpp`, listing every direct document-bearing table. Use an empty list only when there are no direct references. The recipe is immutable per code hash. An incomplete recipe can make pruning unsafe and cannot qualify a module. Preserve old row serialization and source-pinned executable work through upgrades.
+
+Automatic included payer offers are implemented behind explicit qualified/funded configuration. General legacy migration, obligation-specific completion holds, quota enforcement, live providers and independent release verification remain open.
 
 ## License
 

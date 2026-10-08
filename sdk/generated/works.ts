@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'ebf8a690244852786209e5aaecc9e4277722a6ad42d1ade1576642f2f6f2d4fc';
+export const worksAbiHash = '808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -83,6 +83,28 @@ export const worksAbi = {
         },
         {
           "name": "accepted_at",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
           "type": "uint32"
         }
       ]
@@ -436,6 +458,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -537,6 +564,12 @@ export interface agreement_record {
   accepted: boolean;
   accepted_at: number;
 }
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
+  table: string;
+  limit: number;
+}
 export interface bindrampool {
   runtime: string;
 }
@@ -630,6 +663,7 @@ export interface submitwork {
 export interface WorksActions {
   accept: accept;
   acceptagr: acceptagr;
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   cancel: cancel;
   govaccept: govaccept;

@@ -357,3 +357,35 @@ it('checks cross-DAO execution, current member eligibility and award deadlines',
     'AWARDS_CLOSED',
   );
 });
+
+it('replaces application references and clears decision references after an amendment', async () => {
+  await application();
+  const refs = core.tables.docrefs;
+  if (!refs) throw new Error('DOCUMENT_REFERENCE_LEDGER_MISSING');
+  expect(refs(1n).getTableRows()).toHaveLength(3);
+  await act('daclifycore', 'putjson', {
+    document_id: 1,
+    version: 2,
+    value: '{}',
+    envelope_version: 0,
+    key_epoch: 0,
+  });
+  await act(
+    'grants',
+    'amend',
+    {
+      application_id: 1,
+      document_id: 1,
+      document_version: 2,
+      payments: ['2.0000 TLOS'],
+      dues: [2000],
+      term_start: 0,
+      term_end: 4000,
+    },
+    3,
+  );
+  expect(refs(1n).getTableRows()).toEqual([
+    expect.objectContaining({ table: 'rounds', version: 1 }),
+    expect.objectContaining({ table: 'applications', slot: 0, version: 2 }),
+  ]);
+});

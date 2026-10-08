@@ -1,0 +1,28 @@
+// Retain these trusted source identities across later contract upgrades.
+export const qualifiedResourceCheckpoint = {
+  poll: {
+    codeHash: 'feb9bb8b7abd222113971d8bd608e90b52827f9a2c34ebd438396428d34174c5',
+    rawAbiHash: '52bb5b61fe685721a232eec5db9b52208de2490c3ac62450c4dd6a2dba46392b',
+    schemaHash: 'c16a22001c0f8972d8ce4610bc4cb024f64497ef2af9e87aade69a4b6a8d59b7',
+    rowType: 'vote_record',
+  },
+  document: {
+    codeHash: '5a7d037c3e9557b123edfaedbc1248b9a01f8c27f85c11f99d1e63acd5dd3c1a',
+    rawAbiHash: '67a145958f042b374192f68ffa0d3325248b5435adf429d2a8891b2091c707d3',
+    schemaHash: '0924c9553b2fa609f255c85475b8835b111789e8d6abb88982775b0b06d1fed1',
+    rowType: 'document_record',
+  },
+};
+
+// Exact native-qualified document checkpoint preceding automatic allowances; row layout is unchanged.
+export const documentReferencesIdentity = {
+  codeHash: '0d55e35ffa98cadf8646a858228533ad8b53974f16a8776141b1d8bc6c412a99',
+  rawAbiHash: 'ec269800f4772be31c95b5d236dc31970515d91a12e1ca8e8a33bc8ff90a0851',
+  schemaHash: '265abe13cb27cf94717121aad1a5010c65598326327b870d9da771c75f4f173b',
+};
+
+export const documentReferencePollIdentity = {
+  codeHash: 'f7d8333d7e71456668aa4a78ca8f2e7dac8a784b95cdcaa30ffe309e49ae7eb1',
+  rawAbiHash: '809d5a2efc9f638f6e1eda00ebaf507490d074dcc129b933390913085c64e3d8',
+  schemaHash: '0e4ee077734a195f9bbc3d337851d33eca1435b5f7aa43b3bcf859da7ed3f963',
+};
