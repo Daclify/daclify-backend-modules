@@ -4,11 +4,11 @@ CONTRACT payroll:public contract {
 public:
  using contract::contract;
  TABLE schedule_record {uint64_t id;uint64_t dao_id;uint64_t creator;uint64_t recipient;asset quantity;uint8_t periods;uint32_t interval;uint32_t starts;std::vector<uint64_t> entries;uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}EOSLIB_SERIALIZE(schedule_record,(id)(dao_id)(creator)(recipient)(quantity)(periods)(interval)(starts)(entries))};
- using schedules=multi_index<"schedules"_n,schedule_record,indexed_by<"bydao"_n,const_mem_fun<schedule_record,uint64_t,&schedule_record::by_dao>>>;
+ using schedules=ram_table<"schedules"_n,schedule_record,indexed_by<"bydao"_n,const_mem_fun<schedule_record,uint64_t,&schedule_record::by_dao>>>;
  TABLE entry_record {uint64_t id;uint64_t dao_id;uint64_t schedule_id;uint32_t due;uint64_t primary_key()const{return id;}uint64_t by_schedule()const{return schedule_id;}EOSLIB_SERIALIZE(entry_record,(id)(dao_id)(schedule_id)(due))};
- using entries=multi_index<"entries"_n,entry_record,indexed_by<"byschedule"_n,const_mem_fun<entry_record,uint64_t,&entry_record::by_schedule>>>;
- TABLE control_record {uint64_t schedule_id;uint8_t paused;uint32_t last_payout;std::string label;uint64_t primary_key()const{return schedule_id;}EOSLIB_SERIALIZE(control_record,(schedule_id)(paused)(last_payout)(label))};
- using controls=multi_index<"controls"_n,control_record>;
+ using entries=ram_table<"entries"_n,entry_record,indexed_by<"byschedule"_n,const_mem_fun<entry_record,uint64_t,&entry_record::by_schedule>>>;
+ TABLE control_record {uint64_t schedule_id;uint8_t paused;uint32_t last_payout;std::string label;uint64_t ram_owner(name code,uint64_t scope)const{return schedules(code,scope).get(schedule_id,"SCHEDULE_UNKNOWN").dao_id;}uint64_t primary_key()const{return schedule_id;}EOSLIB_SERIALIZE(control_record,(schedule_id)(paused)(last_payout)(label))};
+ using controls=ram_table<"controls"_n,control_record>;
  ACTION commit(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint64_t recipient,asset quantity,uint8_t periods,uint32_t interval,uint32_t starts){
   module_actor(runtime,dao_id,member_id,get_self(),"commit"_n,true);check(schedule_id>0,"SCHEDULE_ID");check(periods>=1&&periods<=12&&interval>=86400&&interval<=2678400,"PAYROLL_LIMIT");auto now=current_time_point().sec_since_epoch();check(starts>=now&&uint64_t(starts)<=uint64_t(now)+2678400,"PAYROLL_START");check(uint64_t(starts)+uint64_t(interval)*(periods-1)<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");
   daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);check(quantity.is_valid()&&quantity.amount>0&&quantity.symbol==d.token_symbol,"ASSET_QUANTITY");check(__int128(quantity.amount)*periods<=asset::max_amount,"AMOUNT_RANGE");members people(runtime,dao_id);check(people.get(recipient,"MEMBER_UNKNOWN").active,"MEMBER_INACTIVE");schedules rows(get_self(),runtime.value);check(rows.find(schedule_id)==rows.end(),"SCHEDULE_EXISTS");entries items(get_self(),runtime.value);std::vector<uint64_t> ids;

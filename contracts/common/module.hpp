@@ -1,4 +1,5 @@
 #pragma once
+#define DACLIFY_MODULE_METERING
 #include "records.hpp"
 #include "governance.hpp"
 #define JSON_NOEXCEPTION

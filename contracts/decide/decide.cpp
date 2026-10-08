@@ -9,27 +9,27 @@ public:
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
   EOSLIB_SERIALIZE(ballot_record,(id)(dao_id)(creator)(kind)(choices)(closes)(quorum)(approval)(denominator)(max_member)(cast)(tallies)(status)(winner)(metadata))
  };
- using ballots=multi_index<"ballots"_n,ballot_record,indexed_by<"bydao"_n,const_mem_fun<ballot_record,uint64_t,&ballot_record::by_dao>>>;
- TABLE vote_record {uint64_t id;uint64_t ballot;uint64_t member;uint64_t weight;uint8_t choice;uint64_t primary_key()const{return id;}uint128_t by_member()const{return (uint128_t(ballot)<<64)|member;}EOSLIB_SERIALIZE(vote_record,(id)(ballot)(member)(weight)(choice))};
- using votes=multi_index<"votes"_n,vote_record,indexed_by<"bymember"_n,const_mem_fun<vote_record,uint128_t,&vote_record::by_member>>>;
+ using ballots=ram_table<"ballots"_n,ballot_record,indexed_by<"bydao"_n,const_mem_fun<ballot_record,uint64_t,&ballot_record::by_dao>>>;
+ TABLE vote_record {uint64_t id;uint64_t ballot;uint64_t member;uint64_t weight;uint8_t choice;uint64_t ram_owner(name code,uint64_t scope)const{return ballots(code,scope).get(ballot,"BALLOT_UNKNOWN").dao_id;}uint64_t primary_key()const{return id;}uint128_t by_member()const{return (uint128_t(ballot)<<64)|member;}EOSLIB_SERIALIZE(vote_record,(id)(ballot)(member)(weight)(choice))};
+ using votes=ram_table<"votes"_n,vote_record,indexed_by<"bymember"_n,const_mem_fun<vote_record,uint128_t,&vote_record::by_member>>>;
  TABLE election_record {
   uint64_t id;uint64_t dao_id;uint64_t creator;std::string title;uint64_t document_id;uint32_t document_version;checksum256 document_commitment;uint64_t policy_revision;uint32_t nomination_close;uint32_t term_start;uint32_t term_end;uint8_t seats;uint8_t status=0;std::vector<uint64_t> candidates;
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
   EOSLIB_SERIALIZE(election_record,(id)(dao_id)(creator)(title)(document_id)(document_version)(document_commitment)(policy_revision)(nomination_close)(term_start)(term_end)(seats)(status)(candidates))
  };
- using elections=multi_index<"elections"_n,election_record,indexed_by<"bydao"_n,const_mem_fun<election_record,uint64_t,&election_record::by_dao>>>;
+ using elections=ram_table<"elections"_n,election_record,indexed_by<"bydao"_n,const_mem_fun<election_record,uint64_t,&election_record::by_dao>>>;
  TABLE nomination_record {
   uint64_t id;uint64_t dao_id;uint64_t election_id;uint64_t member_id;
   uint64_t primary_key()const{return id;}uint64_t by_election()const{return election_id;}uint128_t by_member()const{return(uint128_t(election_id)<<64)|member_id;}
   EOSLIB_SERIALIZE(nomination_record,(id)(dao_id)(election_id)(member_id))
  };
- using nominations=multi_index<"nominations"_n,nomination_record,indexed_by<"bymember"_n,const_mem_fun<nomination_record,uint128_t,&nomination_record::by_member>>,indexed_by<"byelection"_n,const_mem_fun<nomination_record,uint64_t,&nomination_record::by_election>>>;
+ using nominations=ram_table<"nominations"_n,nomination_record,indexed_by<"bymember"_n,const_mem_fun<nomination_record,uint128_t,&nomination_record::by_member>>,indexed_by<"byelection"_n,const_mem_fun<nomination_record,uint64_t,&nomination_record::by_election>>>;
  TABLE term_record {
   uint64_t id;uint64_t dao_id;uint64_t election_id;uint64_t member_id;std::string title;uint32_t starts;uint32_t ends;bool recalled=false;uint32_t recalled_at=0;uint64_t recall_doc=0;uint32_t recall_version=0;
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
   EOSLIB_SERIALIZE(term_record,(id)(dao_id)(election_id)(member_id)(title)(starts)(ends)(recalled)(recalled_at)(recall_doc)(recall_version))
  };
- using terms=multi_index<"terms"_n,term_record,indexed_by<"bydao"_n,const_mem_fun<term_record,uint64_t,&term_record::by_dao>>>;
+ using terms=ram_table<"terms"_n,term_record,indexed_by<"bydao"_n,const_mem_fun<term_record,uint64_t,&term_record::by_dao>>>;
  ACTION newelect(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t election_id,std::string title,uint64_t document_id,uint32_t document_version,uint32_t nomination_close,uint32_t term_start,uint32_t term_end,uint8_t seats){
   module_actor(runtime,dao_id,member_id,get_self(),"newelect"_n,true);check(election_id>0&&!title.empty()&&title.size()<=80,"ELECTION_TITLE");for(unsigned char c:title)check(c>=0x20,"ELECTION_TITLE");check(seats>=1&&seats<=8,"ELECTION_SEATS");
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self(),"POLICY_DECIDE");const auto now=current_time_point().sec_since_epoch();check(nomination_close>now&&uint64_t(nomination_close)<=uint64_t(now)+2592000&&uint64_t(term_start)>uint64_t(nomination_close)+policy.config.duration&&term_end>term_start&&uint64_t(term_end)-term_start<=31536000,"ELECTION_TERM");
