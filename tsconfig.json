@@ -19,6 +19,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": [
+    "archive/**/*.ts",
     "protocol/**/*.ts",
     "sdk/**/*.ts",
     "tools/**/*.ts",

@@ -118,6 +118,14 @@ A durable term records its exact start/end and recall. The term window starts no
 
 Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release.
 
+## Archive integrity format — development
+
+The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks and index-derived proofs protect record integrity. Export jobs, approval, pruning and history screens are not available in this checkpoint.
+
+A valid proof does not establish file availability or authorize deletion. Source contracts must independently check approval, eligibility, references and the qualified schema before pruning. Identities, key grants, liabilities and financial replay guards stay live.
+
+Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; subscriptions and retention enforcement are still being implemented. Original private ciphertext requires the original decryption keys.
+
 ## decide contract
 
 Source ABI JSON SHA-256: `0ca71692eb8136c2fc30fbc6c49a5ebe319daa0ab5e9e71f82aa5a0888d3aa52`.

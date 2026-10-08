@@ -12,7 +12,7 @@ The packed `@daclify/modules/help` bundle appears in the app at `/docs/decide`, 
 
 Module manifests declare compatible core versions, interface/configuration versions, actions and grants. The client and runtime verify reviewed module code pins. A guide version alone does not verify a deployed contract. Closed votes, elected titles and service sessions are not administrative or spending authority.
 
-The 0.7 core runtime update changes no module C++ layout/code. Existing liabilities and identities stay on chain. Follow [upgrade to 0.7](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations/upgrade-0.7.md), and consult [upgrade to 0.5](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations/upgrade-0.5.md) only for the earlier contract changes.
+The baseline 0.7 core runtime update changes no module C++ layout/code. The resource-billing-archives branch changes module code for observation while preserving serialized layouts; its deployment/migration path remains unfinished. Existing liabilities and identities stay on chain. Follow [upgrade to 0.7](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations/upgrade-0.7.md), and consult [upgrade to 0.5](https://github.com/Daclify/daclify-backend-core/blob/main/docs/operations/upgrade-0.5.md) only for the earlier contract changes.
 
 For server loss, [disaster recovery](https://github.com/Daclify/daclify-backend-core/blob/main/docs/disaster-recovery.md) distinguishes on-chain module records from database pairings and each member's private keys. One recovered administrator cannot recover everyone else's secrets. Managed custody, real providers/wallet clients, production deployment and durable off-host backups remain separate qualification work.
 
@@ -25,3 +25,5 @@ Run `npm run verify`, `npm run build` and `npm run format:check` locally. Compil
 ## Connected payments and hosting
 
 See core [payment operations](../../daclify-backend-core/docs/operations/connected-payments.md) and app `/docs/shared-hosting`, `/docs/payments`, `/docs/independent-operators`. Independent API discovery now has issuer/code/ABI and current-registration checks; actual operator browser cookies and external providers still need qualification.
+
+See [Archive format v1](archive-format.md) for the bounded development library, tested integrity rules and pending service behavior.

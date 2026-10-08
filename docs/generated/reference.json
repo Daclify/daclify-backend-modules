@@ -104,6 +104,15 @@
         "A durable term records its exact start/end and recall. The term window starts no earlier than that date; actual membership must remain eligible. An administrator can recall a term with a reason document. Titles grant no administrator flag, reviewer permission, module power, credit issuance or Treasury authority. Permanent roles and approved liabilities remain separate and survive term expiry.",
         "Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release."
       ]
+    },
+    {
+      "id": "archive",
+      "title": "Archive integrity format — development",
+      "paragraphs": [
+        "The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks and index-derived proofs protect record integrity. Export jobs, approval, pruning and history screens are not available in this checkpoint.",
+        "A valid proof does not establish file availability or authorize deletion. Source contracts must independently check approval, eligibility, references and the qualified schema before pruning. Identities, key grants, liabilities and financial replay guards stay live.",
+        "Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; subscriptions and retention enforcement are still being implemented. Original private ciphertext requires the original decryption keys."
+      ]
     }
   ],
   "schemaVersion": 1,
