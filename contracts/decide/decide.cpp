@@ -12,6 +12,12 @@ public:
  using ballots=ram_table<"ballots"_n,ballot_record,indexed_by<"bydao"_n,const_mem_fun<ballot_record,uint64_t,&ballot_record::by_dao>>>;
  TABLE vote_record {uint64_t id;uint64_t ballot;uint64_t member;uint64_t weight;uint8_t choice;uint64_t ram_owner(name code,uint64_t scope)const{return ballots(code,scope).get(ballot,"BALLOT_UNKNOWN").dao_id;}uint64_t primary_key()const{return id;}uint128_t by_member()const{return (uint128_t(ballot)<<64)|member;}EOSLIB_SERIALIZE(vote_record,(id)(ballot)(member)(weight)(choice))};
  using votes=ram_table<"votes"_n,vote_record,indexed_by<"bymember"_n,const_mem_fun<vote_record,uint128_t,&vote_record::by_member>>>;
+ TABLE poll_end {
+  uint64_t ballot_id,dao_id;uint32_t completed_at=0;bool legacy=false;
+  uint64_t primary_key()const{return ballot_id;}
+  EOSLIB_SERIALIZE(poll_end,(ballot_id)(dao_id)(completed_at)(legacy))
+ };
+ using poll_ends=ram_table<"pollends"_n,poll_end>;
  TABLE election_record {
   uint64_t id;uint64_t dao_id;uint64_t creator;std::string title;uint64_t document_id;uint32_t document_version;checksum256 document_commitment;uint64_t policy_revision;uint32_t nomination_close;uint32_t term_start;uint32_t term_end;uint8_t seats;uint8_t status=0;std::vector<uint64_t> candidates;
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
@@ -89,6 +95,7 @@ private:
   daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);uint64_t denominator=kind==0?d.member_count:kind==1?d.eligible_credits:uint64_t(d.eligible_stake);check(denominator>0,"NO_ELIGIBLE_WEIGHT");ballots rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_EXISTS");
   auto now=current_time_point().sec_since_epoch();check(uint64_t(now)+duration<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");uint32_t closes=now+duration;
   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=member_id;r.kind=kind;r.choices=choices;r.closes=closes;r.quorum=quorum;r.approval=approval;r.denominator=denominator;r.max_member=d.max_member;r.tallies=std::vector<uint64_t>(choices,0);r.metadata=metadata;});
+  if(action_name=="open"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}
   core_action(runtime,get_self(),"govlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id,closes)));
  }
  void finish_election(name runtime,uint64_t dao_id,const election_record& election,const ballot_record& ballot){
@@ -98,6 +105,9 @@ private:
   elections rows(get_self(),runtime.value);rows.modify(rows.get(election.id),same_payer,[](auto& r){r.status=2;});ballots votes_table(get_self(),runtime.value);votes_table.modify(votes_table.get(ballot.id),same_payer,[&](auto& r){r.status=issued?1:2;r.winner=-1;});
  }
 public:
+ ACTION markpoll(name runtime,uint64_t dao_id,uint64_t ballot_id){
+  require_auth(get_self());pinned_module(runtime,dao_id,get_self());ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status!=0,"BALLOT_OPEN");check(ordinary(runtime,ballot_id),"ARCHIVE_FAMILY_PROTECTED");record_end(runtime,dao_id,ballot_id,true);
+ }
  ACTION vote(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t choice){
   const auto person=module_actor(runtime,dao_id,member_id,get_self(),"vote"_n);ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status==0&&current_time_point().sec_since_epoch()<b.closes,"BALLOT_CLOSED");check(member_id<=b.max_member,"SNAPSHOT_MEMBER");check(choice<b.choices,"CHOICE");
   votes cast(get_self(),runtime.value);auto index=cast.get_index<"bymember"_n>();check(index.find((uint128_t(ballot_id)<<64)|member_id)==index.end(),"ALREADY_VOTED");uint64_t weight=b.kind==0?1:b.kind==1?person.credits:uint64_t(person.stake);check(weight>0,"NO_VOTING_WEIGHT");check(weight<=b.denominator-b.cast,"VOTE_WEIGHT_RANGE");auto id=cast.available_primary_key();if(!id)id=1;
@@ -111,8 +121,18 @@ public:
   bool passed=quorum&&b.cast>0&&!tie&&winner>=0&&(b.choices!=2||winner==1)&&(__uint128_t(maximum)*10000)>=__uint128_t(b.cast)*b.approval;
   rows.modify(b,same_payer,[&](auto& r){r.status=passed?1:2;r.winner=passed?winner:-1;});
   }
+  if(ordinary(runtime,ballot_id))record_end(runtime,dao_id,ballot_id,false);
   // Expired lock cleanup can already have been called permissionlessly.
   governance_locks locks(runtime,dao_id);auto index=locks.get_index<"bysource"_n>();auto packed=pack(std::make_tuple(get_self(),ballot_id));const auto& lock=index.get(sha256(packed.data(),packed.size()),"LOCK_UNKNOWN");if(lock.active)core_action(runtime,get_self(),"govunlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id)));
  }
+private:
+ bool ordinary(name runtime,uint64_t ballot_id){
+  elections election_rows(get_self(),runtime.value);work_executions works(get_self(),runtime.value);grant_executions grants(get_self(),runtime.value);return election_rows.find(ballot_id)==election_rows.end()&&works.find(ballot_id)==works.end()&&grants.find(ballot_id)==grants.end();
+ }
+ void record_end(name runtime,uint64_t dao_id,uint64_t ballot_id,bool legacy){
+  poll_ends ends(get_self(),runtime.value);auto found=ends.find(ballot_id);
+  if(found!=ends.end()){check(found->dao_id==dao_id,"BALLOT_DOMAIN");if(found->completed_at)return;ends.modify(found,same_payer,[&](auto& r){r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});}
+  else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
+ }
 };
-EOSIO_DISPATCH(decide,(open)(openwork)(vote)(finalize)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(open)(openwork)(vote)(finalize)(markpoll)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

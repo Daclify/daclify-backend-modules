@@ -9,6 +9,7 @@ import {
   StorageInstantSchema,
 } from '@daclify/core-protocol';
 import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
+import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 export const MAX_ARCHIVE_CHUNK_BYTES = 5 * 1024 * 1024;
 export const MAX_ARCHIVE_LEAVES = 65536;
 export const ArchiveDomainSchema = z.strictObject({
@@ -168,3 +169,65 @@ export const ArchiveManifestSchema = ManifestBody.extend({
   descriptorCommitment: ChainIdSchema,
 }).superRefine(checkManifest);
 export type ArchiveManifest = z.infer<typeof ArchiveManifestSchema>;
+export const MIN_ARCHIVE_RETENTION_SECONDS = 90 * 86400;
+export const OrdinaryPollArchiveInputSchema = z.strictObject({
+  dao: DaoRefSchema,
+  source: ManifestBody.shape.source,
+  snapshot: ManifestBody.shape.snapshot,
+  sourceUpdatedAt: StorageInstantSchema,
+  retentionSeconds: z
+    .int()
+    .min(MIN_ARCHIVE_RETENTION_SECONDS)
+    .max(10 * 365 * 86400),
+  ballots: z.array(DecideTableSchemas.ballots).max(64),
+  votes: z.array(DecideTableSchemas.votes).max(MAX_ARCHIVE_LEAVES),
+  terminals: z.array(DecideTableSchemas.pollends).max(64),
+  elections: z.array(DecideTableSchemas.elections.pick({ id: true, dao_id: true })).max(64),
+  executions: z
+    .array(DecideTableSchemas.executions.pick({ ballot_id: true, dao_id: true }))
+    .max(64),
+  grantplans: z
+    .array(DecideTableSchemas.grantplans.pick({ ballot_id: true, dao_id: true }))
+    .max(64),
+});
+export const OrdinaryPollArchivePlanSchema = z.strictObject({
+  dao: DaoRefSchema,
+  source: ManifestBody.shape.source,
+  snapshot: ManifestBody.shape.snapshot,
+  pruningAuthorized: z.literal(false),
+  grossRamBytes: Uint64Schema,
+  blocked: z
+    .array(
+      z.strictObject({
+        parentId: IdSchema,
+        reason: z.enum([
+          'protected-family',
+          'ballot-active',
+          'terminal-marker-required',
+          'terminal-not-irreversible',
+          'retention',
+        ]),
+      }),
+    )
+    .max(64),
+  families: z
+    .array(
+      z.strictObject({
+        kind: z.literal('ordinary-poll-votes'),
+        parentId: IdSchema,
+        grossRamBytes: Uint64Schema,
+        chunks: z
+          .array(
+            z.strictObject({
+              domain: ArchiveDomainSchema,
+              root: ChainIdSchema,
+              bytes: z.int().min(188).max(MAX_ARCHIVE_CHUNK_BYTES),
+              rows: z.array(ArchiveRowSchema).min(1).max(MAX_ARCHIVE_LEAVES),
+            }),
+          )
+          .max(1),
+      }),
+    )
+    .max(64),
+});
+export type OrdinaryPollArchivePlan = z.infer<typeof OrdinaryPollArchivePlanSchema>;

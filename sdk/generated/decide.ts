@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '0ca71692eb8136c2fc30fbc6c49a5ebe319daa0ab5e9e71f82aa5a0888d3aa52';
+export const decideAbiHash = '16a77a90c557e61aef2336b36edb6f30a4690c189883332ed09eeab288214029';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -250,6 +250,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "markpoll",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "newelect",
       "base": "",
       "fields": [
@@ -494,6 +512,28 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "poll_end",
+      "base": "",
+      "fields": [
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "completed_at",
+          "type": "uint32"
+        },
+        {
+          "name": "legacy",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "recall",
       "base": "",
       "fields": [
@@ -707,6 +747,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "markpoll",
+      "type": "markpoll",
+      "ricardian_contract": ""
+    },
+    {
       "name": "newelect",
       "type": "newelect",
       "ricardian_contract": ""
@@ -779,6 +824,13 @@ export const decideAbi = {
     {
       "name": "nominations",
       "type": "nomination_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "pollends",
+      "type": "poll_end",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -866,6 +918,11 @@ export interface grant_execution {
   deadline: number;
   executed: boolean;
 }
+export interface markpoll {
+  runtime: string;
+  dao_id: string;
+  ballot_id: string;
+}
 export interface newelect {
   runtime: string;
   dao_id: string;
@@ -930,6 +987,12 @@ export interface openwork {
   approval: number;
   metadata: string;
 }
+export interface poll_end {
+  ballot_id: string;
+  dao_id: string;
+  completed_at: number;
+  legacy: boolean;
+}
 export interface recall {
   runtime: string;
   dao_id: string;
@@ -986,6 +1049,7 @@ export interface DecideActions {
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;
+  markpoll: markpoll;
   newelect: newelect;
   nominate: nominate;
   open: open;

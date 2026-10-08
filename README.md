@@ -6,7 +6,7 @@ Check the three repositories out as siblings. Install from core’s [development
 
 Current development version: **0.7.0-alpha.1**, requiring the matching 0.7 core protocol/SDK. Contract interface 1 and existing serialized rows remain unchanged. This resource-billing-archives development branch changes the five module WASM builds for opt-in RAM observation; migration/backfill and resource enforcement are not qualified. A separate release and upgrade packet are required before deploying this branch. The package adds a Node-only `ConnectedPaymentClient` for DAO-scoped central Connect calls. Core owns all Stripe configuration, accounting and authorization; this client never needs a platform Stripe key. Products create receipts, with module fulfillment explicit. See [operator payment integration](docs/connected-payments.md) and [core upgrade 0.7](../daclify-backend-core/docs/operations/upgrade-0.7.md). This development package is not a qualified production release.
 
-The planned Archive service begins with the public bounded chunk/manifest [Archive format library](docs/archive-format.md), available through `@daclify/modules/archive`. It does not yet export/prune history or provide subscriptions.
+The planned Archive service includes terminal markers and a bounded ordinary-poll eligibility planner alongside the public chunk/manifest [Archive format library](docs/archive-format.md), available through `@daclify/modules/archive`. It does not yet export/prune history or provide subscriptions.
 
 ## Contracts in this repository
 

@@ -112,6 +112,7 @@ export const ModulesHelpBundle={
       "title": "Archive integrity format — development",
       "paragraphs": [
         "The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks, canonical manifests and index-derived proofs protect record integrity. Manifests bind the ordered chunk descriptors, coverage and existing file references. Original bytes, commitments and roots are verified together. Export jobs, approval, pruning and history screens are not available in this checkpoint.",
+        "Ordinary polls have a parallel terminal marker using actual finalization time. Marking an old finalized poll is native operator maintenance: its migration timestamp starts a fresh 90-day wait and retries never change it. Closing time is not finalization time. The bounded ordinary-poll planner checks age, code/schema/domain, complete vote/tally coverage and exclusions for work, grants and elections. Its output never authorizes pruning; the host still must verify irreversible state, storage and independent backup, and obtain matching native administrator approval.",
         "A valid proof does not establish file availability or authorize deletion. Source contracts must independently check approval, eligibility, references and the qualified schema before pruning. Identities, key grants, liabilities and financial replay guards stay live.",
         "Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; core has explicitly approved prepaid storage subscriptions behind configuration, while live provider qualification and destructive retention enforcement remain pending. Original private ciphertext requires the original decryption keys."
       ]
@@ -122,7 +123,7 @@ export const ModulesHelpBundle={
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "0ca71692eb8136c2fc30fbc6c49a5ebe319daa0ab5e9e71f82aa5a0888d3aa52",
+      "sourceAbiHash": "16a77a90c557e61aef2336b36edb6f30a4690c189883332ed09eeab288214029",
       "actions": [
         {
           "name": "execute",
@@ -160,6 +161,23 @@ export const ModulesHelpBundle={
         },
         {
           "name": "finalize",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "markpoll",
           "fields": [
             {
               "name": "runtime",
@@ -715,6 +733,27 @@ export const ModulesHelpBundle={
             {
               "name": "member_id",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "pollends",
+          "fields": [
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "completed_at",
+              "type": "uint32"
+            },
+            {
+              "name": "legacy",
+              "type": "bool"
             }
           ]
         },

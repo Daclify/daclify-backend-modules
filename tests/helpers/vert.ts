@@ -81,6 +81,12 @@ export function row(account: Account, table: string, scope: bigint, id: bigint):
   if (!accessor) throw new Error(`Missing ABI table ${table}`);
   return accessor(scope).getTableRow(id);
 }
+export function replaceContract(account: Account, path: string): void {
+  account.setContract(
+    AbiSchema.parse(JSON.parse(readFileSync(path + '.abi', 'utf8'))),
+    readFileSync(path + '.wasm'),
+  );
+}
 
 export async function listFirstParty(core: Account, module: string, codeHash: string) {
   await send(

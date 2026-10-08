@@ -3,7 +3,9 @@ import { TimePointSec } from '@greymass/eosio';
 import { Blockchain } from '@proton/vert';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty } from './helpers/vert.js';
+import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
+import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { wasmCodeHash } from './helpers/code-hash.js';
 const decideHash = wasmCodeHash('.artifacts/contracts/decide.wasm');
 let chain: Blockchain;
@@ -59,6 +61,72 @@ const ballot = (id = 1) =>
     })
     .parse(row(decide, 'ballots', core.toBigInt(), BigInt(id)));
 describe('Decide snapshots and finalization', () => {
+  it('gives old finalized ballots a new migration timestamp without guessing from closes', async () => {
+    if (
+      !existsSync('.artifacts/archive-upgrade-old/decide.wasm') ||
+      !existsSync('.artifacts/archive-upgrade-old/decide.abi')
+    )
+      execFileSync('npm', ['exec', '--', 'tsx', 'tools/build-upgrade.ts'], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+    const oldHash = wasmCodeHash('.artifacts/archive-upgrade-old/decide.wasm');
+    replaceContract(decide, '.artifacts/archive-upgrade-old/decide');
+    await listFirstParty(core, 'decide', oldHash);
+    await send(
+      core,
+      'setmodule',
+      [1, 'decide', 1, ['open', 'vote'], ['govlock'], oldHash],
+      'alice@active',
+    );
+    await send(decide, 'open', open(), 'daclifycore@active');
+    chain.addTime(TimePointSec.from(301));
+    await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
+    const original = ballot();
+    chain.addTime(TimePointSec.from(100 * 86400));
+    replaceContract(decide, '.artifacts/contracts/decide');
+    await listFirstParty(core, 'decide', decideHash);
+    await send(
+      core,
+      'setmodule',
+      [1, 'decide', 1, ['open', 'vote'], ['govlock'], decideHash],
+      'alice@active',
+    );
+    await send(decide, 'markpoll', ['daclifycore', 1, 1], 'decide@active');
+    expect(row(decide, 'pollends', core.toBigInt(), 1n)).toMatchObject({
+      completed_at: Math.floor(chain.timestamp.toMilliseconds() / 1000),
+      legacy: true,
+    });
+    expect(ballot()).toEqual(original);
+  }, 60000);
+  it('records actual finalization time, preserving ballot bytes and the original deadline on retries', async () => {
+    await send(decide, 'open', open(), 'daclifycore@active');
+    const terminal = () =>
+      z
+        .object({
+          dao_id: z.number(),
+          ballot_id: z.number(),
+          completed_at: z.number(),
+          legacy: z.boolean(),
+        })
+        .parse(row(decide, 'pollends', core.toBigInt(), 1n));
+    expect(terminal()).toMatchObject({ dao_id: 1, ballot_id: 1, completed_at: 0, legacy: false });
+    await expect(send(decide, 'markpoll', ['daclifycore', 1, 1], 'decide@active')).rejects.toThrow(
+      'BALLOT_OPEN',
+    );
+    chain.addTime(TimePointSec.from(301 + 10 * 86400));
+    await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
+    const completed = terminal(),
+      old = ballot();
+    expect(completed.completed_at).toBe(Math.floor(chain.timestamp.toMilliseconds() / 1000));
+    chain.addTime(TimePointSec.from(86400));
+    await send(decide, 'markpoll', ['daclifycore', 1, 1], 'decide@active');
+    expect(terminal()).toEqual(completed);
+    expect(ballot()).toEqual(old);
+    await expect(send(decide, 'markpoll', ['daclifycore', 2, 1], 'decide@active')).rejects.toThrow(
+      'BALLOT_DOMAIN',
+    );
+    await expect(send(decide, 'markpoll', ['daclifycore', 1, 1], 'alice@active')).rejects.toThrow();
+  });
   it('does not approve a binary proposal when Reject has the qualifying majority', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     for (const member of [1, 2])
