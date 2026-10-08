@@ -3,3 +3,4 @@ export * from './format.js';
 export * from './manifest.js';
 export * from './restore.js';
 export * from './planner.js';
+export * from './export.js';

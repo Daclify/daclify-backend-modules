@@ -7,6 +7,7 @@ import {
   DaoRefSchema,
   CidSchema,
   StorageInstantSchema,
+  HostedBytesSchema,
 } from '@daclify/core-protocol';
 import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
@@ -241,12 +242,99 @@ export const ArchivePreviewRequestSchema = z.strictObject({
   retentionSeconds: OrdinaryPollArchiveInputSchema.shape.retentionSeconds,
 });
 export type ArchivePreviewRequest = z.infer<typeof ArchivePreviewRequestSchema>;
+export const ArchiveExportRequestSchema = z.strictObject({
+  requestId: z.uuid(),
+  selection: ArchivePreviewRequestSchema,
+  selectionCommitment: ChainIdSchema,
+  maximumStoredBytes: Uint64Schema.refine((v) => BigInt(v) > 0n && BigInt(v) <= (1n << 63n) - 1n),
+});
+export type ArchiveExportRequest = z.infer<typeof ArchiveExportRequestSchema>;
+export const ArchiveExportStatusSchema = z.strictObject({
+  id: z.uuid(),
+  dao: DaoRefSchema,
+  state: z.enum([
+    'planned',
+    'exporting',
+    'pinned',
+    'verified',
+    'approved',
+    'pruning',
+    'completed',
+    'failed',
+    'review',
+  ]),
+  maximumStoredBytes: ArchiveExportRequestSchema.shape.maximumStoredBytes,
+  heldBytes: Uint64Schema,
+  verifiedChunks: z.int().min(0).max(1024),
+  totalChunks: z.int().min(0).max(1024),
+  manifest: z
+    .strictObject({
+      cid: CidSchema,
+      bytes: z.int().min(1).max(MAX_ARCHIVE_CHUNK_BYTES),
+      commitment: ChainIdSchema,
+    })
+    .nullable(),
+  pruningAuthorized: z.literal(false),
+});
+export const ArchiveBundleSchema = z.strictObject({
+  id: z.uuid(),
+  manifest: ArchiveManifestSchema,
+  manifestFile: z.strictObject({
+    cid: CidSchema,
+    bytes: z.int().min(1).max(MAX_ARCHIVE_CHUNK_BYTES),
+    commitment: ChainIdSchema,
+    content: HostedBytesSchema,
+  }),
+  chunks: z.array(z.strictObject({ cid: CidSchema, content: HostedBytesSchema })).max(1024),
+});
+export const ArchiveExportListRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  cursor: z.uuid().optional(),
+});
+export const ArchiveExportListSchema = z.strictObject({
+  dao: DaoRefSchema,
+  exports: z.array(ArchiveExportStatusSchema).max(20),
+  next: z.uuid().nullable(),
+});
 export const ArchiveRoutes = {
   preview: {
     method: 'POST',
     path: '/v1/archive/preview',
     input: ArchivePreviewRequestSchema,
     response: OrdinaryPollArchivePlanSchema,
+    helpTopic: 'archive',
+  },
+  export: {
+    method: 'POST',
+    path: '/v1/archive/exports',
+    input: ArchiveExportRequestSchema,
+    response: ArchiveExportStatusSchema,
+    helpTopic: 'archive',
+  },
+  status: {
+    method: 'GET',
+    path: '/v1/archive/exports/:id',
+    response: ArchiveExportStatusSchema,
+    helpTopic: 'archive',
+  },
+  reconcile: {
+    method: 'POST',
+    path: '/v1/archive/exports/:id/reconcile',
+    input: z.strictObject({}),
+    response: ArchiveExportStatusSchema,
+    helpTopic: 'archive',
+  },
+  bundle: {
+    method: 'GET',
+    path: '/v1/archive/exports/:id/bundle',
+    response: ArchiveBundleSchema,
+    helpTopic: 'archive',
+  },
+  list: {
+    method: 'GET',
+    path: '/v1/archive/exports',
+    input: ArchiveExportListRequestSchema,
+    response: ArchiveExportListSchema,
     helpTopic: 'archive',
   },
 } as const;

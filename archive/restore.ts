@@ -1,5 +1,5 @@
 import { ABI, ABIDecoder, Bytes, Checksum256, Name, Serializer } from '@wharfkit/antelope';
-import { IdSchema } from '@daclify/core-protocol';
+import { IdSchema, ChainIdSchema } from '@daclify/core-protocol';
 import {
   runtimeAbi,
   runtimeAbiHash,
@@ -14,7 +14,9 @@ import {
   ArchiveRowSchema,
   type ArchiveDomain,
   type ArchiveRow,
+  ArchiveBundleSchema,
 } from '../protocol/archive.js';
+import { decodeArchiveManifest, verifyArchiveChunks } from './manifest.js';
 const sources = {
   'ordinary-poll-votes': {
     abi: ABI.from(decideAbi),
@@ -102,4 +104,57 @@ export function decodeReleasedArchiveRow(
   )
     throw new RangeError('ARCHIVE_ROW_CANONICAL');
   return { kind, value: document, original: row };
+}
+// Standalone verification uses no server database or decryption keys; original files are separate.
+export function verifyArchiveBundle(value: unknown, expectedManifestCommitment: string) {
+  const bundle = ArchiveBundleSchema.parse(value),
+    expected = ChainIdSchema.parse(expectedManifestCommitment),
+    decode = (content: string) => Uint8Array.from(atob(content), (c) => c.charCodeAt(0)),
+    bytes = decode(bundle.manifestFile.content),
+    manifest = decodeArchiveManifest(bytes, expected);
+  if (bundle.manifestFile.commitment !== expected)
+    throw new RangeError('ARCHIVE_MANIFEST_COMMITMENT');
+  if (
+    bytes.length !== bundle.manifestFile.bytes ||
+    JSON.stringify(manifest) !== JSON.stringify(bundle.manifest)
+  )
+    throw new RangeError('ARCHIVE_BUNDLE_METADATA');
+  for (const family of manifest.families) {
+    if (family.kind === 'protected-export') throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
+    const schema = archiveSourceSchema(family.kind);
+    if (
+      manifest.source.codeHash !== schema.codeHash ||
+      manifest.source.abiHash !== schema.rawAbiHash ||
+      family.schemaHash !== schema.schemaHash ||
+      family.table !== sources[family.kind].table ||
+      (family.kind === 'document-versions'
+        ? manifest.source.account !== manifest.dao.contract || family.scope !== manifest.dao.daoId
+        : manifest.source.account === manifest.dao.contract ||
+          family.scope !== Name.from(manifest.dao.contract).value.toString())
+    )
+      throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
+  }
+  const decodedLength = (content: string) =>
+    (content.length / 4) * 3 - (content.endsWith('==') ? 2 : content.endsWith('=') ? 1 : 0);
+  if (bundle.chunks.reduce((n, c) => n + decodedLength(c.content), bytes.length) > 64 * 1024 * 1024)
+    throw new RangeError('ARCHIVE_RESTORE_LIMIT');
+  const rows = verifyArchiveChunks(
+    manifest,
+    bundle.chunks.map((c) => ({ cid: c.cid, bytes: decode(c.content) })),
+  );
+  for (const row of rows) {
+    const family = manifest.families[row.family],
+      chunk = family?.chunks.find(
+        (c) =>
+          BigInt(row.primaryKey) >= BigInt(c.firstKey) &&
+          BigInt(row.primaryKey) <= BigInt(c.lastKey),
+      );
+    if (!family || !chunk) throw new RangeError('ARCHIVE_CONTENTS_INCOMPLETE');
+    decodeReleasedArchiveRow(
+      chunk.domain,
+      { primaryKey: row.primaryKey, packed: row.packed },
+      family.parentId,
+    );
+  }
+  return bundle;
 }
