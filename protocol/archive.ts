@@ -231,3 +231,22 @@ export const OrdinaryPollArchivePlanSchema = z.strictObject({
     .max(64),
 });
 export type OrdinaryPollArchivePlan = z.infer<typeof OrdinaryPollArchivePlanSchema>;
+export const ArchivePreviewRequestSchema = z.strictObject({
+  dao: DaoRefSchema,
+  ballotIds: z
+    .array(IdSchema)
+    .min(1)
+    .max(64)
+    .refine((ids) => new Set(ids).size === ids.length),
+  retentionSeconds: OrdinaryPollArchiveInputSchema.shape.retentionSeconds,
+});
+export type ArchivePreviewRequest = z.infer<typeof ArchivePreviewRequestSchema>;
+export const ArchiveRoutes = {
+  preview: {
+    method: 'POST',
+    path: '/v1/archive/preview',
+    input: ArchivePreviewRequestSchema,
+    response: OrdinaryPollArchivePlanSchema,
+    helpTopic: 'archive',
+  },
+} as const;

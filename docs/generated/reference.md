@@ -128,6 +128,8 @@ A valid proof does not establish file availability or authorize deletion. Source
 
 Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; core has explicitly approved prepaid storage subscriptions behind configuration, while live provider qualification and destructive retention enforcement remain pending. Original private ciphertext requires the original decryption keys.
 
+In Resources, active administrators can select a finalized ballot and preview archive eligibility. The host binds complete coverage to the current qualified immutable source and an exact irreversible block, rechecking source pins after the read. Changing the selection clears old results. A preview signs no deletion and grants no paid capacity; export, independent backup, native approval/pruning and historic restore remain unavailable.
+
 ## decide contract
 
 Source ABI JSON SHA-256: `16a77a90c557e61aef2336b36edb6f30a4690c189883332ed09eeab288214029`.
@@ -2513,6 +2515,358 @@ Response:
       "additionalProperties": false
     }
   ]
+}
+```
+
+## POST /v1/archive/preview
+
+Guide: archive.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "ballotIds": {
+      "minItems": 1,
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 20
+      }
+    },
+    "retentionSeconds": {
+      "type": "integer",
+      "minimum": 7776000,
+      "maximum": 315360000
+    }
+  },
+  "required": [
+    "dao",
+    "ballotIds",
+    "retentionSeconds"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "codeHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "abiHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "account",
+        "codeHash",
+        "abiHash"
+      ],
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "blockNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "blockId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+            },
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+            }
+          ]
+        }
+      },
+      "required": [
+        "blockNumber",
+        "blockId",
+        "timestamp"
+      ],
+      "additionalProperties": false
+    },
+    "pruningAuthorized": {
+      "type": "boolean",
+      "const": false
+    },
+    "grossRamBytes": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "blocked": {
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "protected-family",
+              "ballot-active",
+              "terminal-marker-required",
+              "terminal-not-irreversible",
+              "retention"
+            ]
+          }
+        },
+        "required": [
+          "parentId",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "families": {
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "ordinary-poll-votes"
+          },
+          "parentId": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "grossRamBytes": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "chunks": {
+            "maxItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "object",
+                  "properties": {
+                    "format_version": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "chain_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "runtime": {
+                      "type": "string",
+                      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                    },
+                    "dao_id": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "source": {
+                      "type": "string",
+                      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                    },
+                    "code_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "abi_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "schema_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "table": {
+                      "type": "string",
+                      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                    },
+                    "scope": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "chunk_ordinal": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "leaf_count": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65536
+                    }
+                  },
+                  "required": [
+                    "format_version",
+                    "chain_id",
+                    "runtime",
+                    "dao_id",
+                    "source",
+                    "code_hash",
+                    "abi_hash",
+                    "schema_hash",
+                    "table",
+                    "scope",
+                    "chunk_ordinal",
+                    "leaf_count"
+                  ],
+                  "additionalProperties": false
+                },
+                "root": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 188,
+                  "maximum": 5242880
+                },
+                "rows": {
+                  "minItems": 1,
+                  "maxItems": 65536,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "primaryKey": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "packed": {
+                        "type": "string",
+                        "maxLength": 10485760,
+                        "pattern": "^[0-9a-f]*$"
+                      }
+                    },
+                    "required": [
+                      "primaryKey",
+                      "packed"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "domain",
+                "root",
+                "bytes",
+                "rows"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "parentId",
+          "grossRamBytes",
+          "chunks"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "dao",
+    "source",
+    "snapshot",
+    "pruningAuthorized",
+    "grossRamBytes",
+    "blocked",
+    "families"
+  ],
+  "additionalProperties": false
 }
 ```
 
