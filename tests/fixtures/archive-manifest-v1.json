@@ -1,0 +1,108 @@
+{
+  "generator": "Python standard-library struct/hashlib/base64, descriptor packing v1",
+  "manifest": {
+    "schemaVersion": 1,
+    "dao": {
+      "chainId": "abababababababababababababababababababababababababababababababab",
+      "contract": "daclifycore",
+      "daoId": "7",
+      "interfaceVersion": 1
+    },
+    "snapshot": {
+      "blockNumber": 100,
+      "blockId": "00000064abababababababababababababababababababababababababababab",
+      "timestamp": "2026-10-08T10:00:00Z"
+    },
+    "source": {
+      "account": "decide",
+      "codeHash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "abiHash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "families": [
+      {
+        "kind": "ordinary-poll-votes",
+        "parentId": "4",
+        "table": "votes",
+        "scope": "5301043730388997120",
+        "schemaHash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "records": "3",
+        "chunks": [
+          {
+            "domain": {
+              "format_version": 1,
+              "chain_id": "abababababababababababababababababababababababababababababababab",
+              "runtime": "daclifycore",
+              "dao_id": "7",
+              "source": "decide",
+              "code_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+              "abi_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+              "schema_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+              "table": "votes",
+              "scope": "5301043730388997120",
+              "chunk_ordinal": 0,
+              "leaf_count": 3
+            },
+            "root": "e2ab002192f113fe04a46a9ddc44ab1f38884cae7e3530726d8225f16c9a2aa4",
+            "cid": "bafkreifmzcitxwjjw7z4gk7a4ivlbkt5xeulrsjebe4kqmnigmryjio6sq",
+            "bytes": 339,
+            "commitment": "acc8913bd929b7f3c32be0e22ab0aa7db928b8c9240938a831a8332384a1de94",
+            "firstKey": "1",
+            "lastKey": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "files": [],
+    "descriptorCommitment": "bfefd42ec01a6b5e19497eba310f50c2a24754c648448086e4b5d957b0b9952f"
+  },
+  "descriptorHex": "0100abababababababababababababababababababababababababababababababab00d4a5c82f179149070000000000000000000000a8e4904a111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222226400000000000064abababababababababababababababababababababababababababab14323032362d31302d30385431303a30303a30305a01136f7264696e6172792d706f6c6c2d766f74657304000000000000000000000000ac32dd00d4a5c82f17914933333333333333333333333333333333333333333333333333333333333333330300000000000000010100abababababababababababababababababababababababababababababababab00d4a5c82f179149070000000000000000000000a8e4904a1111111111111111111111111111111111111111111111111111111111111111222222222222222222222222222222222222222222222222222222222222222233333333333333333333333333333333333333333333333333333333333333330000000000ac32dd00d4a5c82f1791490000000003000000e2ab002192f113fe04a46a9ddc44ab1f38884cae7e3530726d8225f16c9a2aa43b6261666b726569666d7a63697478776a6a77377a34676b37613469766c626b74357865756c72736a656265346b716d6e69676d72796a696f36737153010000acc8913bd929b7f3c32be0e22ab0aa7db928b8c9240938a831a8332384a1de940100000000000000ffffffffffffffff00",
+  "descriptorCommitment": "bfefd42ec01a6b5e19497eba310f50c2a24754c648448086e4b5d957b0b9952f",
+  "manifestCommitment": "ef4bb72fc66621f99487883ec1271e78eeb5eea130351f2c574c83eb6c2a2c68",
+  "nativeDescriptor": {
+    "format_version": 1,
+    "chain_id": "abababababababababababababababababababababababababababababababab",
+    "runtime": "daclifycore",
+    "dao_id": "7",
+    "source": "decide",
+    "code_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "abi_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+    "block_number": 100,
+    "block_id": "00000064abababababababababababababababababababababababababababab",
+    "timestamp": "2026-10-08T10:00:00Z",
+    "families": [
+      {
+        "kind": "ordinary-poll-votes",
+        "parent_id": "4",
+        "table": "votes",
+        "scope": "5301043730388997120",
+        "schema_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "records": "3",
+        "chunks": [
+          {
+            "domain": {
+              "format_version": 1,
+              "chain_id": "abababababababababababababababababababababababababababababababab",
+              "runtime": "daclifycore",
+              "dao_id": "7",
+              "source": "decide",
+              "code_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+              "abi_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+              "schema_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+              "table": "votes",
+              "scope": "5301043730388997120",
+              "chunk_ordinal": 0,
+              "leaf_count": 3
+            },
+            "root": "e2ab002192f113fe04a46a9ddc44ab1f38884cae7e3530726d8225f16c9a2aa4",
+            "cid": "bafkreifmzcitxwjjw7z4gk7a4ivlbkt5xeulrsjebe4kqmnigmryjio6sq",
+            "bytes": 339,
+            "commitment": "acc8913bd929b7f3c32be0e22ab0aa7db928b8c9240938a831a8332384a1de94",
+            "first_key": "1",
+            "last_key": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "files": []
+  }
+}

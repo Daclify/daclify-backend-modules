@@ -11,6 +11,10 @@
     "registry": "https://npm.pkg.github.com"
   },
   "exports": {
+    "./archive/migrations": {
+      "types": "./dist/archive/migrations.d.ts",
+      "import": "./dist/archive/migrations.js"
+    },
     "./archive": {
       "types": "./dist/archive/index.d.ts",
       "import": "./dist/archive/index.js"
@@ -29,6 +33,7 @@
     }
   },
   "files": [
+    "migrations/archive",
     "dist/archive",
     "dist/protocol",
     "dist/sdk",

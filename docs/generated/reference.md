@@ -120,11 +120,11 @@ Vote and finalize in Decide. Representative terms are read-only mandates unless 
 
 ## Archive integrity format — development
 
-The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks and index-derived proofs protect record integrity. Export jobs, approval, pruning and history screens are not available in this checkpoint.
+The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks, canonical manifests and index-derived proofs protect record integrity. Manifests bind the ordered chunk descriptors, coverage and existing file references. Original bytes, commitments and roots are verified together. Export jobs, approval, pruning and history screens are not available in this checkpoint.
 
 A valid proof does not establish file availability or authorize deletion. Source contracts must independently check approval, eligibility, references and the qualified schema before pruning. Identities, key grants, liabilities and financial replay guards stay live.
 
-Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; subscriptions and retention enforcement are still being implemented. Original private ciphertext requires the original decryption keys.
+Archived files remain pinned and use ordinary approved storage capacity. The approved launch policy is 100 MB free and $1 per additional approved 1 GB monthly; core has explicitly approved prepaid storage subscriptions behind configuration, while live provider qualification and destructive retention enforcement remain pending. Original private ciphertext requires the original decryption keys.
 
 ## decide contract
 
