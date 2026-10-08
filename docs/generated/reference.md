@@ -120,7 +120,7 @@ Vote and finalize in Decide. Representative terms are read-only mandates unless 
 
 ## Archive exports and recovery — development
 
-The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks, canonical manifests and index-derived proofs protect record integrity. Core hosts resumable ordinary-poll exports, complete storage reservations and verified recovery downloads. Independent backup attestation, native approval, pruning and historic browsing remain unfinished.
+The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks, canonical manifests and index-derived proofs protect record integrity. Core hosts resumable ordinary-poll exports, complete storage reservations and verified recovery downloads. Core can additionally create an authenticated encrypted backup, restore it independently and record an immutable receipt when the operator configures a separate backup store. Native availability attestation, administrator approval, pruning and historic browsing remain unfinished.
 
 Ordinary polls have a parallel terminal marker using actual finalization time. Marking an old finalized poll is native operator maintenance: its migration timestamp starts a fresh 90-day wait and retries never change it. Closing time is not finalization time. The bounded ordinary-poll planner checks age, code/schema/domain, complete vote/tally coverage and exclusions for work, grants and elections. Its output never authorizes pruning; the host still must verify irreversible state, storage and independent backup, and obtain matching native administrator approval.
 
@@ -131,6 +131,8 @@ Archived files remain pinned and use ordinary approved storage capacity. The app
 In Resources, active administrators select a finalized poll, preview its eligibility and approve the displayed maximum stored-byte reservation. Export uses existing hosting capacity and creates no subscription or pruning approval. Source changes require a new preview; a newer irreversible snapshot alone does not alter consent. Saved exports survive page/server restarts. Refresh advances bounded work; uncertain provider outcomes keep their holds. The original requesting administrator must remain authorized for completion.
 
 Download the verified recovery bundle and store its displayed manifest SHA-256 separately, off the server. Standalone verification requires that expected commitment and the matching qualified schema package, not a hash supplied only by the file itself. The current manifest is not yet anchored on chain. These exports contain ordinary-poll votes and a manifest, not account keys, social-login pairings or original document files. A download is not an independently verified backup or permission to delete source rows.
+
+When an independent encrypted backup store is configured, Resources offers Create and verify encrypted backup for the exact displayed manifest. The host writes only ciphertext, verifies its restored records, and saves the encrypted-file commitment. Retries preserve the original file. A separate folder on the same disk is not an independent failure domain; the operator must qualify the storage and keep its backup encryption key offline. This copy does not include member decryption keys, social pairings or original document files. Verified primary-provider downloads can fall back to the matching saved backup. A receipt does not authorize pruning or guarantee perpetual availability.
 
 ## decide contract
 
@@ -3063,6 +3065,71 @@ Response:
         }
       ]
     },
+    "backup": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "formatVersion": {
+              "type": "number",
+              "const": 1
+            },
+            "storeId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "keyId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifestCommitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "verifiedAt": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "formatVersion",
+            "storeId",
+            "keyId",
+            "commitment",
+            "manifestCommitment",
+            "bytes",
+            "verifiedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backupSupported": {
+      "default": false,
+      "type": "boolean"
+    },
     "pruningAuthorized": {
       "type": "boolean",
       "const": false
@@ -3077,6 +3144,8 @@ Response:
     "verifiedChunks",
     "totalChunks",
     "manifest",
+    "backup",
+    "backupSupported",
     "pruningAuthorized"
   ],
   "additionalProperties": false
@@ -3192,6 +3261,71 @@ Response:
         }
       ]
     },
+    "backup": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "formatVersion": {
+              "type": "number",
+              "const": 1
+            },
+            "storeId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "keyId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifestCommitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "verifiedAt": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "formatVersion",
+            "storeId",
+            "keyId",
+            "commitment",
+            "manifestCommitment",
+            "bytes",
+            "verifiedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backupSupported": {
+      "default": false,
+      "type": "boolean"
+    },
     "pruningAuthorized": {
       "type": "boolean",
       "const": false
@@ -3206,6 +3340,8 @@ Response:
     "verifiedChunks",
     "totalChunks",
     "manifest",
+    "backup",
+    "backupSupported",
     "pruningAuthorized"
   ],
   "additionalProperties": false
@@ -3330,6 +3466,71 @@ Response:
         }
       ]
     },
+    "backup": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "formatVersion": {
+              "type": "number",
+              "const": 1
+            },
+            "storeId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "keyId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifestCommitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "verifiedAt": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "formatVersion",
+            "storeId",
+            "keyId",
+            "commitment",
+            "manifestCommitment",
+            "bytes",
+            "verifiedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backupSupported": {
+      "default": false,
+      "type": "boolean"
+    },
     "pruningAuthorized": {
       "type": "boolean",
       "const": false
@@ -3344,6 +3545,221 @@ Response:
     "verifiedChunks",
     "totalChunks",
     "manifest",
+    "backup",
+    "backupSupported",
+    "pruningAuthorized"
+  ],
+  "additionalProperties": false
+}
+```
+
+## POST /v1/archive/exports/:id/backup
+
+Guide: archive.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "expectedManifestCommitment": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "expectedManifestCommitment"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "exporting",
+        "pinned",
+        "verified",
+        "approved",
+        "pruning",
+        "completed",
+        "failed",
+        "review"
+      ]
+    },
+    "maximumStoredBytes": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "heldBytes": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "verifiedChunks": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1024
+    },
+    "totalChunks": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1024
+    },
+    "manifest": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cid": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5242880
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "cid",
+            "bytes",
+            "commitment"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backup": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "formatVersion": {
+              "type": "number",
+              "const": 1
+            },
+            "storeId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "keyId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifestCommitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "verifiedAt": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "formatVersion",
+            "storeId",
+            "keyId",
+            "commitment",
+            "manifestCommitment",
+            "bytes",
+            "verifiedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backupSupported": {
+      "default": false,
+      "type": "boolean"
+    },
+    "pruningAuthorized": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "id",
+    "dao",
+    "state",
+    "maximumStoredBytes",
+    "heldBytes",
+    "verifiedChunks",
+    "totalChunks",
+    "manifest",
+    "backup",
+    "backupSupported",
     "pruningAuthorized"
   ],
   "additionalProperties": false
@@ -3947,6 +4363,71 @@ Response:
               }
             ]
           },
+          "backup": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "formatVersion": {
+                    "type": "number",
+                    "const": 1
+                  },
+                  "storeId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+                  },
+                  "keyId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "manifestCommitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "bytes": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "verifiedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "formatVersion",
+                  "storeId",
+                  "keyId",
+                  "commitment",
+                  "manifestCommitment",
+                  "bytes",
+                  "verifiedAt"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "backupSupported": {
+            "default": false,
+            "type": "boolean"
+          },
           "pruningAuthorized": {
             "type": "boolean",
             "const": false
@@ -3961,6 +4442,8 @@ Response:
           "verifiedChunks",
           "totalChunks",
           "manifest",
+          "backup",
+          "backupSupported",
           "pruningAuthorized"
         ],
         "additionalProperties": false

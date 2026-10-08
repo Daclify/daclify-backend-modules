@@ -77,3 +77,5 @@ Module records remain on chain through service loss. Recovering an existing memb
 First-party code, contracts, SDKs and documentation are licensed under
 **AGPL-3.0-only**. See [LICENSE](LICENSE) and [licensing and source obligations](LICENSING.md).
 Third-party files retain their own licenses. Contributions remain owned by their authors.
+
+Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native approval/attestation, pruning and historic index rebuild remain separate launch gates. See the Archive format and core export operations guides.

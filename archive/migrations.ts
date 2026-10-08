@@ -10,4 +10,9 @@ export const ArchiveMigrations = Object.freeze([
     name: '002_transport.sql',
     url: new URL('../../migrations/archive/002_transport.sql', import.meta.url),
   },
+  {
+    namespace: 'archive',
+    name: '003_backups.sql',
+    url: new URL('../../migrations/archive/003_backups.sql', import.meta.url),
+  },
 ]);

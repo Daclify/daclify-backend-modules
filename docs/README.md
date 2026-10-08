@@ -27,3 +27,5 @@ Run `npm run verify`, `npm run build` and `npm run format:check` locally. Compil
 See core [payment operations](../../daclify-backend-core/docs/operations/connected-payments.md) and app `/docs/shared-hosting`, `/docs/payments`, `/docs/independent-operators`. Independent API discovery now has issuer/code/ABI and current-registration checks; actual operator browser cookies and external providers still need qualification.
 
 See [Archive format v1](archive-format.md) for the bounded development library, tested integrity rules and pending service behavior.
+
+Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native approval/attestation, pruning and historic index rebuild remain separate launch gates. See the Archive format and core export operations guides.

@@ -249,6 +249,16 @@ export const ArchiveExportRequestSchema = z.strictObject({
   maximumStoredBytes: Uint64Schema.refine((v) => BigInt(v) > 0n && BigInt(v) <= (1n << 63n) - 1n),
 });
 export type ArchiveExportRequest = z.infer<typeof ArchiveExportRequestSchema>;
+export const ArchiveBackupReceiptSchema = z.strictObject({
+  formatVersion: z.literal(1),
+  storeId: z.string().regex(/^[A-Za-z0-9_.:-]{1,128}$/),
+  keyId: z.string().regex(/^[A-Za-z0-9_.:-]{1,128}$/),
+  commitment: ChainIdSchema,
+  manifestCommitment: ChainIdSchema,
+  bytes: Uint64Schema.refine((v) => BigInt(v) > 0n && BigInt(v) <= 128n * 1024n * 1024n),
+  verifiedAt: StorageInstantSchema,
+});
+export type ArchiveBackupReceipt = z.infer<typeof ArchiveBackupReceiptSchema>;
 export const ArchiveExportStatusSchema = z.strictObject({
   id: z.uuid(),
   dao: DaoRefSchema,
@@ -274,6 +284,8 @@ export const ArchiveExportStatusSchema = z.strictObject({
       commitment: ChainIdSchema,
     })
     .nullable(),
+  backup: ArchiveBackupReceiptSchema.nullable().default(null),
+  backupSupported: z.boolean().default(false),
   pruningAuthorized: z.literal(false),
 });
 export const ArchiveBundleSchema = z.strictObject({
@@ -321,6 +333,13 @@ export const ArchiveRoutes = {
     method: 'POST',
     path: '/v1/archive/exports/:id/reconcile',
     input: z.strictObject({}),
+    response: ArchiveExportStatusSchema,
+    helpTopic: 'archive',
+  },
+  backup: {
+    method: 'POST',
+    path: '/v1/archive/exports/:id/backup',
+    input: z.strictObject({ expectedManifestCommitment: ChainIdSchema }),
     response: ArchiveExportStatusSchema,
     helpTopic: 'archive',
   },
