@@ -284,6 +284,10 @@ export const ArchiveExportStatusSchema = z.strictObject({
       commitment: ChainIdSchema,
     })
     .nullable(),
+  retentionSeconds: ArchivePreviewRequestSchema.shape.retentionSeconds.default(
+    MIN_ARCHIVE_RETENTION_SECONDS,
+  ),
+  anchor: RuntimeTableSchemas.archives.nullable().default(null),
   backup: ArchiveBackupReceiptSchema.nullable().default(null),
   backupSupported: z.boolean().default(false),
   pruningAuthorized: z.literal(false),
@@ -333,6 +337,18 @@ export const ArchiveRoutes = {
     method: 'POST',
     path: '/v1/archive/exports/:id/reconcile',
     input: z.strictObject({}),
+    response: ArchiveExportStatusSchema,
+    helpTopic: 'archive',
+  },
+  attest: {
+    method: 'POST',
+    path: '/v1/archive/exports/:id/attest',
+    input: z.strictObject({
+      manifestCommitment: ChainIdSchema,
+      descriptorCommitment: ChainIdSchema,
+      backupCommitment: ChainIdSchema,
+      retentionSeconds: ArchivePreviewRequestSchema.shape.retentionSeconds,
+    }),
     response: ArchiveExportStatusSchema,
     helpTopic: 'archive',
   },

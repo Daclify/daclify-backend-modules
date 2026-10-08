@@ -79,3 +79,5 @@ First-party code, contracts, SDKs and documentation are licensed under
 Third-party files retain their own licenses. Contributions remain owned by their authors.
 
 Archive backup checkpoint: core hosts optional authenticated encrypted backups and database-free restore verification through producer-owned Archive receipt/status/route schemas and immutable migration 003. Independent storage durability, native approval/attestation, pruning and historic index rebuild remain separate launch gates. See the Archive format and core export operations guides.
+
+The resource-billing-archives development branch supports exact native Archive availability attestation and signed administrator approval/revocation. Destructive pruning remains disabled pending source-owned eligibility and recovery qualification. This is development-branch functionality, not a production deployment.

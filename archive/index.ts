@@ -4,3 +4,4 @@ export * from './manifest.js';
 export * from './restore.js';
 export * from './planner.js';
 export * from './export.js';
+export * from './attestation.js';
