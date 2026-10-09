@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.7 development — payment transport audit
+
+Bound central Connect responses to 64 KiB of streamed bytes before buffering, cancel rejected/error bodies and preserve UTF-8 across chunk boundaries. Keep the exact core 0.9.0-alpha.6 peer and unchanged 0.9.0-alpha.5 contract version. Add adversarial response regressions and record cross-contract permission qualification in the audit report. No fiat fulfillment or governance policy changes.
+
 ## 0.9.0-alpha.6 development — SDK and contract versions
 
 Keep the SDK/help package version separate from the unchanged 0.9.0-alpha.5 module contract release. Installation manifests and response schemas report the contract version; an SDK-only update does not demand redeploying matching contracts. Consume the refreshed core protocol and regenerate help; no C++ or ABI changes.

@@ -35,10 +35,44 @@ export class ConnectedPaymentClient {
       ...(input === undefined ? {} : { body: JSON.stringify(input) }),
       signal: AbortSignal.timeout(15000),
     });
-    if (!response.ok) throw new Error('PAYMENT_OPERATOR_UNAVAILABLE');
-    const raw = await response.text();
-    if (raw.length > 65536) throw new Error('PAYMENT_OPERATOR_RESPONSE');
-    const result = schema.parse(JSON.parse(raw));
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new Error('PAYMENT_OPERATOR_UNAVAILABLE');
+    }
+    if (!response.body) throw new Error('PAYMENT_OPERATOR_RESPONSE');
+    const length = response.headers.get('content-length');
+    if (length !== null && (!/^[0-9]+$/.test(length) || BigInt(length) > 65536n)) {
+      await response.body.cancel().catch(() => undefined);
+      throw new Error('PAYMENT_OPERATOR_RESPONSE');
+    }
+    const reader = response.body.getReader(),
+      decoder = new TextDecoder();
+    let size = 0,
+      raw = '';
+    try {
+      while (true) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        size += chunk.value.byteLength;
+        if (size > 65536) throw new Error('PAYMENT_OPERATOR_RESPONSE');
+        raw += decoder.decode(chunk.value, { stream: true });
+      }
+      raw += decoder.decode();
+    } catch (cause) {
+      await reader.cancel().catch(() => undefined);
+      throw cause;
+    } finally {
+      reader.releaseLock();
+    }
+    let value: unknown;
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      throw new Error('PAYMENT_OPERATOR_RESPONSE');
+    }
+    const parsed = schema.safeParse(value);
+    if (!parsed.success) throw new Error('PAYMENT_OPERATOR_RESPONSE');
+    const result = parsed.data;
     if (daoPaymentKey(result.dao) !== daoPaymentKey(this.dao))
       throw new Error('PAYMENT_OPERATOR_RESPONSE');
     return result;

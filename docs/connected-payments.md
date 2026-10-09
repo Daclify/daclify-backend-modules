@@ -1,5 +1,7 @@
 # Independent-server payment integration
 
+The server-only client enforces a 15-second request deadline, rejects redirects and reads at most 64 KiB of response bytes. Oversized, malformed-length and error responses release the unread body. Retry the same request ID after uncertain completion; a timeout does not prove that a charge was never created.
+
 Use `ConnectedPaymentClient` from `@daclify/modules/sdk` only in a Node backend. It consumes canonical core schemas, validates HTTPS/full DAO identity and provider responses, and uses a revocable DAO-scoped bearer credential. Never bundle the credential or platform Stripe keys in browser code, Hub metadata or Git.
 
 ```ts
