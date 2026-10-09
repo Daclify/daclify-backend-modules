@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.8.0-alpha.1",
+  "packageVersion": "0.9.0-alpha.1",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -13,7 +13,8 @@ export const ModulesHelpBundle={
         "A ballot snapshots its eligible denominator and highest member ID. Active ballots freeze issuance, stake changes, and reactivation so a voter cannot change their weight during voting.",
         "Closing and finalization are separate from execution. A passed proposal does not authorize arbitrary contract calls. Executors require bounded, explicitly configured effects.",
         "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions.",
-        "DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory."
+        "DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory.",
+        "Executive elections are opt-in: initialize a core executive policy and install the electexec grant. The reserved title Executives schedules a core roster handover at term start; the pending roster activates after eligible successor pairing and synchronization within its term. Other titles remain representative terms. The old roster retains control until a valid successor activates, and recall cannot remove the final paired native controller. Non-voting members are excluded from new ballot denominators and cannot cast votes."
       ]
     },
     {
@@ -10470,8 +10471,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "decide",
-        "version": "0.8.0-alpha.1",
-        "coreRange": "^0.8.0-alpha.1",
+        "version": "0.9.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10526,8 +10527,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "works",
-        "version": "0.8.0-alpha.1",
-        "coreRange": "^0.8.0-alpha.1",
+        "version": "0.9.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10565,8 +10566,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.8.0-alpha.1",
-        "coreRange": "^0.8.0-alpha.1",
+        "version": "0.9.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10605,8 +10606,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.8.0-alpha.1",
-        "coreRange": "^0.8.0-alpha.1",
+        "version": "0.9.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10647,8 +10648,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.8.0-alpha.1",
-        "coreRange": "^0.8.0-alpha.1",
+        "version": "0.9.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.1",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

@@ -309,3 +309,131 @@ it('physically allocates bounded term space when voting starts and consumes it d
   expect(row(decide, 'termholds', core.toBigInt(), 1n)).toBeUndefined();
   expect(row(decide, 'terms', core.toBigInt(), 1n)).toMatchObject({ member_id: 2, election_id: 1 });
 });
+
+it('excludes non-voting members from the denominator and rejects their ballots', async () => {
+  await act('daclifycore', 'setvoter', { target: 3, can_vote: false });
+  await election();
+  await nominate(1);
+  await start();
+  expect(row(decide, 'ballots', core.toBigInt(), 1n)).toMatchObject({ denominator: 2 });
+  await expect(act('decide', 'vote', { ballot_id: 1, choice: 1 }, 3)).rejects.toThrow(
+    'VOTER_INELIGIBLE',
+  );
+  await expect(act('daclifycore', 'setvoter', { target: 2, can_vote: false })).rejects.toThrow(
+    'GOVERNANCE_LOCKED',
+  );
+});
+async function executiveElection() {
+  await send(core, 'appoint', [1, [1], 60, 10000], 'alice@active');
+  await send(
+    core,
+    'setmodule',
+    [
+      1,
+      'decide',
+      1,
+      ['open', 'vote', 'openwork', 'openaward', 'newelect', 'nominate', 'startelect', 'recall'],
+      ['govlock', 'electexec'],
+      wasmCodeHash('.artifacts/contracts/decide.wasm'),
+    ],
+    'alice@active',
+  );
+  await act('decide', 'newelect', {
+    election_id: 1,
+    title: 'Executives',
+    document_id: 1,
+    document_version: 1,
+    nomination_close: 100,
+    term_start: 1000,
+    term_end: 2000,
+    seats: 1,
+  });
+}
+it('schedules an explicit executive election and activates the elected roster at term start', async () => {
+  await executiveElection();
+  await nominate(2);
+  await start();
+  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  await finish();
+  expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
+  expect(row(core, 'execpending', core.toBigInt(), 1n)).toMatchObject({
+    members: [2],
+    starts: 1000,
+  });
+  chain.addTime(TimePointSec.from(599));
+  await send(core, 'syncexec', [1], 'relay@active');
+  expect(row(core, 'executives', 1n, 2n)).toMatchObject({ member_id: 2, election_id: 1 });
+  expect(row(core, 'executives', 1n, 1n)).toBeUndefined();
+  await expect(act('daclifycore', 'heartbeat', {})).rejects.toThrow('EXECUTIVE_REQUIRED');
+  await send(core, 'syncexec', [1], 'relay@active');
+  expect(row(core, 'execpending', core.toBigInt(), 1n)).toBeUndefined();
+  await expect(
+    act('decide', 'recall', { term_id: 1, document_id: 1, document_version: 1 }),
+  ).rejects.toThrow('LAST_EXECUTIVE');
+});
+it('refuses executive elections without an appointed policy', async () => {
+  await expect(
+    act('decide', 'newelect', {
+      election_id: 1,
+      title: 'Executives',
+      document_id: 1,
+      document_version: 1,
+      nomination_close: 100,
+      term_start: 1000,
+      term_end: 2000,
+      seats: 1,
+    }),
+  ).rejects.toThrow('EXECUTIVE_POLICY_UNKNOWN');
+});
+it('refuses executive elections when the pinned module lacks the roster grant', async () => {
+  await send(core, 'appoint', [1, [1], 60, 10000], 'alice@active');
+  await expect(
+    act('decide', 'newelect', {
+      election_id: 1,
+      title: 'Executives',
+      document_id: 1,
+      document_version: 1,
+      nomination_close: 100,
+      term_start: 1000,
+      term_end: 2000,
+      seats: 1,
+    }),
+  ).rejects.toThrow('MODULE_GRANT');
+});
+it('representative elections leave executive authority unchanged', async () => {
+  await send(core, 'appoint', [1, [1], 60, 10000], 'alice@active');
+  await election();
+  await nominate(2);
+  await start();
+  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  await finish();
+  expect(row(core, 'execpending', core.toBigInt(), 1n)).toBeUndefined();
+  expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
+  expect(row(core, 'executives', 1n, 2n)).toBeUndefined();
+});
+
+it('keeps the incumbent when a pending elected term expires before activation', async () => {
+  await executiveElection();
+  await nominate(2);
+  await start();
+  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  await finish();
+  chain.addTime(TimePointSec.from(1600));
+  await send(core, 'syncexec', [1], 'relay@active');
+  expect(row(core, 'execpending', core.toBigInt(), 1n)).toBeUndefined();
+  expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
+  expect(row(core, 'executives', 1n, 2n)).toBeUndefined();
+});
+it('cancels a recalled pending roster without stripping the incumbent office', async () => {
+  await executiveElection();
+  await nominate(2);
+  await start();
+  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  await finish();
+  await act('decide', 'recall', { term_id: 1, document_id: 1, document_version: 1 });
+  chain.addTime(TimePointSec.from(599));
+  await send(core, 'syncexec', [1], 'relay@active');
+  expect(row(core, 'execpending', core.toBigInt(), 1n)).toBeUndefined();
+  expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
+  expect(row(decide, 'terms', core.toBigInt(), 1n)).toMatchObject({ recalled: true });
+});
