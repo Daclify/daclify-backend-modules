@@ -22,7 +22,12 @@ import { decodeArchiveManifest, verifyArchiveChunks } from './manifest.js';
 import { previousPollRelease } from './releases/ordinary-polls-observer.js';
 import { pruningPollRelease } from './releases/ordinary-polls-pruning.js';
 import { previousDocumentRelease } from './releases/document-versions-before-pools.js';
-import { qualifiedResourceCheckpoint, documentReferencesIdentity, documentReferencePollIdentity } from './releases/qualified-resource-checkpoint.js';
+import {
+  qualifiedResourceCheckpoint,
+  documentReferencesIdentity,
+  documentReferencePollIdentity,
+  documentAllocationIdentity,
+} from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
   'ordinary-poll-votes': {
@@ -90,6 +95,7 @@ function releasedSource(
       documentPoolsIdentity,
       qualifiedResourceCheckpoint.document,
       documentReferencesIdentity,
+      documentAllocationIdentity,
     ])
       if (
         codeHash === identity.codeHash &&

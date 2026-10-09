@@ -1,10 +1,11 @@
 import { beforeEach, describe, it, expect } from 'vitest';
 import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
-import { PrivateKey } from '@wharfkit/antelope';
+import { ABI, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
 import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
+import { PayrollTableSchemas, payrollAbi } from '../sdk/index.js';
 const payrollHash = wasmCodeHash('.artifacts/contracts/payroll.wasm');
 let chain: Blockchain;
 let core: ReturnType<typeof load>;
@@ -52,6 +53,22 @@ const totals = () =>
     .object({ available: z.number(), reserved: z.number(), claims: z.number() })
     .parse(row(core, 'daos', core.toBigInt(), 1n));
 describe('fixed-term funded payroll', () => {
+  it('allocates its fixed control row when work is accepted and keeps its size stable on first settlement', async () => {
+    await send(payroll, 'commit', commit('1.0000 TLOS', 1), 'daclifycore@active');
+    const before = PayrollTableSchemas.controls.parse(
+      row(payroll, 'controls', core.toBigInt(), 1n),
+    );
+    expect(before).toMatchObject({ schedule_id: '1', paused: 0, last_payout: 0, label: '' });
+    chain.addTime(TimePointSec.from(61));
+    await send(payroll, 'settle', ['daclifycore', 1, 1], 'bob@active');
+    const after = PayrollTableSchemas.controls.parse(row(payroll, 'controls', core.toBigInt(), 1n));
+    expect(after).toMatchObject({ schedule_id: '1', paused: 0, label: '' });
+    const abi = ABI.from(payrollAbi);
+    expect(Serializer.encode({ abi, type: 'control_record', object: after }).array.length).toBe(
+      Serializer.encode({ abi, type: 'control_record', object: before }).array.length,
+    );
+    expect(totals().claims).toBe(10000);
+  });
   it('reserves and approves the entire bounded commitment', async () => {
     await send(payroll, 'commit', commit(), 'daclifycore@active');
     expect(totals()).toMatchObject({ available: 80000, reserved: 20000, claims: 0 });

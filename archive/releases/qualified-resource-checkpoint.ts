@@ -26,3 +26,10 @@ export const documentReferencePollIdentity = {
   rawAbiHash: '809d5a2efc9f638f6e1eda00ebaf507490d074dcc129b933390913085c64e3d8',
   schemaHash: '0e4ee077734a195f9bbc3d337851d33eca1435b5f7aa43b3bcf859da7ed3f963',
 };
+
+// Native-qualified allocation/document recovery checkpoint; original document row layout is unchanged.
+export const documentAllocationIdentity = {
+  codeHash: '9d05dbedf1fd8b81eb312bc33a16f0449afa1c0e2b7127cfc3dd3feb774277e0',
+  rawAbiHash: '4ac41f5aa0178b751675f1c7239580cf9984f141361eb82269f149ddf32e9e8c',
+  schemaHash: '6079db548124d589855edf609cace967501b62c5356d69ac11a0f5f7e42eba39',
+};
