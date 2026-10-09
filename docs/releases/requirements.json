@@ -19,6 +19,10 @@
     {
       "id": "CONNECT-SERVER-CLIENT",
       "tests": ["tests/connected-payments.test.ts"]
+    },
+    {
+      "id": "GRANTS-INTERCONTRACT-CAPABILITIES",
+      "tests": ["tests/grants.test.ts"]
     }
   ]
 }

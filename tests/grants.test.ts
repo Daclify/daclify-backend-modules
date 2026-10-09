@@ -411,6 +411,71 @@ it('atomically turns an approved application into a backed Works agreement and s
   await expect(send(works, 'settle', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow();
   expect(totals().reserved).toBe(0);
 });
+it('rolls back a voted award without its Grants-to-Works capability and succeeds after restoration', async () => {
+  await application();
+  await award();
+  await send(
+    core,
+    'setmodule',
+    [
+      1,
+      'grants',
+      1,
+      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround'],
+      [],
+      wasmCodeHash('.artifacts/contracts/grants.wasm'),
+    ],
+    'alice@active',
+  );
+  const before = {
+    totals: totals(),
+    round: row(grants, 'rounds', core.toBigInt(), 1n),
+    application: row(grants, 'applications', core.toBigInt(), 1n),
+    execution: row(decide, 'grantplans', core.toBigInt(), 1n),
+  };
+  await expect(send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
+    'MODULE_GRANT',
+  );
+  expect(totals()).toEqual(before.totals);
+  expect(row(grants, 'rounds', core.toBigInt(), 1n)).toEqual(before.round);
+  expect(row(grants, 'applications', core.toBigInt(), 1n)).toEqual(before.application);
+  expect(row(decide, 'grantplans', core.toBigInt(), 1n)).toEqual(before.execution);
+  expect(row(works, 'projects', core.toBigInt(), 10n)).toBeUndefined();
+  await send(
+    core,
+    'setmodule',
+    [
+      1,
+      'grants',
+      1,
+      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround'],
+      ['awardwork'],
+      wasmCodeHash('.artifacts/contracts/grants.wasm'),
+    ],
+    'alice@active',
+  );
+  await send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active');
+  expect(totals()).toMatchObject({ available: 170000, reserved: 30000 });
+  await expect(send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
+    'ALREADY_EXECUTED',
+  );
+});
+
+it('rejects a cleared Works executor without consuming the approved grant', async () => {
+  await application();
+  await award();
+  await send(core, 'setmodule', [1, 'works', 1, [], [], '0'.repeat(64)], 'alice@active');
+  const before = totals();
+  await expect(send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
+    'MODULE_CODE',
+  );
+  expect(totals()).toEqual(before);
+  expect(
+    z.object({ status: z.number() }).parse(row(grants, 'applications', core.toBigInt(), 1n)).status,
+  ).toBe(2);
+  expect(row(works, 'projects', core.toBigInt(), 10n)).toBeUndefined();
+});
+
 it('invalidates a vote when the application is revised and needs fresh consent', async () => {
   await application();
   await award();
