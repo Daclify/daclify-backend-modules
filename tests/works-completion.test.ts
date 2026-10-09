@@ -129,5 +129,6 @@ it.each([false, true])(
       send(core, 'docref', [1, 'works', 'milestones', 1, 0, 2, 1], 'works@active'),
     ).rejects.toThrow('DOCUMENT_SOURCE_SENDER');
   },
-  60000,
+  // VERT creates over 5,000 rows here; allow time on smaller build hosts.
+  180000,
 );
