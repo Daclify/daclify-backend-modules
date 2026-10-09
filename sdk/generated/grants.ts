@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const grantsAbiHash = '46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab487cef70dc75';
+export const grantsAbiHash = 'ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a2744215216116';
 export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -144,6 +144,20 @@ export const grantsAbi = {
         {
           "name": "kind",
           "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "checkquota",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
         }
       ]
     },
@@ -559,6 +573,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkquota",
+      "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
       "name": "closeapp",
       "type": "closeapp",
       "ricardian_contract": ""
@@ -673,6 +692,10 @@ export interface checkmig {
   runtime: string;
   kind: number;
 }
+export interface checkquota {
+  runtime: string;
+  dao_id: string;
+}
 export interface closeapp {
   runtime: string;
   dao_id: string;
@@ -781,6 +804,7 @@ export interface GrantsActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   checkmig: checkmig;
+  checkquota: checkquota;
   closeapp: closeapp;
   closeround: closeround;
   govaward: govaward;

@@ -142,7 +142,7 @@ Resources offers a separate signed archive approval after independent backup ver
 
 ## decide contract
 
-Source ABI JSON SHA-256: `628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e36c2389be1`.
+Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150`.
 
 ### Action: backfillrefs
 
@@ -165,6 +165,13 @@ Source ABI JSON SHA-256: `628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e
 | --- | --- |
 | runtime | name |
 | kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: execute
 
@@ -477,7 +484,7 @@ Source ABI JSON SHA-256: `628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e
 
 ## works contract
 
-Source ABI JSON SHA-256: `fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e77037715ecdeeb`.
+Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc95f19399a45`.
 
 ### Action: accept
 
@@ -527,6 +534,13 @@ Source ABI JSON SHA-256: `fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e7703
 | --- | --- |
 | runtime | name |
 | kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: govaccept
 
@@ -679,7 +693,7 @@ Source ABI JSON SHA-256: `fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e7703
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8f9a9eb4686`.
+Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b0c8548f084`.
 
 ### Action: backfillrefs
 
@@ -700,6 +714,13 @@ Source ABI JSON SHA-256: `dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8
 | --- | --- |
 | runtime | name |
 | kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: commit
 
@@ -799,7 +820,7 @@ Source ABI JSON SHA-256: `dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8
 
 ## grants contract
 
-Source ABI JSON SHA-256: `46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab487cef70dc75`.
+Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a2744215216116`.
 
 ### Action: amend
 
@@ -853,6 +874,13 @@ Source ABI JSON SHA-256: `46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab48
 | --- | --- |
 | runtime | name |
 | kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: closeapp
 
@@ -994,7 +1022,7 @@ Source ABI JSON SHA-256: `46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab48
 
 ## endorse contract
 
-Source ABI JSON SHA-256: `19919df873c890390940620d98201aadb5e4e49306541302ba85967bbaf1a239`.
+Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa6ce9e100f7`.
 
 ### Action: admit
 
@@ -1044,6 +1072,13 @@ Source ABI JSON SHA-256: `19919df873c890390940620d98201aadb5e4e49306541302ba8596
 | --- | --- |
 | runtime | name |
 | kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: scanram
 

@@ -55,6 +55,7 @@ const totals = () =>
 describe('fixed-term funded payroll', () => {
   it('allocates its fixed control row when work is accepted and keeps its size stable on first settlement', async () => {
     await send(payroll, 'commit', commit('1.0000 TLOS', 1), 'daclifycore@active');
+    await send(payroll, 'checkquota', ['daclifycore', 1], 'daclifycore@active');
     const before = PayrollTableSchemas.controls.parse(
       row(payroll, 'controls', core.toBigInt(), 1n),
     );

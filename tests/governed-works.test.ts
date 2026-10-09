@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty } from './helpers/vert.js';
+import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain,
   core: ReturnType<typeof load>,
@@ -143,6 +143,54 @@ beforeEach(async () => {
   });
 });
 describe('vote-authorised Works funding', () => {
+  it('drains a historical approved executor before replacement without rewriting its accepted hash', async () => {
+    const previous = '.artifacts/document-upgrade-old/works';
+    const oldHash = wasmCodeHash(previous + '.wasm');
+    const currentHash = wasmCodeHash('.artifacts/contracts/works.wasm');
+    async function pin(hash: string) {
+      await listFirstParty(core, 'works', hash);
+      await send(
+        core,
+        'setmodule',
+        [
+          1,
+          'works',
+          1,
+          ['propose', 'accept', 'submitwork', 'review', 'cancel', 'offeragr', 'acceptagr'],
+          ['reserve', 'approve', 'cancel'],
+          hash,
+        ],
+        'alice@active',
+      );
+    }
+    replaceContract(works, previous);
+    await pin(oldHash);
+    await open();
+    await pass();
+    const approved = row(decide, 'executions', core.toBigInt(), 1n);
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+    replaceContract(works, '.artifacts/contracts/works');
+    await pin(currentHash);
+    await expect(
+      send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active'),
+    ).rejects.toThrow('RAM_MIGRATION_PENDING_WORK');
+    await expect(send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
+      'MODULE_CODE',
+    );
+    expect(row(decide, 'executions', core.toBigInt(), 1n)).toEqual(approved);
+    replaceContract(works, previous);
+    await pin(oldHash);
+    await send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active');
+    expect(
+      z
+        .object({ works_hash: z.string(), executed: z.boolean() })
+        .parse(row(decide, 'executions', core.toBigInt(), 1n)),
+    ).toMatchObject({ works_hash: oldHash, executed: true });
+    expect(totals().reserved).toBe(30000);
+    replaceContract(works, '.artifacts/contracts/works');
+    await pin(currentHash);
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+  });
   it('refuses administrator acceptance under governed funding', async () => {
     await expect(act('works', 'accept', { project_id: 1 })).rejects.toThrow('GOVERNANCE_REQUIRED');
     expect(totals().reserved).toBe(0);

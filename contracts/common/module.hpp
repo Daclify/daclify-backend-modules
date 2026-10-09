@@ -19,13 +19,17 @@ inline void bind_ram_pool(name payer,name runtime){
  const ram_payer_owner owner{runtime};binding.set(owner,payer);observe_ram(runtime,0,payer,"rampayer"_n,pack_size(owner)+224,0);
 }
 inline bool scan_ram_binding(name runtime,name payer,name table,uint8_t kind,uint32_t limit){
- require_auth(runtime);check(limit>=1&&limit<=25,"RAM_MIGRATION_BATCH");require_migration_source(runtime,payer,kind);
+ require_auth(runtime);check(limit>=1&&limit<=25,"RAM_MIGRATION_BATCH");
+ if(ram_backfill_active(runtime))require_migration_source(runtime,payer,kind);
+ else{const bool adoption=(kind==1&&(table=="adoptelect"_n||table=="adoptpolls"_n))||(kind==2&&table=="adoptwork"_n)||(kind==3&&table=="adoptpay"_n);check(adoption,"RAM_MIGRATION_INACTIVE");
+  check(ram_observer_settings(runtime,runtime.value).get().runtime_hash==get_code_hash(runtime),"RAM_SOURCE_CODE");check(ram_sources(runtime,runtime.value).get(payer.value,"RAM_SOURCE_UNKNOWN").code_hash==get_code_hash(payer),"RAM_SOURCE_CODE");check_ram_payer_runtime(payer,runtime);return false;}
  if(table!="rampayer"_n)return false;
  ram_payer_binding binding(payer,payer.value);check(binding.exists()&&binding.get().runtime==runtime,"RAM_PAYER_RUNTIME");
  auto progress=migration_cursor(runtime,payer,payer.value,table,false,0,0);if(progress.complete)return true;
  observe_ram(runtime,0,payer,table,pack_size(binding.get())+224,0);progress.advanced=true;progress.complete=true;
  ram_migration_cursors rows(payer,payer.value);rows.modify(rows.get(table.value),same_payer,[&](auto& r){r=progress;});return true;
 }
+inline void check_completion_adoption(name runtime,uint64_t dao_id){check(ram_backfill_active(runtime)||!ram_quota_enabled(runtime,dao_id),"RAM_QUOTA_ACTIVE");}
 inline void pinned_module(name runtime,uint64_t dao_id,name account){
  modules rows(runtime,dao_id);const auto& installed=rows.get(account.value,"MODULE_DISABLED");
  check(!installed.actions.empty()&&installed.code_hash!=checksum256()&&get_code_hash(account)==installed.code_hash,"MODULE_CODE");

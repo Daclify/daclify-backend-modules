@@ -16,12 +16,20 @@ public:
   module_actor(runtime,dao_id,member_id,get_self(),"propose"_n);create_project(runtime,dao_id,member_id,project_id,contributor,document_id,document_version,payments,dues);
  }
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==2,"RAM_MIGRATION_SOURCE_KIND");}
+ ACTION checkquota(name runtime,uint64_t dao_id){
+  require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);
+  projects owned(get_self(),runtime.value);auto communities=owned.get_index<"bydao"_n>();milestones rows(get_self(),runtime.value);document_references refs(runtime,dao_id);auto index=refs.get_index<"bysource"_n>();uint32_t count=0;
+  for(auto project=communities.lower_bound(dao_id);project!=communities.end()&&project->dao_id==dao_id;++project){check(!project->milestones.empty()&&project->milestones.size()<=16,"MILESTONE_LIMIT");for(auto id:project->milestones){const auto it=rows.find(id);check(it!=rows.end()&&it->dao_id==dao_id&&it->project_id==project->id,"MILESTONE_DOMAIN");check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");if(it->status<1||it->status>3)continue;
+   for(uint8_t slot=0;slot<2;slot++){document_reference key{};key.source=get_self();key.table="milestones"_n;key.source_id=it->id;key.slot=slot;auto ref=index.find(key.by_source());
+    check(ref!=index.end()&&ref->source==get_self()&&ref->table=="milestones"_n&&ref->source_id==it->id&&ref->slot==slot&&ref->document_id==(slot?it->review_doc:it->submission_doc)&&ref->version==(slot?it->review_version:it->submission_version),"RAM_WORK_REFS_REQUIRED");}
+  }}
+ }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,2,limit))return;
   if(table=="adoptwork"_n){
     auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;
     milestones rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();uint32_t count=0;
-    for(;it!=rows.end()&&count<limit;++it,++count){if(it->status>=1&&it->status<=3)sync_milestone(runtime,*it);progress.cursor=it->id;progress.advanced=true;}
+    for(;it!=rows.end()&&count<limit;++it,++count){if(it->status>=1&&it->status<=3){check_completion_adoption(runtime,it->dao_id);pinned_module(runtime,it->dao_id,get_self());sync_milestone(runtime,*it);}progress.cursor=it->id;progress.advanced=true;}
     progress.complete=it==rows.end();ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
   }
   if(table=="projects"_n){works_projects(get_self(),runtime.value).backfill(limit);return;}
@@ -92,4 +100,4 @@ public:
 private:
  void check_document(name runtime,uint64_t dao_id,uint64_t id,uint32_t version){documents rows(runtime,dao_id);auto index=rows.get_index<"byversion"_n>();index.get((uint128_t(id)<<32)|version,"DOCUMENT_UNKNOWN");}
 };
-EOSIO_DISPATCH(works,(checkmig)(scanram)(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))
+EOSIO_DISPATCH(works,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))

@@ -42,6 +42,7 @@ public:
   int64_t total=0;for(const auto& payment:app.payments)total=add_amount(total,payment.amount);const auto awarded=add_amount(round.awarded,total);check(awarded<=round.maximum.amount,"ROUND_CAP");rounds.modify(round,same_payer,[&](auto& r){r.awarded=awarded;});apps.modify(app,same_payer,[&](auto& r){r.status=4;r.project_id=plan.project_id;r.funding_ballot=ballot_id;});
   action(permission_level{get_self(),"active"_n},round.works,"grantwork"_n,std::make_tuple(runtime,dao_id,get_self(),round_id,application_id,ballot_id)).send();
  }
+ ACTION checkquota(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==4,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,4,limit))return;
@@ -60,4 +61,4 @@ private:
   check_doc(runtime,dao_id,doc,version);check(!payments.empty()&&payments.size()<=16&&payments.size()==dues.size(),"MILESTONE_LIMIT");check(end>start&&uint64_t(end)-start<=31536000&&end>current_time_point().sec_since_epoch(),"AGREEMENT_TERM");int64_t total=0;for(size_t i=0;i<payments.size();i++){const auto& payment=payments[i];check(payment.is_valid()&&payment.amount>0&&payment.symbol==round.maximum.symbol,"ASSET_QUANTITY");check(dues[i]>=start&&dues[i]<=end,"AGREEMENT_DUE");total=add_amount(total,payment.amount);}check(total<=round.maximum.amount,"ROUND_CAP");
  }
 };
-EOSIO_DISPATCH(grants,(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))
+EOSIO_DISPATCH(grants,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))

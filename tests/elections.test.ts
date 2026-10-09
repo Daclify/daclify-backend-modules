@@ -152,6 +152,7 @@ async function nominate(member: number) {
 async function start() {
   chain.addTime(TimePointSec.from(101));
   await act('decide', 'startelect', { election_id: 1 });
+  await send(decide, 'checkquota', ['daclifycore', 1], 'daclifycore@active');
 }
 async function finish() {
   chain.addTime(TimePointSec.from(301));

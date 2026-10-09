@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const endorseAbiHash = '19919df873c890390940620d98201aadb5e4e49306541302ba85967bbaf1a239';
+export const endorseAbiHash = 'c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa6ce9e100f7';
 export const endorseAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -206,6 +206,20 @@ export const endorseAbi = {
       ]
     },
     {
+      "name": "checkquota",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_migration_cursor",
       "base": "",
       "fields": [
@@ -353,6 +367,11 @@ export const endorseAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkquota",
+      "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanram",
       "type": "scanram",
       "ricardian_contract": ""
@@ -455,6 +474,10 @@ export interface checkmig {
   runtime: string;
   kind: number;
 }
+export interface checkquota {
+  runtime: string;
+  dao_id: string;
+}
 export interface ram_migration_cursor {
   table: string;
   cursor: string;
@@ -494,6 +517,7 @@ export interface EndorseActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   checkmig: checkmig;
+  checkquota: checkquota;
   scanram: scanram;
   unwitness: unwitness;
   witness: witness;

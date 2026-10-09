@@ -100,3 +100,15 @@ export const quotaPollIdentity = {
   rawAbiHash: 'ca0ba4033f95c6b47815464de3bf3b246e5dec7e6007322a8980b04e327d0e40',
   schemaHash: '98c193f78c6de82e2510a86e5c64469b2997061d8f4080993552279fb93ad3df',
 };
+
+export const acceptedWorkDocumentIdentity = {
+  codeHash: 'c185f2ed3872f795b035dbd6fcfa309f25b792a9eb10a05034f0c769dece0651',
+  rawAbiHash: 'a7f5fe4b28aa5cd33ac243ee2baf2a9c78dae7f20b9009f35523754c30561051',
+  schemaHash: '3ab801a8e3e8b74203144189d5e83f12f96fd3ed2183500622e5fc7999ccc51e',
+};
+
+export const completionDocumentIdentity = {
+  codeHash: 'c762b54b8f8225f9f0a906cd0b208d675bc4fb9e5bc4572872fb192a54f219f7',
+  rawAbiHash: 'a7f5fe4b28aa5cd33ac243ee2baf2a9c78dae7f20b9009f35523754c30561051',
+  schemaHash: '3ab801a8e3e8b74203144189d5e83f12f96fd3ed2183500622e5fc7999ccc51e',
+};

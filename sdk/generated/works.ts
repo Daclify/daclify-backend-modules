@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e77037715ecdeeb';
+export const worksAbiHash = 'd9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc95f19399a45';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -152,6 +152,20 @@ export const worksAbi = {
         {
           "name": "kind",
           "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "checkquota",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
         }
       ]
     },
@@ -550,6 +564,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkquota",
+      "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
       "name": "govaccept",
       "type": "govaccept",
       "ricardian_contract": ""
@@ -679,6 +698,10 @@ export interface checkmig {
   runtime: string;
   kind: number;
 }
+export interface checkquota {
+  runtime: string;
+  dao_id: string;
+}
 export interface govaccept {
   runtime: string;
   dao_id: string;
@@ -783,6 +806,7 @@ export interface WorksActions {
   bindrampool: bindrampool;
   cancel: cancel;
   checkmig: checkmig;
+  checkquota: checkquota;
   govaccept: govaccept;
   grantwork: grantwork;
   offeragr: offeragr;

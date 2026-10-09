@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e36c2389be1';
+export const decideAbiHash = '73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -128,6 +128,20 @@ export const decideAbi = {
         {
           "name": "kind",
           "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "checkquota",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
         }
       ]
     },
@@ -941,6 +955,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkquota",
+      "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
       "name": "execute",
       "type": "execute",
       "ricardian_contract": ""
@@ -1141,6 +1160,10 @@ export interface bindrampool {
 export interface checkmig {
   runtime: string;
   kind: number;
+}
+export interface checkquota {
+  runtime: string;
+  dao_id: string;
 }
 export interface election_record {
   id: string;
@@ -1357,6 +1380,7 @@ export interface DecideActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   checkmig: checkmig;
+  checkquota: checkquota;
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;

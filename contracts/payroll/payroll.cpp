@@ -37,8 +37,19 @@ public:
   if(flag==flags.end())flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule.id;r.paused=0;r.last_payout=now;r.label="";});else flags.modify(*flag,same_payer,[&](auto& r){r.last_payout=now;});
  }
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==3,"RAM_MIGRATION_SOURCE_KIND");}
+ ACTION checkquota(name runtime,uint64_t dao_id){
+  require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);
+  schedules rows(get_self(),runtime.value);auto owned=rows.get_index<"bydao"_n>();controls flags(get_self(),runtime.value);uint32_t count=0;
+  for(auto it=owned.lower_bound(dao_id);it!=owned.end()&&it->dao_id==dao_id;++it){check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");check(flags.find(it->id)!=flags.end(),"RAM_PAYROLL_CONTROL_REQUIRED");}
+ }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,3,limit))return;
+  if(table=="adoptpay"_n){
+   auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;
+   schedules rows(get_self(),runtime.value);controls flags(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();uint32_t count=0;
+   for(;it!=rows.end()&&count<limit;++it,++count){if(flags.find(it->id)==flags.end()){check_completion_adoption(runtime,it->dao_id);pinned_module(runtime,it->dao_id,get_self());flags.emplace(get_self(),[&](auto& r){r.schedule_id=it->id;r.paused=0;r.last_payout=0;r.label="";});}progress.cursor=it->id;progress.advanced=true;}
+   progress.complete=it==rows.end();ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
+  }
   if(table=="schedules"_n){schedules(get_self(),runtime.value).backfill(limit);return;}
   if(table=="entries"_n){entries(get_self(),runtime.value).backfill(limit);return;}
   if(table=="controls"_n){controls(get_self(),runtime.value).backfill(limit);return;}
@@ -46,4 +57,4 @@ public:
  }
 
 };
-EOSIO_DISPATCH(payroll,(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))
+EOSIO_DISPATCH(payroll,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))

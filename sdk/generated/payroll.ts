@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = 'dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8f9a9eb4686';
+export const payrollAbiHash = '8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b0c8548f084';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -40,6 +40,20 @@ export const payrollAbi = {
         {
           "name": "kind",
           "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "checkquota",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
         }
       ]
     },
@@ -305,6 +319,11 @@ export const payrollAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkquota",
+      "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
       "name": "commit",
       "type": "commit",
       "ricardian_contract": ""
@@ -384,6 +403,10 @@ export interface checkmig {
   runtime: string;
   kind: number;
 }
+export interface checkquota {
+  runtime: string;
+  dao_id: string;
+}
 export interface commit {
   runtime: string;
   dao_id: string;
@@ -454,6 +477,7 @@ export interface PayrollActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   checkmig: checkmig;
+  checkquota: checkquota;
   commit: commit;
   edit: edit;
   scanram: scanram;

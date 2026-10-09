@@ -91,3 +91,5 @@ First-party code, contracts, SDKs and documentation are licensed under
 Third-party files retain their own licenses. Contributions remain owned by their authors.
 
 The development migration controller scans all five module payers using canonical row/index recipes and checks module kind/source code. Decide adopts missing legacy term holds and poll completion markers without rewriting ballot/term records or approved executable hashes. See [core migration operations](../daclify-backend-core/docs/operations/ram-migration.md); a bound payer belongs exclusively to one runtime. Migration and quotas still need release qualification.
+
+Each first-party contract exposes an authenticated readonly `checkquota(runtime,dao_id)` for atomic core activation. Works verifies fixed pending-work document references, Payroll verifies fixed settlement controls, and Decide verifies active election holds/open ordinary-poll completion markers. Bounded completion-only adoption supports already observed deployments with guards disabled; it preserves existing projects, schedules, ballots and executable approval hashes. See core’s RAM migration runbook for exact families and release limits.

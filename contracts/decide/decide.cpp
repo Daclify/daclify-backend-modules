@@ -107,6 +107,15 @@ public:
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self()&&policy.revision==plan.policy_revision,"POLICY_CHANGED");check(!dao_paused(runtime,dao_id),"DAO_PAUSED");pinned_module(runtime,dao_id,get_self());pinned_module(runtime,dao_id,plan.grants);pinned_module(runtime,dao_id,plan.works);check(plan.grants_hash==get_code_hash(plan.grants)&&plan.works_hash==get_code_hash(plan.works),"MODULE_CODE");
   grant_applications apps(plan.grants,runtime.value);check(apps.get(plan.application_id).status==2,"APPLICATION_NOT_ELIGIBLE");check(plan.commitment==grant_commitment(runtime,dao_id,plan.grants,plan.round_id,plan.application_id),"APPLICATION_CHANGED");plans.modify(plan,same_payer,[](auto& r){r.executed=true;});action(permission_level{get_self(),"active"_n},plan.grants,"govaward"_n,std::make_tuple(runtime,dao_id,plan.round_id,plan.application_id,ballot_id)).send();
  }
+ ACTION checkquota(name runtime,uint64_t dao_id){
+  require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);
+  elections rows(get_self(),runtime.value);auto owned=rows.get_index<"bydao"_n>();term_holds holds(get_self(),runtime.value);uint32_t count=0;
+  for(auto it=owned.lower_bound(dao_id);it!=owned.end()&&it->dao_id==dao_id;++it){check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");if(it->status!=1)continue;
+   term_record sample{};sample.title=it->title;const auto bytes=ram_row_bytes<term_record,term_index>(sample)*it->seats+ram_scope_bytes<term_index>();auto held=holds.find(it->id);
+   check(held!=holds.end()&&held->dao_id==dao_id&&held->padding.size()>=bytes,"RAM_ELECTION_HOLD_REQUIRED");}
+  ballots polls(get_self(),runtime.value);auto ballots_by_dao=polls.get_index<"bydao"_n>();poll_ends ends(get_self(),runtime.value);count=0;
+  for(auto it=ballots_by_dao.lower_bound(dao_id);it!=ballots_by_dao.end()&&it->dao_id==dao_id;++it){check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");if(it->status==0&&ordinary(runtime,it->id)){auto end=ends.find(it->id);check(end!=ends.end()&&end->dao_id==dao_id,"RAM_POLL_END_REQUIRED");}}
+ }
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==1,"RAM_MIGRATION_SOURCE_KIND");
   uint32_t count=0;const auto now=current_time_point().sec_since_epoch();work_executions work(get_self(),runtime.value);
   for(const auto& plan:work){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now)check(plan.works_hash==get_code_hash(plan.works),"RAM_MIGRATION_PENDING_WORK");}
@@ -118,9 +127,9 @@ public:
   if(table=="adoptelect"_n||table=="adoptpolls"_n){
     auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;uint32_t count=0;bool complete=false;
     if(table=="adoptelect"_n){elections rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();
-      for(;it!=rows.end()&&count<limit;++it,++count){if(it->status==1)reserve_term_hold(runtime,*it);progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
+      for(;it!=rows.end()&&count<limit;++it,++count){if(it->status==1){check_completion_adoption(runtime,it->dao_id);pinned_module(runtime,it->dao_id,get_self());reserve_term_hold(runtime,*it);}progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
     }else{ballots rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();poll_ends ends(get_self(),runtime.value);
-      for(;it!=rows.end()&&count<limit;++it,++count){if(ordinary(runtime,it->id)&&ends.find(it->id)==ends.end())ends.emplace(get_self(),[&](auto& r){r.ballot_id=it->id;r.dao_id=it->dao_id;if(it->status){r.completed_at=current_time_point().sec_since_epoch();r.legacy=true;}});progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
+      for(;it!=rows.end()&&count<limit;++it,++count){if(ordinary(runtime,it->id)&&ends.find(it->id)==ends.end()){check_completion_adoption(runtime,it->dao_id);pinned_module(runtime,it->dao_id,get_self());ends.emplace(get_self(),[&](auto& r){r.ballot_id=it->id;r.dao_id=it->dao_id;if(it->status){r.completed_at=current_time_point().sec_since_epoch();r.legacy=true;}});}progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
     }
     progress.complete=complete;ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
   }
@@ -218,4 +227,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

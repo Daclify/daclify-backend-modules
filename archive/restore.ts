@@ -39,6 +39,8 @@ import {
   migrationControllerPollIdentity,
   quotaDocumentIdentity,
   quotaPollIdentity,
+  acceptedWorkDocumentIdentity,
+  completionDocumentIdentity,
 } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
@@ -120,6 +122,8 @@ function releasedSource(
       migrationKernelDocumentIdentity,
       migrationControllerDocumentIdentity,
       quotaDocumentIdentity,
+      acceptedWorkDocumentIdentity,
+      completionDocumentIdentity,
     ])
       if (
         codeHash === identity.codeHash &&
