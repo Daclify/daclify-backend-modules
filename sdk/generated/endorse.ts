@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const endorseAbiHash = '19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a';
+export const endorseAbiHash = '19919df873c890390940620d98201aadb5e4e49306541302ba85967bbaf1a239';
 export const endorseAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -192,12 +192,84 @@ export const endorseAbi = {
       ]
     },
     {
+      "name": "checkmig",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_cursor",
+      "base": "",
+      "fields": [
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "advanced",
+          "type": "bool"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_overlay",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "row",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_payer_owner",
       "base": "",
       "fields": [
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "scanram",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
         }
       ]
     },
@@ -276,6 +348,16 @@ export const endorseAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkmig",
+      "type": "checkmig",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanram",
+      "type": "scanram",
+      "ricardian_contract": ""
+    },
+    {
       "name": "unwitness",
       "type": "unwitness",
       "ricardian_contract": ""
@@ -290,6 +372,20 @@ export const endorseAbi = {
     {
       "name": "joinapps",
       "type": "admission_application",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramcursors",
+      "type": "ram_migration_cursor",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramoverlays",
+      "type": "ram_migration_overlay",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -355,8 +451,28 @@ export interface backfillrefs {
 export interface bindrampool {
   runtime: string;
 }
+export interface checkmig {
+  runtime: string;
+  kind: number;
+}
+export interface ram_migration_cursor {
+  table: string;
+  cursor: string;
+  advanced: boolean;
+  complete: boolean;
+}
+export interface ram_migration_overlay {
+  id: string;
+  table: string;
+  row: string;
+}
 export interface ram_payer_owner {
   runtime: string;
+}
+export interface scanram {
+  runtime: string;
+  table: string;
+  limit: number;
 }
 export interface unwitness {
   runtime: string;
@@ -377,6 +493,8 @@ export interface EndorseActions {
   applyjoin: applyjoin;
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
+  checkmig: checkmig;
+  scanram: scanram;
   unwitness: unwitness;
   witness: witness;
 }

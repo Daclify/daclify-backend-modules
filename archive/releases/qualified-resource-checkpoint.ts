@@ -57,3 +57,24 @@ export const receiptHoldPollIdentity = {
   rawAbiHash: '809d5a2efc9f638f6e1eda00ebaf507490d074dcc129b933390913085c64e3d8',
   schemaHash: '0e4ee077734a195f9bbc3d337851d33eca1435b5f7aa43b3bcf859da7ed3f963',
 };
+export const completedHoldDocumentIdentity = {
+  codeHash: 'd5f4af5867d38339cb6bbf08fc2ac9c5e90a275bfb050013efc26860d9eb2fb7',
+  rawAbiHash: 'a0f3223045f4a9cd98ad99b4cb5a8fd8cb9aa7a57f1c1d462ad77dc94b36d6b2',
+  schemaHash: '5094dc2ac6e2487b926b0bf7abbc10dce534e082cc31adbf01d81a9fb49b84e7',
+};
+export const completedHoldPollIdentity = {
+  codeHash: '4cf20ecedac8994c55fd78804a9053a2bc5cb456a86cf4a5e4dbbd7e6e66d6a2',
+  rawAbiHash: '51651c1542e9b8971509cf84f7c4180f7f7bc9d8bdb166584105fade245d1ef3',
+  schemaHash: '2650fe6fe11af88b8a161e6bfed2b2ede8d1f59d503dcbd3a7c02cb9d8784871',
+};
+
+export const migrationKernelDocumentIdentity = {
+  codeHash: '3b7b2d9f692bc019d442d217c4af0bacca385b4aa1d6e186e30ec29c7d442216',
+  rawAbiHash: 'eaf5181a0d4b7241dca45573cc78a9af6fd3ad0acbbc11a019b32205ecbff219',
+  schemaHash: '8b9358982109c78339ac7978144226f3884c26c788e44b11789f8faa78b3e2ae',
+};
+export const migrationKernelPollIdentity = {
+  codeHash: '7d1c5b17097902d211b2c2e8a819ef8c856179e8079b87453c35c828f181bfda',
+  rawAbiHash: 'f841368ff5fe76a1e7c7cedf5b680569067dc62cdbfb86e171817ce98cf568f6',
+  schemaHash: 'eddce53bdf3c9373ff2f4fc844014eb0eb6a556534213f8f6eb10e450b6beea7',
+};

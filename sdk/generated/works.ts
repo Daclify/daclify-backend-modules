@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = '808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd';
+export const worksAbiHash = 'fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e77037715ecdeeb';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -138,6 +138,20 @@ export const worksAbi = {
         {
           "name": "project_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "checkmig",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
         }
       ]
     },
@@ -354,6 +368,46 @@ export const worksAbi = {
       ]
     },
     {
+      "name": "ram_migration_cursor",
+      "base": "",
+      "fields": [
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "advanced",
+          "type": "bool"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_overlay",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "row",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_payer_owner",
       "base": "",
       "fields": [
@@ -393,6 +447,24 @@ export const worksAbi = {
         },
         {
           "name": "document_version",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "scanram",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
           "type": "uint32"
         }
       ]
@@ -473,6 +545,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkmig",
+      "type": "checkmig",
+      "ricardian_contract": ""
+    },
+    {
       "name": "govaccept",
       "type": "govaccept",
       "ricardian_contract": ""
@@ -495,6 +572,11 @@ export const worksAbi = {
     {
       "name": "review",
       "type": "review",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanram",
+      "type": "scanram",
       "ricardian_contract": ""
     },
     {
@@ -526,6 +608,20 @@ export const worksAbi = {
     {
       "name": "projects",
       "type": "project_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramcursors",
+      "type": "ram_migration_cursor",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramoverlays",
+      "type": "ram_migration_overlay",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -578,6 +674,10 @@ export interface cancel {
   dao_id: string;
   member_id: string;
   project_id: string;
+}
+export interface checkmig {
+  runtime: string;
+  kind: number;
 }
 export interface govaccept {
   runtime: string;
@@ -635,6 +735,17 @@ export interface propose {
   payments: string[];
   dues: number[];
 }
+export interface ram_migration_cursor {
+  table: string;
+  cursor: string;
+  advanced: boolean;
+  complete: boolean;
+}
+export interface ram_migration_overlay {
+  id: string;
+  table: string;
+  row: string;
+}
 export interface ram_payer_owner {
   runtime: string;
 }
@@ -646,6 +757,11 @@ export interface review {
   approve: boolean;
   document_id: string;
   document_version: number;
+}
+export interface scanram {
+  runtime: string;
+  table: string;
+  limit: number;
 }
 export interface settle {
   runtime: string;
@@ -666,11 +782,13 @@ export interface WorksActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   cancel: cancel;
+  checkmig: checkmig;
   govaccept: govaccept;
   grantwork: grantwork;
   offeragr: offeragr;
   propose: propose;
   review: review;
+  scanram: scanram;
   settle: settle;
   submitwork: submitwork;
 }

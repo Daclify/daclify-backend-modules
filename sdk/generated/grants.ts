@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const grantsAbiHash = 'b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e';
+export const grantsAbiHash = '46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab487cef70dc75';
 export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -130,6 +130,20 @@ export const grantsAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "checkmig",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
         }
       ]
     },
@@ -394,6 +408,46 @@ export const grantsAbi = {
       ]
     },
     {
+      "name": "ram_migration_cursor",
+      "base": "",
+      "fields": [
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "advanced",
+          "type": "bool"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_overlay",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "row",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_payer_owner",
       "base": "",
       "fields": [
@@ -433,6 +487,24 @@ export const grantsAbi = {
         },
         {
           "name": "document_version",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "scanram",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
           "type": "uint32"
         }
       ]
@@ -482,6 +554,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkmig",
+      "type": "checkmig",
+      "ricardian_contract": ""
+    },
+    {
       "name": "closeapp",
       "type": "closeapp",
       "ricardian_contract": ""
@@ -507,6 +584,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "scanram",
+      "type": "scanram",
+      "ricardian_contract": ""
+    },
+    {
       "name": "submitapp",
       "type": "submitapp",
       "ricardian_contract": ""
@@ -516,6 +598,20 @@ export const grantsAbi = {
     {
       "name": "applications",
       "type": "grant_application",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramcursors",
+      "type": "ram_migration_cursor",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramoverlays",
+      "type": "ram_migration_overlay",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -572,6 +668,10 @@ export interface backfillrefs {
 }
 export interface bindrampool {
   runtime: string;
+}
+export interface checkmig {
+  runtime: string;
+  kind: number;
 }
 export interface closeapp {
   runtime: string;
@@ -641,6 +741,17 @@ export interface newround {
   allow_agents: boolean;
   works: string;
 }
+export interface ram_migration_cursor {
+  table: string;
+  cursor: string;
+  advanced: boolean;
+  complete: boolean;
+}
+export interface ram_migration_overlay {
+  id: string;
+  table: string;
+  row: string;
+}
 export interface ram_payer_owner {
   runtime: string;
 }
@@ -653,6 +764,11 @@ export interface reviewapp {
   document_id: string;
   document_version: number;
 }
+export interface scanram {
+  runtime: string;
+  table: string;
+  limit: number;
+}
 export interface submitapp {
   runtime: string;
   dao_id: string;
@@ -664,10 +780,12 @@ export interface GrantsActions {
   applygrant: applygrant;
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
+  checkmig: checkmig;
   closeapp: closeapp;
   closeround: closeround;
   govaward: govaward;
   newround: newround;
   reviewapp: reviewapp;
+  scanram: scanram;
   submitapp: submitapp;
 }

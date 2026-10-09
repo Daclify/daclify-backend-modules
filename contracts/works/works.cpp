@@ -15,6 +15,15 @@ public:
  ACTION propose(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id,uint64_t contributor,uint64_t document_id,uint32_t document_version,std::vector<asset> payments,std::vector<uint32_t> dues){
   module_actor(runtime,dao_id,member_id,get_self(),"propose"_n);create_project(runtime,dao_id,member_id,project_id,contributor,document_id,document_version,payments,dues);
  }
+ ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==2,"RAM_MIGRATION_SOURCE_KIND");}
+ ACTION scanram(name runtime,name table,uint32_t limit){
+  if(scan_ram_binding(runtime,get_self(),table,2,limit))return;
+  if(table=="projects"_n){works_projects(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="milestones"_n){works_milestones(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="agreements"_n){works_agreements(get_self(),runtime.value).backfill(limit);return;}
+  check(false,"RAM_MIGRATION_TABLE");
+ }
+
 private:
  void sync_project(name runtime,const project_record& r){document_ref(runtime,r.dao_id,get_self(),"projects"_n,r.id,0,r.document_id,r.document_version);}
  void sync_milestone(name runtime,const milestone_record& r){document_ref(runtime,r.dao_id,get_self(),"milestones"_n,r.id,0,r.submission_doc,r.submission_version);document_ref(runtime,r.dao_id,get_self(),"milestones"_n,r.id,1,r.review_doc,r.review_version);}
@@ -77,4 +86,4 @@ public:
 private:
  void check_document(name runtime,uint64_t dao_id,uint64_t id,uint32_t version){documents rows(runtime,dao_id);auto index=rows.get_index<"byversion"_n>();index.get((uint128_t(id)<<32)|version,"DOCUMENT_UNKNOWN");}
 };
-EOSIO_DISPATCH(works,(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))
+EOSIO_DISPATCH(works,(checkmig)(scanram)(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))

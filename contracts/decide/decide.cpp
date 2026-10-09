@@ -107,7 +107,42 @@ public:
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self()&&policy.revision==plan.policy_revision,"POLICY_CHANGED");check(!dao_paused(runtime,dao_id),"DAO_PAUSED");pinned_module(runtime,dao_id,get_self());pinned_module(runtime,dao_id,plan.grants);pinned_module(runtime,dao_id,plan.works);check(plan.grants_hash==get_code_hash(plan.grants)&&plan.works_hash==get_code_hash(plan.works),"MODULE_CODE");
   grant_applications apps(plan.grants,runtime.value);check(apps.get(plan.application_id).status==2,"APPLICATION_NOT_ELIGIBLE");check(plan.commitment==grant_commitment(runtime,dao_id,plan.grants,plan.round_id,plan.application_id),"APPLICATION_CHANGED");plans.modify(plan,same_payer,[](auto& r){r.executed=true;});action(permission_level{get_self(),"active"_n},plan.grants,"govaward"_n,std::make_tuple(runtime,dao_id,plan.round_id,plan.application_id,ballot_id)).send();
  }
+ ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==1,"RAM_MIGRATION_SOURCE_KIND");
+  uint32_t count=0;const auto now=current_time_point().sec_since_epoch();work_executions work(get_self(),runtime.value);
+  for(const auto& plan:work){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now)check(plan.works_hash==get_code_hash(plan.works),"RAM_MIGRATION_PENDING_WORK");}
+  count=0;grant_executions grants(get_self(),runtime.value);
+  for(const auto& plan:grants){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now)check(plan.works_hash==get_code_hash(plan.works)&&plan.grants_hash==get_code_hash(plan.grants),"RAM_MIGRATION_PENDING_WORK");}
+ }
+ ACTION scanram(name runtime,name table,uint32_t limit){
+  if(scan_ram_binding(runtime,get_self(),table,1,limit))return;
+  if(table=="adoptelect"_n||table=="adoptpolls"_n){
+    auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;uint32_t count=0;bool complete=false;
+    if(table=="adoptelect"_n){elections rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();
+      for(;it!=rows.end()&&count<limit;++it,++count){if(it->status==1)reserve_term_hold(runtime,*it);progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
+    }else{ballots rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();poll_ends ends(get_self(),runtime.value);
+      for(;it!=rows.end()&&count<limit;++it,++count){if(ordinary(runtime,it->id)&&ends.find(it->id)==ends.end())ends.emplace(get_self(),[&](auto& r){r.ballot_id=it->id;r.dao_id=it->dao_id;if(it->status){r.completed_at=current_time_point().sec_since_epoch();r.legacy=true;}});progress.cursor=it->id;progress.advanced=true;}complete=it==rows.end();
+    }
+    progress.complete=complete;ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
+  }
+  if(table=="ballots"_n){ballots(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="votes"_n){votes(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="pollends"_n){poll_ends(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="voteids"_n){vote_identities(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="elections"_n){elections(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="nominations"_n){nominations(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="terms"_n){terms(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="termholds"_n){term_holds(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="executions"_n){work_executions(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="grantplans"_n){grant_executions(get_self(),runtime.value).backfill(limit);return;}
+  check(false,"RAM_MIGRATION_TABLE");
+ }
+
 private:
+ void reserve_term_hold(name runtime,const election_record& election){
+  term_record sample{};sample.title=election.title;const auto bytes=ram_row_bytes<term_record,term_index>(sample)*election.seats+ram_scope_bytes<term_index>();
+  term_holds holds(get_self(),runtime.value);auto found=holds.find(election.id);if(found!=holds.end()){check(found->dao_id==election.dao_id&&found->padding.size()>=bytes,"ELECTION_DOMAIN");return;}
+  holds.emplace(get_self(),[&](auto& r){r.id=election.id;r.dao_id=election.dao_id;r.padding.resize(bytes);});
+ }
  void sync_election(name runtime,const election_record& r){document_ref(runtime,r.dao_id,get_self(),"elections"_n,r.id,0,r.document_id,r.document_version);}
  void sync_term(name runtime,const term_record& r){document_ref(runtime,r.dao_id,get_self(),"terms"_n,r.id,0,r.recall_doc,r.recall_version);}
 
@@ -120,11 +155,7 @@ private:
   auto now=current_time_point().sec_since_epoch();check(uint64_t(now)+duration<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");uint32_t closes=now+duration;
   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=member_id;r.kind=kind;r.choices=choices;r.closes=closes;r.quorum=quorum;r.approval=approval;r.denominator=denominator;r.max_member=d.max_member;r.tallies=std::vector<uint64_t>(choices,0);r.metadata=metadata;});
   if(action_name=="open"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}
-  if(action_name=="startelect"_n&&ram_observer_settings(runtime,runtime.value).exists()){
-    const auto& election=elections_table.get(ballot_id);term_record sample{};sample.title=election.title;
-    const auto bytes=ram_row_bytes<term_record,term_index>(sample)*election.seats+ram_scope_bytes<term_index>();
-    term_holds holds(get_self(),runtime.value);holds.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.padding.resize(bytes);});
-  }
+  if(action_name=="startelect"_n&&ram_observer_settings(runtime,runtime.value).exists())reserve_term_hold(runtime,elections_table.get(ballot_id));
   core_action(runtime,get_self(),"govlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id,closes)));
  }
  void finish_election(name runtime,uint64_t dao_id,const election_record& election,const ballot_record& ballot){
@@ -187,4 +218,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

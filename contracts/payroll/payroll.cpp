@@ -36,5 +36,14 @@ public:
   check(paid,"NOT_PAYABLE");
   if(flag==flags.end())flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule.id;r.paused=0;r.last_payout=now;r.label="";});else flags.modify(*flag,same_payer,[&](auto& r){r.last_payout=now;});
  }
+ ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==3,"RAM_MIGRATION_SOURCE_KIND");}
+ ACTION scanram(name runtime,name table,uint32_t limit){
+  if(scan_ram_binding(runtime,get_self(),table,3,limit))return;
+  if(table=="schedules"_n){schedules(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="entries"_n){entries(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="controls"_n){controls(get_self(),runtime.value).backfill(limit);return;}
+  check(false,"RAM_MIGRATION_TABLE");
+ }
+
 };
-EOSIO_DISPATCH(payroll,(backfillrefs)(bindrampool)(commit)(edit)(settle))
+EOSIO_DISPATCH(payroll,(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))

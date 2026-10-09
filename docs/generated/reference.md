@@ -140,7 +140,7 @@ Resources offers a separate signed archive approval after independent backup ver
 
 ## decide contract
 
-Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18`.
+Source ABI JSON SHA-256: `628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e36c2389be1`.
 
 ### Action: backfillrefs
 
@@ -156,6 +156,13 @@ Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
 
 ### Action: execute
 
@@ -284,6 +291,14 @@ Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24
 | document_id | uint64 |
 | document_version | uint32 |
 
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
+
 ### Action: startelect
 
 | Field | ABI type |
@@ -393,6 +408,23 @@ Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24
 | completed_at | uint32 |
 | legacy | bool |
 
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
 ### Table: rampayer
 
 | Field | ABI type |
@@ -443,7 +475,7 @@ Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24
 
 ## works contract
 
-Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd`.
+Source ABI JSON SHA-256: `fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e77037715ecdeeb`.
 
 ### Action: accept
 
@@ -486,6 +518,13 @@ Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7
 | dao_id | uint64 |
 | member_id | uint64 |
 | project_id | uint64 |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
 
 ### Action: govaccept
 
@@ -543,6 +582,14 @@ Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7
 | approve | bool |
 | document_id | uint64 |
 | document_version | uint32 |
+
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
 
 ### Action: settle
 
@@ -605,6 +652,23 @@ Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7
 | milestones | uint64[] |
 | status | uint8 |
 
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
 ### Table: rampayer
 
 | Field | ABI type |
@@ -613,7 +677,7 @@ Source ABI JSON SHA-256: `808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226`.
+Source ABI JSON SHA-256: `dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8f9a9eb4686`.
 
 ### Action: backfillrefs
 
@@ -627,6 +691,13 @@ Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
 
 ### Action: commit
 
@@ -652,6 +723,14 @@ Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b
 | schedule_id | uint64 |
 | paused | uint8 |
 | label | string |
+
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
 
 ### Action: settle
 
@@ -679,6 +758,23 @@ Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b
 | schedule_id | uint64 |
 | due | uint32 |
 
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
 ### Table: rampayer
 
 | Field | ABI type |
@@ -701,7 +797,7 @@ Source ABI JSON SHA-256: `e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b
 
 ## grants contract
 
-Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e`.
+Source ABI JSON SHA-256: `46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab487cef70dc75`.
 
 ### Action: amend
 
@@ -748,6 +844,13 @@ Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
 
 ### Action: closeapp
 
@@ -806,6 +909,14 @@ Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae
 | document_id | uint64 |
 | document_version | uint32 |
 
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
+
 ### Action: submitapp
 
 | Field | ABI type |
@@ -837,6 +948,23 @@ Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae
 | project_id | uint64 |
 | funding_ballot | uint64 |
 
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
 ### Table: rampayer
 
 | Field | ABI type |
@@ -864,7 +992,7 @@ Source ABI JSON SHA-256: `b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae
 
 ## endorse contract
 
-Source ABI JSON SHA-256: `19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a`.
+Source ABI JSON SHA-256: `19919df873c890390940620d98201aadb5e4e49306541302ba85967bbaf1a239`.
 
 ### Action: admit
 
@@ -908,6 +1036,21 @@ Source ABI JSON SHA-256: `19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c
 | --- | --- |
 | runtime | name |
 
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
+
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
+
 ### Action: unwitness
 
 | Field | ABI type |
@@ -949,6 +1092,23 @@ Source ABI JSON SHA-256: `19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c
 | witnesses | uint64[] |
 | admitted | bool |
 | member_id | uint64 |
+
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
 
 ### Table: rampayer
 

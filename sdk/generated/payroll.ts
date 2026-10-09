@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = 'e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226';
+export const payrollAbiHash = 'dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8f9a9eb4686';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -26,6 +26,20 @@ export const payrollAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "checkmig",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
         }
       ]
     },
@@ -146,12 +160,70 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "ram_migration_cursor",
+      "base": "",
+      "fields": [
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "advanced",
+          "type": "bool"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_overlay",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "row",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_payer_owner",
       "base": "",
       "fields": [
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "scanram",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
         }
       ]
     },
@@ -228,6 +300,11 @@ export const payrollAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkmig",
+      "type": "checkmig",
+      "ricardian_contract": ""
+    },
+    {
       "name": "commit",
       "type": "commit",
       "ricardian_contract": ""
@@ -235,6 +312,11 @@ export const payrollAbi = {
     {
       "name": "edit",
       "type": "edit",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanram",
+      "type": "scanram",
       "ricardian_contract": ""
     },
     {
@@ -254,6 +336,20 @@ export const payrollAbi = {
     {
       "name": "entries",
       "type": "entry_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramcursors",
+      "type": "ram_migration_cursor",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramoverlays",
+      "type": "ram_migration_overlay",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -283,6 +379,10 @@ export interface backfillrefs {
 }
 export interface bindrampool {
   runtime: string;
+}
+export interface checkmig {
+  runtime: string;
+  kind: number;
 }
 export interface commit {
   runtime: string;
@@ -315,8 +415,24 @@ export interface entry_record {
   schedule_id: string;
   due: number;
 }
+export interface ram_migration_cursor {
+  table: string;
+  cursor: string;
+  advanced: boolean;
+  complete: boolean;
+}
+export interface ram_migration_overlay {
+  id: string;
+  table: string;
+  row: string;
+}
 export interface ram_payer_owner {
   runtime: string;
+}
+export interface scanram {
+  runtime: string;
+  table: string;
+  limit: number;
 }
 export interface schedule_record {
   id: string;
@@ -337,7 +453,9 @@ export interface settle {
 export interface PayrollActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
+  checkmig: checkmig;
   commit: commit;
   edit: edit;
+  scanram: scanram;
   settle: settle;
 }

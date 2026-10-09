@@ -128,7 +128,7 @@ export const ModulesHelpBundle={
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18",
+      "sourceAbiHash": "628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e36c2389be1",
       "actions": [
         {
           "name": "backfillrefs",
@@ -157,6 +157,19 @@ export const ModulesHelpBundle={
             {
               "name": "runtime",
               "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
             }
           ]
         },
@@ -504,6 +517,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "startelect",
           "fields": [
             {
@@ -822,6 +852,44 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
           "name": "rampayer",
           "fields": [
             {
@@ -943,7 +1011,7 @@ export const ModulesHelpBundle={
     {
       "name": "works",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "808c0e62e2e7abeb7a81683a756b23ff37422c7ede0b00a0bfcba7422ca76dcd",
+      "sourceAbiHash": "fc873f60e983a5450f60c3274658e66935b47a2bb111f5177e77037715ecdeeb",
       "actions": [
         {
           "name": "accept",
@@ -1035,6 +1103,19 @@ export const ModulesHelpBundle={
             {
               "name": "project_id",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
             }
           ]
         },
@@ -1187,6 +1268,23 @@ export const ModulesHelpBundle={
             },
             {
               "name": "document_version",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
               "type": "uint32"
             }
           ]
@@ -1363,6 +1461,44 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
           "name": "rampayer",
           "fields": [
             {
@@ -1376,7 +1512,7 @@ export const ModulesHelpBundle={
     {
       "name": "payroll",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "e6a6f13ba4347bfa5293b9142649ec191c135c91f0d0acf1c5bf7b59c19a5226",
+      "sourceAbiHash": "dc67c668cc4c37e9a39492d7d90de4e26b68e3f85d57768829ffb8f9a9eb4686",
       "actions": [
         {
           "name": "backfillrefs",
@@ -1397,6 +1533,19 @@ export const ModulesHelpBundle={
             {
               "name": "runtime",
               "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
             }
           ]
         },
@@ -1471,6 +1620,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "settle",
           "fields": [
             {
@@ -1532,6 +1698,44 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
           "name": "rampayer",
           "fields": [
             {
@@ -1586,7 +1790,7 @@ export const ModulesHelpBundle={
     {
       "name": "grants",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "b1de762f757090b8e8a9666649b6094db74a5b0422dd7d9f1e97ae858f5cec8e",
+      "sourceAbiHash": "46b3493c3230110458318c2f20aba854c5b602bdee018b2f1eab487cef70dc75",
       "actions": [
         {
           "name": "amend",
@@ -1709,6 +1913,19 @@ export const ModulesHelpBundle={
             {
               "name": "runtime",
               "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
             }
           ]
         },
@@ -1866,6 +2083,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "submitapp",
           "fields": [
             {
@@ -1962,6 +2196,44 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
           "name": "rampayer",
           "fields": [
             {
@@ -2036,7 +2308,7 @@ export const ModulesHelpBundle={
     {
       "name": "endorse",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "19f0eaa8dcde5af27faca19ce6bd46ce7e2e74d65d5672c4c6081c2e3af9b56a",
+      "sourceAbiHash": "19919df873c890390940620d98201aadb5e4e49306541302ba85967bbaf1a239",
       "actions": [
         {
           "name": "admit",
@@ -2143,6 +2415,36 @@ export const ModulesHelpBundle={
             {
               "name": "runtime",
               "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
             }
           ]
         },
@@ -2267,6 +2569,44 @@ export const ModulesHelpBundle={
             },
             {
               "name": "member_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
               "type": "uint64"
             }
           ]

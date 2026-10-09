@@ -3,6 +3,7 @@
 #include "records.hpp"
 #include "governance.hpp"
 #include "document_refs.hpp"
+#include "ram_families.hpp"
 #define JSON_NOEXCEPTION
 #define JSON_HAS_FILESYSTEM 0
 #define JSON_HAS_EXPERIMENTAL_FILESYSTEM 0
@@ -11,9 +12,19 @@ namespace daclify {
 inline void bind_ram_pool(name payer,name runtime){
  require_auth(payer);check(is_account(runtime),"RUNTIME_ACCOUNT");ram_payer_binding binding(payer,payer.value);
  if(binding.exists()){check(binding.get().runtime==runtime,"RAM_PAYER_RUNTIME");return;}
- ram_observer_settings observer(runtime,runtime.value);check(observer.exists()&&observer.get().runtime_hash==get_code_hash(runtime),"RAM_OBSERVER_REQUIRED");
+ ram_observer_settings observer(runtime,runtime.value);if(observer.exists()){
+ check(observer.get().runtime_hash==get_code_hash(runtime),"RAM_OBSERVER_REQUIRED");
  ram_sources sources(runtime,runtime.value);check(sources.get(payer.value,"RAM_SOURCE_UNKNOWN").code_hash==get_code_hash(payer),"RAM_SOURCE_CODE");
+ }
  const ram_payer_owner owner{runtime};binding.set(owner,payer);observe_ram(runtime,0,payer,"rampayer"_n,pack_size(owner)+224,0);
+}
+inline bool scan_ram_binding(name runtime,name payer,name table,uint8_t kind,uint32_t limit){
+ require_auth(runtime);check(limit>=1&&limit<=25,"RAM_MIGRATION_BATCH");require_migration_source(runtime,payer,kind);
+ if(table!="rampayer"_n)return false;
+ ram_payer_binding binding(payer,payer.value);check(binding.exists()&&binding.get().runtime==runtime,"RAM_PAYER_RUNTIME");
+ auto progress=migration_cursor(runtime,payer,payer.value,table,false,0,0);if(progress.complete)return true;
+ observe_ram(runtime,0,payer,table,pack_size(binding.get())+224,0);progress.advanced=true;progress.complete=true;
+ ram_migration_cursors rows(payer,payer.value);rows.modify(rows.get(table.value),same_payer,[&](auto& r){r=progress;});return true;
 }
 inline void pinned_module(name runtime,uint64_t dao_id,name account){
  modules rows(runtime,dao_id);const auto& installed=rows.get(account.value,"MODULE_DISABLED");

@@ -87,3 +87,5 @@ Automatic included payer offers are implemented behind explicit qualified/funded
 First-party code, contracts, SDKs and documentation are licensed under
 **AGPL-3.0-only**. See [LICENSE](LICENSE) and [licensing and source obligations](LICENSING.md).
 Third-party files retain their own licenses. Contributions remain owned by their authors.
+
+The development migration controller scans all five module payers using canonical row/index recipes and checks module kind/source code. Decide adopts missing legacy term holds and poll completion markers without rewriting ballot/term records or approved executable hashes. See [core migration operations](../daclify-backend-core/docs/operations/ram-migration.md); a bound payer belongs exclusively to one runtime. Migration and quotas still need release qualification.

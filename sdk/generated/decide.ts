@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18';
+export const decideAbiHash = '628c269a076ca47d88d615897ea2b83b385bc64e28f6cda6ccea2e36c2389be1';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -114,6 +114,20 @@ export const decideAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "checkmig",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
         }
       ]
     },
@@ -610,6 +624,46 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "ram_migration_cursor",
+      "base": "",
+      "fields": [
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "advanced",
+          "type": "bool"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "ram_migration_overlay",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "row",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "ram_payer_owner",
       "base": "",
       "fields": [
@@ -645,6 +699,24 @@ export const decideAbi = {
         },
         {
           "name": "document_version",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "scanram",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "table",
+          "type": "name"
+        },
+        {
+          "name": "limit",
           "type": "uint32"
         }
       ]
@@ -864,6 +936,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "checkmig",
+      "type": "checkmig",
+      "ricardian_contract": ""
+    },
+    {
       "name": "execute",
       "type": "execute",
       "ricardian_contract": ""
@@ -919,6 +996,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "scanram",
+      "type": "scanram",
+      "ricardian_contract": ""
+    },
+    {
       "name": "startelect",
       "type": "startelect",
       "ricardian_contract": ""
@@ -968,6 +1050,20 @@ export const decideAbi = {
     {
       "name": "pollends",
       "type": "poll_end",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramcursors",
+      "type": "ram_migration_cursor",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ramoverlays",
+      "type": "ram_migration_overlay",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -1041,6 +1137,10 @@ export interface ballot_record {
 }
 export interface bindrampool {
   runtime: string;
+}
+export interface checkmig {
+  runtime: string;
+  kind: number;
 }
 export interface election_record {
   id: string;
@@ -1172,6 +1272,17 @@ export interface prunevotes {
   start: number;
   proofs: archive_prune_proof[];
 }
+export interface ram_migration_cursor {
+  table: string;
+  cursor: string;
+  advanced: boolean;
+  complete: boolean;
+}
+export interface ram_migration_overlay {
+  id: string;
+  table: string;
+  row: string;
+}
 export interface ram_payer_owner {
   runtime: string;
 }
@@ -1182,6 +1293,11 @@ export interface recall {
   term_id: string;
   document_id: string;
   document_version: number;
+}
+export interface scanram {
+  runtime: string;
+  table: string;
+  limit: number;
 }
 export interface startelect {
   runtime: string;
@@ -1240,6 +1356,7 @@ export interface work_execution_record {
 export interface DecideActions {
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
+  checkmig: checkmig;
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;
@@ -1251,6 +1368,7 @@ export interface DecideActions {
   openwork: openwork;
   prunevotes: prunevotes;
   recall: recall;
+  scanram: scanram;
   startelect: startelect;
   vote: vote;
 }
