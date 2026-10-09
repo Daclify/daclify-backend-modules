@@ -3,6 +3,8 @@
 ## Unreleased — RAM completion and Archive
 
 - Added readonly quota activation checks for all first-party modules, bounded Payroll control adoption and already-observed completion-family adoption; retained the native-qualified accepted-Works document decoder.
+- Decide migration checks preserve open/approved Works and Grants execution pins, while finalized failed votes no longer block replacement until the old deadline. Historical C++ fixtures cover both award producers, unchanged approved plans, once-only execution and post-upgrade settlement.
+- Retained the preceding native-qualified Decide poll Archive identity so the readonly guard update does not strand previously exported votes.
 
 All five contracts use source-bound native RAM observation and bounded legacy scans. Accepted work reserves financial receipt holds in core; elections reserve exact bounded term capacity; Works reserves fixed submission/review reference slots and adopts pending legacy slots. Existing approved execution hashes and serialized records remain unchanged.
 

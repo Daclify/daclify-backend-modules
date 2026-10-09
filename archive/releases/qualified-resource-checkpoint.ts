@@ -112,3 +112,9 @@ export const completionDocumentIdentity = {
   rawAbiHash: 'a7f5fe4b28aa5cd33ac243ee2baf2a9c78dae7f20b9009f35523754c30561051',
   schemaHash: '3ab801a8e3e8b74203144189d5e83f12f96fd3ed2183500622e5fc7999ccc51e',
 };
+
+export const completionPollIdentity = {
+  codeHash: '1ca2ac6de52772a42ca29b4689ede3f9b30f707b845e3a4e30f70069c5a940d5',
+  rawAbiHash: '29abcba925283ff84c58743d432f570ec159d5cb4d998e8df1488027a9b1d44b',
+  schemaHash: 'f53519be37af2c4df3efafdbc6e0a6f5ed0915469c082248e5e30633c05ed014',
+};

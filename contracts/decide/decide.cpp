@@ -117,10 +117,11 @@ public:
   for(auto it=ballots_by_dao.lower_bound(dao_id);it!=ballots_by_dao.end()&&it->dao_id==dao_id;++it){check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");if(it->status==0&&ordinary(runtime,it->id)){auto end=ends.find(it->id);check(end!=ends.end()&&end->dao_id==dao_id,"RAM_POLL_END_REQUIRED");}}
  }
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==1,"RAM_MIGRATION_SOURCE_KIND");
+  ballots polls(get_self(),runtime.value);auto pending=[&](uint64_t id,uint64_t dao_id){const auto& poll=polls.get(id,"BALLOT_UNKNOWN");check(poll.dao_id==dao_id,"BALLOT_DOMAIN");return poll.status!=2;};
   uint32_t count=0;const auto now=current_time_point().sec_since_epoch();work_executions work(get_self(),runtime.value);
-  for(const auto& plan:work){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now)check(plan.works_hash==get_code_hash(plan.works),"RAM_MIGRATION_PENDING_WORK");}
+  for(const auto& plan:work){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now&&pending(plan.ballot_id,plan.dao_id))check(plan.works_hash==get_code_hash(plan.works),"RAM_MIGRATION_PENDING_WORK");}
   count=0;grant_executions grants(get_self(),runtime.value);
-  for(const auto& plan:grants){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now)check(plan.works_hash==get_code_hash(plan.works)&&plan.grants_hash==get_code_hash(plan.grants),"RAM_MIGRATION_PENDING_WORK");}
+  for(const auto& plan:grants){check(++count<=5000,"RAM_POOL_SCAN_LIMIT");if(!plan.executed&&plan.deadline>=now&&pending(plan.ballot_id,plan.dao_id))check(plan.works_hash==get_code_hash(plan.works)&&plan.grants_hash==get_code_hash(plan.grants),"RAM_MIGRATION_PENDING_WORK");}
  }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,1,limit))return;

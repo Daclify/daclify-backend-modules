@@ -228,11 +228,18 @@ describe('vote-authorised Works funding', () => {
   });
   it('cannot execute pending or failed votes', async () => {
     await open();
+    const original = row(decide, 'executions', core.toBigInt(), 1n);
+    replaceContract(works, '.artifacts/document-upgrade-old/works');
+    await expect(
+      send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active'),
+    ).rejects.toThrow('RAM_MIGRATION_PENDING_WORK');
     await expect(send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
       'BALLOT_NOT_PASSED',
     );
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'relay@active');
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+    expect(row(decide, 'executions', core.toBigInt(), 1n)).toEqual(original);
     await expect(send(decide, 'execute', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow(
       'BALLOT_NOT_PASSED',
     );

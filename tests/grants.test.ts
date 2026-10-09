@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty } from './helpers/vert.js';
+import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain,
   core: ReturnType<typeof load>,
@@ -134,12 +134,12 @@ beforeEach(async () => {
   });
 });
 
-async function application(id = 1, payment = '3.0000 TLOS') {
+async function application(id = 1, payment = '3.0000 TLOS', roundId = 1) {
   await act(
     'grants',
     'applygrant',
     {
-      round_id: 1,
+      round_id: roundId,
       application_id: id,
       document_id: 1,
       document_version: 1,
@@ -158,11 +158,11 @@ async function application(id = 1, payment = '3.0000 TLOS') {
     document_version: 1,
   });
 }
-async function award(ballot = 1, applicationId = 1, project = 10) {
+async function openAward(ballot = 1, applicationId = 1, project = 10, roundId = 1) {
   await act('decide', 'openaward', {
     ballot_id: ballot,
     grants: 'grants',
-    round_id: 1,
+    round_id: roundId,
     application_id: applicationId,
     project_id: project,
     duration: 300,
@@ -170,14 +170,17 @@ async function award(ballot = 1, applicationId = 1, project = 10) {
     approval: 5001,
     metadata: '{}',
   });
+}
+async function award(ballot = 1, applicationId = 1, project = 10, roundId = 1) {
+  await openAward(ballot, applicationId, project, roundId);
   for (const member of [1, 2])
     await act('decide', 'vote', { ballot_id: ballot, choice: 1 }, member);
   chain.addTime(TimePointSec.from(301));
   await send(decide, 'finalize', ['daclifycore', 1, ballot], 'relay@active');
 }
-beforeEach(async () => {
+async function newRound(id = 1) {
   await act('grants', 'newround', {
-    round_id: 1,
+    round_id: id,
     document_id: 1,
     document_version: 1,
     applications_close: 900,
@@ -187,6 +190,9 @@ beforeEach(async () => {
     allow_agents: false,
     works: 'works',
   });
+}
+beforeEach(async () => {
+  await newRound();
 });
 it('requires contributor consent and review; direct callback authorization is insufficient', async () => {
   await act(
@@ -227,6 +233,139 @@ it('requires contributor consent and review; direct callback authorization is in
     send(works, 'grantwork', ['daclifycore', 1, 'grants', 1, 1, 1], 'grants@active'),
   ).rejects.toThrow('EXECUTOR_SENDER');
 });
+it.each(['grants', 'works'] as const)(
+  'drains a historical award before replacing %s without rewriting the approved plan',
+  async (producer) => {
+    const oldGrants = '.artifacts/document-upgrade-old/grants';
+    const oldWorks = '.artifacts/document-upgrade-old/works';
+    const oldDecide = '.artifacts/document-upgrade-old/award-decide';
+    const oldGrantsHash = wasmCodeHash(oldGrants + '.wasm');
+    const oldWorksHash = wasmCodeHash(oldWorks + '.wasm');
+    async function pinDecide(path: string) {
+      const hash = wasmCodeHash(path + '.wasm');
+      await listFirstParty(core, 'decide', hash);
+      await send(
+        core,
+        'setmodule',
+        [1, 'decide', 1, ['open', 'vote', 'openwork', 'openaward'], ['govlock'], hash],
+        'alice@active',
+      );
+    }
+    async function pin(module: 'grants' | 'works', hash: string) {
+      await listFirstParty(core, module, hash);
+      await send(
+        core,
+        'setmodule',
+        [
+          1,
+          module,
+          1,
+          module === 'grants'
+            ? [
+                'newround',
+                'applygrant',
+                'amend',
+                'submitapp',
+                'reviewapp',
+                'closeapp',
+                'closeround',
+              ]
+            : ['propose', 'accept', 'submitwork', 'review', 'cancel', 'offeragr', 'acceptagr'],
+          module === 'grants' ? ['awardwork'] : ['reserve', 'approve', 'cancel'],
+          hash,
+        ],
+        'alice@active',
+      );
+    }
+    replaceContract(grants, oldGrants);
+    replaceContract(works, oldWorks);
+    replaceContract(decide, oldDecide);
+    await pinDecide(oldDecide);
+    await pin('grants', oldGrantsHash);
+    await pin('works', oldWorksHash);
+    await newRound(2);
+    await application(1, '3.0000 TLOS', 2);
+    await award(1, 1, 10, 2);
+    const approved = row(decide, 'grantplans', core.toBigInt(), 1n);
+    const eligible = row(grants, 'applications', core.toBigInt(), 1n);
+    const round = row(grants, 'rounds', core.toBigInt(), 2n);
+    replaceContract(decide, '.artifacts/contracts/decide');
+    await pinDecide('.artifacts/contracts/decide');
+    expect(row(decide, 'grantplans', core.toBigInt(), 1n)).toEqual(approved);
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+    const target = producer === 'grants' ? grants : works;
+    const currentPath = '.artifacts/contracts/' + producer;
+    replaceContract(target, currentPath);
+    await pin(producer, wasmCodeHash(currentPath + '.wasm'));
+    await expect(
+      send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active'),
+    ).rejects.toThrow('RAM_MIGRATION_PENDING_WORK');
+    await expect(
+      send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active'),
+    ).rejects.toThrow('MODULE_CODE');
+    expect(row(decide, 'grantplans', core.toBigInt(), 1n)).toEqual(approved);
+    expect(row(grants, 'applications', core.toBigInt(), 1n)).toEqual(eligible);
+    expect(row(grants, 'rounds', core.toBigInt(), 2n)).toEqual(round);
+    expect(totals()).toMatchObject({ available: 200000, reserved: 0 });
+    expect(row(works, 'projects', core.toBigInt(), 10n)).toBeUndefined();
+    replaceContract(target, producer === 'grants' ? oldGrants : oldWorks);
+    await pin(producer, producer === 'grants' ? oldGrantsHash : oldWorksHash);
+    await send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active');
+    expect(
+      z
+        .object({ grants_hash: z.string(), works_hash: z.string(), executed: z.boolean() })
+        .parse(row(decide, 'grantplans', core.toBigInt(), 1n)),
+    ).toMatchObject({ grants_hash: oldGrantsHash, works_hash: oldWorksHash, executed: true });
+    expect(totals()).toMatchObject({ available: 170000, reserved: 30000 });
+    replaceContract(grants, '.artifacts/contracts/grants');
+    replaceContract(works, '.artifacts/contracts/works');
+    await pin('grants', wasmCodeHash('.artifacts/contracts/grants.wasm'));
+    await pin('works', wasmCodeHash('.artifacts/contracts/works.wasm'));
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+    await expect(
+      send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active'),
+    ).rejects.toThrow('ALREADY_EXECUTED');
+    await act('works', 'submitwork', { milestone_id: 1, document_id: 1, document_version: 1 }, 3);
+    await act('works', 'review', {
+      milestone_id: 1,
+      approve: true,
+      document_id: 1,
+      document_version: 1,
+    });
+    chain.addTime(TimePointSec.from(1700));
+    await send(works, 'settle', ['daclifycore', 1, 1], 'relay@active');
+    await expect(send(works, 'settle', ['daclifycore', 1, 1], 'relay@active')).rejects.toThrow();
+    expect(totals()).toMatchObject({ available: 170000, reserved: 0 });
+    expect(z.object({ claim: z.number() }).parse(row(core, 'members', 1n, 3n)).claim).toBe(30000);
+  },
+);
+it.each(['grants', 'works'] as const)(
+  'keeps an open award protected but lets a failed vote stop blocking %s replacement',
+  async (producer) => {
+    await application();
+    await openAward();
+    const approved = row(decide, 'grantplans', core.toBigInt(), 1n);
+    replaceContract(
+      producer === 'grants' ? grants : works,
+      '.artifacts/document-upgrade-old/' + producer,
+    );
+    await expect(
+      send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active'),
+    ).rejects.toThrow('RAM_MIGRATION_PENDING_WORK');
+    for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 0 }, member);
+    chain.addTime(TimePointSec.from(301));
+    await send(decide, 'finalize', ['daclifycore', 1, 1], 'relay@active');
+    expect(
+      z.object({ status: z.number() }).parse(row(decide, 'ballots', core.toBigInt(), 1n)).status,
+    ).toBe(2);
+    await send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active');
+    expect(row(decide, 'grantplans', core.toBigInt(), 1n)).toEqual(approved);
+    await expect(
+      send(decide, 'executeaward', ['daclifycore', 1, 1], 'relay@active'),
+    ).rejects.toThrow('BALLOT_NOT_PASSED');
+    expect(totals()).toMatchObject({ available: 200000, reserved: 0 });
+  },
+);
 it('atomically turns an approved application into a backed Works agreement and settles once', async () => {
   await application();
   await award();

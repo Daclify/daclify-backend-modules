@@ -21,6 +21,8 @@ for (const [directory, contract] of [
   ['core', 'runtime'],
   ['modules', 'works'],
   ['modules', 'payroll'],
+  ['modules', 'grants'],
+  ['modules', 'decide'],
 ] as const)
   execFileSync(
     'docker',
@@ -41,7 +43,8 @@ for (const [directory, contract] of [
       '-I',
       `${directory}/contracts/vendor`,
       '-o',
-      contract + '.wasm',
+      // Keep the separately qualified election fixture's original Decide binary.
+      (contract === 'decide' ? 'award-decide' : contract) + '.wasm',
       '--abigen',
       '-contract',
       contract ?? '',

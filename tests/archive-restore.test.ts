@@ -7,6 +7,7 @@ import { archiveSourceSchema, decodeReleasedArchiveRow } from '../archive/restor
 import {
   receiptHoldDocumentIdentity,
   receiptHoldPollIdentity,
+  completionPollIdentity,
 } from '../archive/releases/qualified-resource-checkpoint.js';
 const row = DecideTableSchemas.votes.parse({
   id: '3',
@@ -46,6 +47,18 @@ it('decodes a whitelisted released row and preserves exact original packed bytes
     value: row,
     original: value.row,
   });
+});
+it('retains the native-qualified completion poll decoder after a readonly migration-guard update', () => {
+  const value = input();
+  expect(value.domain.code_hash).not.toBe(completionPollIdentity.codeHash);
+  expect(value.domain.abi_hash).toBe(completionPollIdentity.rawAbiHash);
+  expect(value.domain.schema_hash).toBe(completionPollIdentity.schemaHash);
+  const domain = { ...value.domain, code_hash: completionPollIdentity.codeHash };
+  expect(decodeReleasedArchiveRow(domain, value.row, '7').value).toEqual(row);
+  for (const field of ['code_hash', 'abi_hash', 'schema_hash'] as const)
+    expect(() =>
+      decodeReleasedArchiveRow({ ...domain, [field]: 'cd'.repeat(32) }, value.row, '7'),
+    ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
 });
 it('rejects unknown code/ABI/schema/scope, another parent and altered primary identity', () => {
   const value = input();
