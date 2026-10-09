@@ -114,6 +114,21 @@ it('preserves original document ciphertext and epoch metadata under its qualifie
     value: document,
     original,
   });
+  const previousObserved = {
+    ...domain,
+    code_hash: '6ad460053da97c3f55fe2217291b9c1f77c5d73bb5f7b7188a092d9fcf3e6615',
+    abi_hash: 'a7f5fe4b28aa5cd33ac243ee2baf2a9c78dae7f20b9009f35523754c30561051',
+    schema_hash: '3ab801a8e3e8b74203144189d5e83f12f96fd3ed2183500622e5fc7999ccc51e',
+  };
+  expect(decodeReleasedArchiveRow(previousObserved, original, '6')).toEqual({
+    kind: 'document-versions',
+    value: document,
+    original,
+  });
+  for (const field of ['code_hash', 'abi_hash', 'schema_hash'] as const)
+    expect(() =>
+      decodeReleasedArchiveRow({ ...previousObserved, [field]: 'cd'.repeat(32) }, original, '6'),
+    ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
   expect(
     decodeReleasedArchiveRow(
       {

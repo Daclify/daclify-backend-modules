@@ -41,6 +41,7 @@ import {
   quotaPollIdentity,
   acceptedWorkDocumentIdentity,
   completionDocumentIdentity,
+  grantsQualifiedDocumentIdentity,
   completionPollIdentity,
 } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
@@ -126,6 +127,7 @@ function releasedSource(
       quotaDocumentIdentity,
       acceptedWorkDocumentIdentity,
       completionDocumentIdentity,
+      grantsQualifiedDocumentIdentity,
     ])
       if (
         codeHash === identity.codeHash &&
