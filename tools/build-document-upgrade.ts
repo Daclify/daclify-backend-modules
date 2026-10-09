@@ -23,6 +23,7 @@ for (const [directory, contract] of [
   ['modules', 'payroll'],
   ['modules', 'grants'],
   ['modules', 'decide'],
+  ['modules', 'endorse'],
 ] as const)
   execFileSync(
     'docker',
