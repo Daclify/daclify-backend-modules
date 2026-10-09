@@ -18,6 +18,12 @@ public:
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==2,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,2,limit))return;
+  if(table=="adoptwork"_n){
+    auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;
+    milestones rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();uint32_t count=0;
+    for(;it!=rows.end()&&count<limit;++it,++count){if(it->status>=1&&it->status<=3)sync_milestone(runtime,*it);progress.cursor=it->id;progress.advanced=true;}
+    progress.complete=it==rows.end();ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
+  }
   if(table=="projects"_n){works_projects(get_self(),runtime.value).backfill(limit);return;}
   if(table=="milestones"_n){works_milestones(get_self(),runtime.value).backfill(limit);return;}
   if(table=="agreements"_n){works_agreements(get_self(),runtime.value).backfill(limit);return;}
@@ -66,7 +72,7 @@ private:
  void accept_project(name runtime,uint64_t dao_id,uint64_t project_id){
   check(!dao_paused(runtime,dao_id),"DAO_PAUSED");projects rows(get_self(),runtime.value);const auto& p=rows.get(project_id,"PROJECT_UNKNOWN");check(p.dao_id==dao_id,"PROJECT_DOMAIN");check(p.status==0,"PROJECT_NOT_PROPOSED");members people(runtime,dao_id);check(people.get(p.contributor).active,"MEMBER_INACTIVE");milestones items(get_self(),runtime.value);
   works_agreements agreements(get_self(),runtime.value);auto agreement=agreements.find(project_id);if(agreement!=agreements.end()){check(current_time_point().sec_since_epoch()<agreement->term_end,"AGREEMENT_EXPIRED");work_commitment(runtime,dao_id,get_self(),project_id);}
-  for(auto id:p.milestones){const auto& m=items.get(id);check(m.status==0,"MILESTONE_STATE");core_action(runtime,get_self(),"reserve"_n,pack(std::make_tuple(dao_id,get_self(),id,p.contributor,m.quantity,m.due)));items.modify(m,same_payer,[](auto& r){r.status=1;});}rows.modify(p,same_payer,[](auto& r){r.status=1;});
+  for(auto id:p.milestones){const auto& m=items.get(id);check(m.status==0,"MILESTONE_STATE");sync_milestone(runtime,m);core_action(runtime,get_self(),"reserve"_n,pack(std::make_tuple(dao_id,get_self(),id,p.contributor,m.quantity,m.due)));items.modify(m,same_payer,[](auto& r){r.status=1;});}rows.modify(p,same_payer,[](auto& r){r.status=1;});
  }
 public:
  ACTION submitwork(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t milestone_id,uint64_t document_id,uint32_t document_version){

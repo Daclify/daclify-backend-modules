@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — RAM completion and Archive
+
+All five contracts use source-bound native RAM observation and bounded legacy scans. Accepted work reserves financial receipt holds in core; elections reserve exact bounded term capacity; Works reserves fixed submission/review reference slots and adopts pending legacy slots. Existing approved execution hashes and serialized records remain unchanged.
+
+The public Archive subpath includes deterministic bounded bundles, proof/manifest verification, namespaced SQL migrations, eligibility/history/restoration and retained trusted schema identities. Archived files retain normal hosting charges. Production pruning, remaining lifecycle qualification and immutable release packaging remain gated; see [core execution evidence](../daclify-backend-core/docs/evidence/2026-10-08-resource-execution.md).
+
 ## 0.7.0-alpha.1 — Shared hosting and connected payments
 
 Applied AGPL-3.0-only to first-party code, contracts, SDKs and documentation; preserved third-party licenses. Development packages include the license and source guidance.

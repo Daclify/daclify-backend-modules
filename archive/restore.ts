@@ -37,6 +37,8 @@ import {
   migrationKernelPollIdentity,
   migrationControllerDocumentIdentity,
   migrationControllerPollIdentity,
+  quotaDocumentIdentity,
+  quotaPollIdentity,
 } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
@@ -97,6 +99,7 @@ function releasedSource(
       { identity: completedHoldPollIdentity, abi: pruningPollRelease.abi },
       { identity: migrationKernelPollIdentity, abi: pruningPollRelease.abi },
       { identity: migrationControllerPollIdentity, abi: pruningPollRelease.abi },
+      { identity: quotaPollIdentity, abi: pruningPollRelease.abi },
     ])
       if (
         codeHash === release.identity.codeHash &&
@@ -116,6 +119,7 @@ function releasedSource(
       completedHoldDocumentIdentity,
       migrationKernelDocumentIdentity,
       migrationControllerDocumentIdentity,
+      quotaDocumentIdentity,
     ])
       if (
         codeHash === identity.codeHash &&

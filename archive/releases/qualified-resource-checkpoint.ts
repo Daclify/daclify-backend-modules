@@ -89,3 +89,14 @@ export const migrationControllerPollIdentity = {
   rawAbiHash: 'ca0ba4033f95c6b47815464de3bf3b246e5dec7e6007322a8980b04e327d0e40',
   schemaHash: '98c193f78c6de82e2510a86e5c64469b2997061d8f4080993552279fb93ad3df',
 };
+
+export const quotaDocumentIdentity = {
+  codeHash: 'c4a69eccf3b776f4238f31148730d8733df23597d87892dd671d22a889ad6fca',
+  rawAbiHash: 'a7f5fe4b28aa5cd33ac243ee2baf2a9c78dae7f20b9009f35523754c30561051',
+  schemaHash: '3ab801a8e3e8b74203144189d5e83f12f96fd3ed2183500622e5fc7999ccc51e',
+};
+export const quotaPollIdentity = {
+  codeHash: '6436a6f2c0e1c28b6c52c2269588fe32f8a082dc5a5f504ec4a7967cd4feae09',
+  rawAbiHash: 'ca0ba4033f95c6b47815464de3bf3b246e5dec7e6007322a8980b04e327d0e40',
+  schemaHash: '98c193f78c6de82e2510a86e5c64469b2997061d8f4080993552279fb93ad3df',
+};
