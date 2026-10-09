@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.7.0-alpha.1 · interface 1.
+Package 0.8.0-alpha.1 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -9061,7 +9061,7 @@ Response:
 
 ## decide configuration
 
-Module 0.7.0-alpha.1 · config 1 · core ^0.7.0-alpha.1.
+Module 0.8.0-alpha.1 · config 1 · core ^0.8.0-alpha.1.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -9113,7 +9113,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.7.0-alpha.1 · config 1 · core ^0.7.0-alpha.1.
+Module 0.8.0-alpha.1 · config 1 · core ^0.8.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9149,7 +9149,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.7.0-alpha.1 · config 1 · core ^0.7.0-alpha.1.
+Module 0.8.0-alpha.1 · config 1 · core ^0.8.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9186,7 +9186,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.7.0-alpha.1 · config 1 · core ^0.7.0-alpha.1.
+Module 0.8.0-alpha.1 · config 1 · core ^0.8.0-alpha.1.
 
 Capabilities: obligation.create.
 
@@ -9226,7 +9226,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.7.0-alpha.1 · config 1 · core ^0.7.0-alpha.1.
+Module 0.8.0-alpha.1 · config 1 · core ^0.8.0-alpha.1.
 
 Capabilities: member.manage.
 

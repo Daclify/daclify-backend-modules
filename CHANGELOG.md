@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — RAM completion and Archive
+## 0.8.0-alpha.1 development candidate — RAM completion and Archive
 
 - Extended retained historical fixtures to Endorsement and tested pending-application/key/witness preservation, source-owned document backfill, inactive-witness rollback and once-only ordinary admission after upgrade.
 - Added readonly quota activation checks for all first-party modules, bounded Payroll control adoption and already-observed completion-family adoption; retained the native-qualified accepted-Works document decoder.

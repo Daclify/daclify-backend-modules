@@ -1,6 +1,6 @@
 # Archive format v1 — development
 
-`@daclify/modules/archive` currently exports bounded binary chunks, canonical manifest encoding/decoding, domain validation, Merkle-tree construction and proof verification. This is the format library for the planned Archive service module. It has no separate blockchain account. Export jobs, administrator approval, availability attestations, source pruning, billing and history UI are not implemented by this library.
+`@daclify/modules/archive` currently exports bounded binary chunks, canonical manifest encoding/decoding, domain validation, Merkle-tree construction and proof verification. This is the format library for the implemented Archive service module hosted by core. It has no separate blockchain account. Export jobs, administrator approval, availability attestations, source pruning, billing and history UI are not implemented by this library.
 
 The format binds each chunk to its format version, chain, runtime, DAO, source account, source code hash, raw ABI hash, source schema hash, table, scope, chunk ordinal and leaf count, in that order. Fixed integers use unsigned little-endian Antelope serialization. Names use packed uint64 values; checksums use 32 raw bytes. The domain occupies 178 bytes in version 1.
 
