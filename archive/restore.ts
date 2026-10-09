@@ -27,6 +27,10 @@ import {
   documentReferencesIdentity,
   documentReferencePollIdentity,
   documentAllocationIdentity,
+  documentPreallocatedIdentity,
+  preallocatedPollIdentity,
+  receiptHoldDocumentIdentity,
+  receiptHoldPollIdentity,
 } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
 const sources = {
@@ -82,6 +86,8 @@ function releasedSource(
       pruningPollRelease,
       { identity: qualifiedResourceCheckpoint.poll, abi: pruningPollRelease.abi },
       { identity: documentReferencePollIdentity, abi: pruningPollRelease.abi },
+      { identity: preallocatedPollIdentity, abi: pruningPollRelease.abi },
+      { identity: receiptHoldPollIdentity, abi: pruningPollRelease.abi },
     ])
       if (
         codeHash === release.identity.codeHash &&
@@ -96,6 +102,8 @@ function releasedSource(
       qualifiedResourceCheckpoint.document,
       documentReferencesIdentity,
       documentAllocationIdentity,
+      documentPreallocatedIdentity,
+      receiptHoldDocumentIdentity,
     ])
       if (
         codeHash === identity.codeHash &&

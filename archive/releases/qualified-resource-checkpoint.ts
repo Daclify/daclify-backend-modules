@@ -33,3 +33,27 @@ export const documentAllocationIdentity = {
   rawAbiHash: '4ac41f5aa0178b751675f1c7239580cf9984f141361eb82269f149ddf32e9e8c',
   schemaHash: '6079db548124d589855edf609cace967501b62c5356d69ac11a0f5f7e42eba39',
 };
+
+// Native-qualified fixed metadata checkpoint; document row serialization did not change.
+export const documentPreallocatedIdentity = {
+  codeHash: '9a6691b98cc168134625f9e76d812a670dc8085b2605c4dff6af9851cefe93ea',
+  rawAbiHash: '4ac41f5aa0178b751675f1c7239580cf9984f141361eb82269f149ddf32e9e8c',
+  schemaHash: '6079db548124d589855edf609cace967501b62c5356d69ac11a0f5f7e42eba39',
+};
+
+export const preallocatedPollIdentity = {
+  codeHash: '2543f510a1a8a6a76ebab92e1856bb6c639c486d52d83547588fa2bd8e9fb8ba',
+  rawAbiHash: '809d5a2efc9f638f6e1eda00ebaf507490d074dcc129b933390913085c64e3d8',
+  schemaHash: '0e4ee077734a195f9bbc3d337851d33eca1435b5f7aa43b3bcf859da7ed3f963',
+};
+
+export const receiptHoldDocumentIdentity = {
+  codeHash: 'd11d0da5de949014ec13c9cf4f4f9f7c8271dd9f05c0d84614e409adbef99b85',
+  rawAbiHash: 'a0f3223045f4a9cd98ad99b4cb5a8fd8cb9aa7a57f1c1d462ad77dc94b36d6b2',
+  schemaHash: '5094dc2ac6e2487b926b0bf7abbc10dce534e082cc31adbf01d81a9fb49b84e7',
+};
+export const receiptHoldPollIdentity = {
+  codeHash: '8ce43efdf75bbc3a604be2085d7a79f964d855ac55baa0da2cab23025030b7a6',
+  rawAbiHash: '809d5a2efc9f638f6e1eda00ebaf507490d074dcc129b933390913085c64e3d8',
+  schemaHash: '0e4ee077734a195f9bbc3d337851d33eca1435b5f7aa43b3bcf859da7ed3f963',
+};

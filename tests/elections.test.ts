@@ -64,6 +64,14 @@ beforeEach(async () => {
   load(chain, 'grants', '.artifacts/contracts/grants');
   const token = load(chain, 'eosio.token', '.artifacts/core-release/testtoken');
   await send(core, 'init', ['ab'.repeat(32)], 'daclifycore@active');
+  await send(core, 'initramobs', [], 'daclifycore@active');
+  for (const module of ['decide', 'works', 'grants'])
+    await send(
+      core,
+      'setramcode',
+      [module, wasmCodeHash('.artifacts/contracts/' + module + '.wasm')],
+      'daclifycore@active',
+    );
   for (const module of ['decide', 'works', 'grants'])
     await listFirstParty(core, module, wasmCodeHash('.artifacts/contracts/' + module + '.wasm'));
   await send(core, 'createdao', [1, 'alice', '{}', 0, 'eosio.token', '4,TLOS'], 'alice@active');
@@ -287,4 +295,16 @@ it('counts explicit abstention toward quorum without inventing a representative'
   for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 0 }, member);
   await finish();
   expect(terms()).toHaveLength(0);
+});
+
+it('physically allocates bounded term space when voting starts and consumes it during finalization', async () => {
+  await election(1);
+  await nominate(2);
+  await start();
+  expect(row(decide, 'termholds', core.toBigInt(), 1n)).toMatchObject({ dao_id: 1, id: 1 });
+  expect(row(decide, 'terms', core.toBigInt(), 1n)).toBeUndefined();
+  for (const member of [1, 2, 3]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  await finish();
+  expect(row(decide, 'termholds', core.toBigInt(), 1n)).toBeUndefined();
+  expect(row(decide, 'terms', core.toBigInt(), 1n)).toMatchObject({ member_id: 2, election_id: 1 });
 });

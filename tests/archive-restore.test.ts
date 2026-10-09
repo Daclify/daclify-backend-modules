@@ -4,6 +4,10 @@ import { decideAbi, DecideTableSchemas } from '../sdk/index.js';
 import { runtimeAbi, RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
 import { ArchiveDomainSchema } from '../protocol/archive.js';
 import { archiveSourceSchema, decodeReleasedArchiveRow } from '../archive/restore.js';
+import {
+  receiptHoldDocumentIdentity,
+  receiptHoldPollIdentity,
+} from '../archive/releases/qualified-resource-checkpoint.js';
 const row = DecideTableSchemas.votes.parse({
   id: '3',
   ballot: '7',
@@ -97,6 +101,18 @@ it('preserves original document ciphertext and epoch metadata under its qualifie
     value: document,
     original,
   });
+  expect(
+    decodeReleasedArchiveRow(
+      {
+        ...domain,
+        code_hash: receiptHoldDocumentIdentity.codeHash,
+        abi_hash: receiptHoldDocumentIdentity.rawAbiHash,
+        schema_hash: receiptHoldDocumentIdentity.schemaHash,
+      },
+      original,
+      '6',
+    ),
+  ).toEqual({ kind: 'document-versions', value: document, original });
   expect(() => decodeReleasedArchiveRow({ ...domain, scope: '3' }, original, '6')).toThrow(
     'ARCHIVE_SCHEMA_UNSUPPORTED',
   );
@@ -189,3 +205,21 @@ it.each(['before-pools', 'pool-checkpoint'])(
     ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
   },
 );
+
+it('retains the native-qualified receipt checkpoint poll decoder across election-hold changes', () => {
+  const value = input();
+  const domain = {
+    ...value.domain,
+    code_hash: receiptHoldPollIdentity.codeHash,
+    abi_hash: receiptHoldPollIdentity.rawAbiHash,
+    schema_hash: receiptHoldPollIdentity.schemaHash,
+  };
+  expect(decodeReleasedArchiveRow(domain, value.row, '7')).toEqual({
+    kind: 'ordinary-poll-votes',
+    value: row,
+    original: value.row,
+  });
+  expect(() =>
+    decodeReleasedArchiveRow({ ...domain, code_hash: '00'.repeat(32) }, value.row, '7'),
+  ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
+});

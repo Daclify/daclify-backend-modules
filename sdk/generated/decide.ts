@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = 'e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df';
+export const decideAbiHash = '2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -672,6 +672,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "term_hold",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "padding",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
       "name": "term_record",
       "base": "",
       "fields": [
@@ -962,6 +980,13 @@ export const decideAbi = {
       "key_types": []
     },
     {
+      "name": "termholds",
+      "type": "term_hold",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
       "name": "terms",
       "type": "term_record",
       "index_type": "i64",
@@ -1163,6 +1188,11 @@ export interface startelect {
   dao_id: string;
   member_id: string;
   election_id: string;
+}
+export interface term_hold {
+  id: string;
+  dao_id: string;
+  padding: string;
 }
 export interface term_record {
   id: string;

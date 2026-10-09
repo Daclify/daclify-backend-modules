@@ -45,7 +45,14 @@ public:
   uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
   EOSLIB_SERIALIZE(term_record,(id)(dao_id)(election_id)(member_id)(title)(starts)(ends)(recalled)(recalled_at)(recall_doc)(recall_version))
  };
- using terms=ram_table<"terms"_n,term_record,indexed_by<"bydao"_n,const_mem_fun<term_record,uint64_t,&term_record::by_dao>>>;
+ using term_index=indexed_by<"bydao"_n,const_mem_fun<term_record,uint64_t,&term_record::by_dao>>;
+ using terms=ram_table<"terms"_n,term_record,term_index>;
+ TABLE term_hold {
+  uint64_t id,dao_id;std::vector<char> padding;
+  uint64_t primary_key()const{return id;}
+  EOSLIB_SERIALIZE(term_hold,(id)(dao_id)(padding))
+ };
+ using term_holds=ram_table<"termholds"_n,term_hold>;
  ACTION backfillrefs(name runtime,uint64_t dao_id,name table,uint32_t limit){
   if(table=="elections"_n)backfill_document_refs<elections>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_election(runtime,r);});
   else if(table=="terms"_n)backfill_document_refs<terms>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_term(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
@@ -113,11 +120,17 @@ private:
   auto now=current_time_point().sec_since_epoch();check(uint64_t(now)+duration<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");uint32_t closes=now+duration;
   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=member_id;r.kind=kind;r.choices=choices;r.closes=closes;r.quorum=quorum;r.approval=approval;r.denominator=denominator;r.max_member=d.max_member;r.tallies=std::vector<uint64_t>(choices,0);r.metadata=metadata;});
   if(action_name=="open"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}
+  if(action_name=="startelect"_n&&ram_observer_settings(runtime,runtime.value).exists()){
+    const auto& election=elections_table.get(ballot_id);term_record sample{};sample.title=election.title;
+    const auto bytes=ram_row_bytes<term_record,term_index>(sample)*election.seats+ram_scope_bytes<term_index>();
+    term_holds holds(get_self(),runtime.value);holds.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.padding.resize(bytes);});
+  }
   core_action(runtime,get_self(),"govlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id,closes)));
  }
  void finish_election(name runtime,uint64_t dao_id,const election_record& election,const ballot_record& ballot){
   check(election.dao_id==dao_id&&election.status==1&&election.candidates.size()+1==ballot.tallies.size(),"ELECTION_DOMAIN");bool quorum=__uint128_t(ballot.cast)*10000>=__uint128_t(ballot.denominator)*ballot.quorum;
   std::vector<std::pair<uint64_t,uint64_t>> ranking;for(size_t i=0;i<election.candidates.size();i++)ranking.push_back({ballot.tallies[i+1],election.candidates[i]});std::sort(ranking.begin(),ranking.end(),[](const auto& a,const auto& b){return a.first!=b.first?a.first>b.first:a.second<b.second;});
+  term_holds holds(get_self(),runtime.value);auto held=holds.find(election.id);if(held!=holds.end()){check(held->dao_id==dao_id,"ELECTION_DOMAIN");holds.erase(held);}
   terms seats(get_self(),runtime.value);uint32_t occupied=0,issued=0;const auto now=current_time_point().sec_since_epoch();if(quorum&&now<election.term_end)for(size_t i=0;i<ranking.size();){size_t end=i+1;while(end<ranking.size()&&ranking[end].first==ranking[i].first)++end;if(!ranking[i].first||occupied+end-i>election.seats)break;occupied+=end-i;for(size_t j=i;j<end;j++)if(eligible_witness(runtime,dao_id,ranking[j].second,true)){auto id=seats.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"TERM_LIMIT");seats.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.election_id=election.id;r.member_id=ranking[j].second;r.title=election.title;r.starts=election.term_start;r.ends=election.term_end;});++issued;}i=end;}
   elections rows(get_self(),runtime.value);rows.modify(rows.get(election.id),same_payer,[](auto& r){r.status=2;});ballots votes_table(get_self(),runtime.value);votes_table.modify(votes_table.get(ballot.id),same_payer,[&](auto& r){r.status=issued?1:2;r.winner=-1;});
  }

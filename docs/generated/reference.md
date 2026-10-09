@@ -118,6 +118,8 @@ A durable term records its exact start/end and recall. The term window starts no
 
 Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release.
 
+On an observed development deployment, starting an election physically allocates the maximum term-row space for its approved seats and exact title. Finalization consumes that hold before issuing actual terms; an unsuccessful election releases it. This changes no permanent roles or voting weights. Legacy election adoption, DAO quota enforcement and live deployment remain separate release gates.
+
 ## Archive exports and recovery — development
 
 The Archive format library binds packed records to their DAO, source code, released schema, table and snapshot domain. Bounded chunks, canonical manifests and index-derived proofs protect record integrity. Core hosts resumable ordinary-poll exports, complete storage reservations and verified recovery downloads. Core can additionally create an authenticated encrypted backup, restore it independently and record an immutable receipt when the operator configures a separate backup store. The development runtime can additionally anchor one bounded ordinary-poll export, record restricted availability attestation and accept the administrator's exact signed approval or revocation. Bounded ordinary-poll source pruning and on-chain discovery/browsing are implemented in development, with destructive production use separately gated.
@@ -138,7 +140,7 @@ Resources offers a separate signed archive approval after independent backup ver
 
 ## decide contract
 
-Source ABI JSON SHA-256: `e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df`.
+Source ABI JSON SHA-256: `2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18`.
 
 ### Action: backfillrefs
 
@@ -396,6 +398,14 @@ Source ABI JSON SHA-256: `e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de7
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+### Table: termholds
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| padding | bytes |
 
 ### Table: terms
 

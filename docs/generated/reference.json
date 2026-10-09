@@ -102,7 +102,8 @@
         "After nominations close, any active member may start the election before the term’s start. A changed policy revision prevents starting; schedule a successor election with reviewed rules. Starting freezes the sorted candidate IDs, exact DAO quorum/weight and normal voting denominator/highest member snapshot. One member votes once for one candidate or explicit abstention.",
         "Finalization requires the frozen quorum; the yes/no approval majority is not used to rank candidates. Positive candidate tallies rank by weight. A tied group is installed only when the whole group fits remaining seats; a tie crossing the seat boundary leaves those seats vacant. No quorum or abstention-only voting creates no terms. Inactive or revoked winners leave their ranked seats vacant, without promoting a runner-up. Finalizing after the term ends creates no terms.",
         "A durable term records its exact start/end and recall. The term window starts no earlier than that date; actual membership must remain eligible. An administrator can recall a term with a reason document. Titles grant no administrator flag, reviewer permission, module power, credit issuance or Treasury authority. Permanent roles and approved liabilities remain separate and survive term expiry.",
-        "Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release."
+        "Vote and finalize in Decide. Representative terms are read-only mandates unless a future separately reviewed bounded authority module is explicitly installed. Delegated budgets and fractal elections remain outside this release.",
+        "On an observed development deployment, starting an election physically allocates the maximum term-row space for its approved seats and exact title. Finalization consumes that hold before issuing actual terms; an unsuccessful election releases it. This changes no permanent roles or voting weights. Legacy election adoption, DAO quota enforcement and live deployment remain separate release gates."
       ]
     },
     {
@@ -125,7 +126,7 @@
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "e7814efc16668d505d826d1e5701cd2c289e359b237791f2244de71d62ac28df",
+      "sourceAbiHash": "2138bf1a6f820f9365b5d687b0a23bc09d5fad3d2fd0dac1c1ea24860b293a18",
       "actions": [
         {
           "name": "backfillrefs",
@@ -824,6 +825,23 @@
             {
               "name": "runtime",
               "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "termholds",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "padding",
+              "type": "bytes"
             }
           ]
         },
