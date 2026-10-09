@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.6 development — SDK and contract versions
+
+Keep the SDK/help package version separate from the unchanged 0.9.0-alpha.5 module contract release. Installation manifests and response schemas report the contract version; an SDK-only update does not demand redeploying matching contracts. Consume the refreshed core protocol and regenerate help; no C++ or ABI changes.
+
 ## 0.8.0-alpha.1 development candidate — RAM completion and Archive
 
 - Extended retained historical fixtures to Endorsement and tested pending-application/key/witness preservation, source-owned document backfill, inactive-witness rollback and once-only ordinary admission after upgrade.

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.9.0-alpha.5';
+export const VERSION = '0.9.0-alpha.6';
+// SDK/help releases do not require redeploying unchanged contract binaries.
+export const CONTRACT_VERSION = '0.9.0-alpha.5';
 export const ModulePermissions = Object.freeze({
   decide: {
     actions: [
@@ -75,7 +77,7 @@ export const EndorsementConfigSchema = z.strictObject({
 export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
-    version: VERSION,
+    version: CONTRACT_VERSION,
     coreRange: '^0.9.0-alpha.5',
     interfaceVersion: 1,
     configVersion: 1,
@@ -84,7 +86,7 @@ export const Catalog = Object.freeze([
   }),
   ModuleManifestSchema.parse({
     id: 'works',
-    version: VERSION,
+    version: CONTRACT_VERSION,
     coreRange: '^0.9.0-alpha.5',
     interfaceVersion: 1,
     configVersion: 1,
@@ -93,7 +95,7 @@ export const Catalog = Object.freeze([
   }),
   ModuleManifestSchema.parse({
     id: 'payroll',
-    version: VERSION,
+    version: CONTRACT_VERSION,
     coreRange: '^0.9.0-alpha.5',
     interfaceVersion: 1,
     configVersion: 1,
@@ -102,7 +104,7 @@ export const Catalog = Object.freeze([
   }),
   ModuleManifestSchema.parse({
     id: 'grants-rounds',
-    version: VERSION,
+    version: CONTRACT_VERSION,
     coreRange: '^0.9.0-alpha.5',
     interfaceVersion: 1,
     configVersion: 1,
@@ -111,7 +113,7 @@ export const Catalog = Object.freeze([
   }),
   ModuleManifestSchema.parse({
     id: 'endorsement-admission',
-    version: VERSION,
+    version: CONTRACT_VERSION,
     coreRange: '^0.9.0-alpha.5',
     interfaceVersion: 1,
     configVersion: 1,
@@ -123,7 +125,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
   z.strictObject({
     id: z.literal('decide'),
     account: NativeAccountSchema,
-    version: z.literal(VERSION),
+    version: z.literal(CONTRACT_VERSION),
     config: DecideConfigSchema,
     actions: z.tuple([
       z.literal(ModulePermissions.decide.actions[0]),
@@ -140,7 +142,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
   z.strictObject({
     id: z.literal('works'),
     account: NativeAccountSchema,
-    version: z.literal(VERSION),
+    version: z.literal(CONTRACT_VERSION),
     config: WorksConfigSchema,
     actions: z.tuple([
       z.literal('propose'),
@@ -156,7 +158,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
   z.strictObject({
     id: z.literal('payroll'),
     account: NativeAccountSchema,
-    version: z.literal(VERSION),
+    version: z.literal(CONTRACT_VERSION),
     config: PayrollConfigSchema,
     actions: z.tuple([
       z.literal(ModulePermissions.payroll.actions[0]),
@@ -167,7 +169,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
   z.strictObject({
     id: z.literal('grants-rounds'),
     account: NativeAccountSchema,
-    version: z.literal(VERSION),
+    version: z.literal(CONTRACT_VERSION),
     config: GrantsConfigSchema,
     actions: z.tuple([
       z.literal('newround'),
@@ -183,7 +185,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
   z.strictObject({
     id: z.literal('endorsement-admission'),
     account: NativeAccountSchema,
-    version: z.literal(VERSION),
+    version: z.literal(CONTRACT_VERSION),
     config: EndorsementConfigSchema,
     actions: z.tuple([
       z.literal('applyjoin'),

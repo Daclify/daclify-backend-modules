@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.9.0-alpha.5",
+  "packageVersion": "0.9.0-alpha.6",
   "interfaceVersion": 1,
   "topics": [
     {

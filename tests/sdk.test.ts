@@ -1,6 +1,40 @@
 import { describe, it, expect } from 'vitest';
 import { encodeDecide, encodeWorks, encodePayroll } from '../sdk/index.js';
+import {
+  Catalog,
+  CONTRACT_VERSION,
+  DecideConfigSchema,
+  ModuleInstallationSchema,
+} from '../protocol/index.js';
 describe('public module codecs', () => {
+  it('keeps unchanged deployed contract versions installable after an SDK-only update', () => {
+    expect(Catalog.every((manifest) => manifest.version === CONTRACT_VERSION)).toBe(true);
+    expect(
+      ModuleInstallationSchema.parse({
+        id: 'decide',
+        account: 'decide',
+        version: '0.9.0-alpha.5',
+        config: DecideConfigSchema.parse({
+          configVersion: 1,
+          weight: 'member',
+          duration: 60,
+          quorumBasisPoints: 5000,
+          approvalBasisPoints: 5001,
+        }),
+        actions: [
+          'open',
+          'vote',
+          'openwork',
+          'openaward',
+          'newelect',
+          'nominate',
+          'startelect',
+          'recall',
+        ],
+        grants: ['govlock', 'electexec'],
+      }).version,
+    ).toBe('0.9.0-alpha.5');
+  });
   it('encodes exact binary member vote data', () => {
     expect(
       encodeDecide('vote', {
