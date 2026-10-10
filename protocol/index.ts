@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.9.0-alpha.14';
+export const VERSION = '0.9.0-alpha.16';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.9.0-alpha.5';
+const CORE_RANGE = '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2';
 export const ModulePermissions = Object.freeze({
   decide: {
     actions: [
@@ -78,7 +79,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
+    coreRange: CORE_RANGE,
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
@@ -87,7 +88,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'works',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
+    coreRange: CORE_RANGE,
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -96,7 +97,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
+    coreRange: CORE_RANGE,
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -105,7 +106,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'grants-rounds',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
+    coreRange: CORE_RANGE,
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create'],
@@ -114,7 +115,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'endorsement-admission',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
+    coreRange: CORE_RANGE,
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['member.manage'],

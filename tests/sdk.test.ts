@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { encodeDecide, encodeWorks, encodePayroll } from '../sdk/index.js';
-import { compatible } from '@daclify/core-protocol';
+import { compatible, VERSION as CoreVersion } from '@daclify/core-protocol';
 import {
   Catalog,
   CONTRACT_VERSION,
@@ -43,6 +43,14 @@ describe('public module codecs', () => {
         grants: ['govlock', 'electexec'],
       }).version,
     ).toBe('0.9.0-alpha.5');
+  });
+  it('accepts its pinned core release while refusing unqualified patch and minor releases', () => {
+    for (const manifest of Catalog) {
+      expect(compatible(CoreVersion, manifest.coreRange)).toBe(true);
+      expect(compatible('0.12.0-alpha.1', manifest.coreRange)).toBe(true);
+      expect(compatible('0.12.0-alpha.3', manifest.coreRange)).toBe(false);
+      expect(compatible('0.13.0-alpha.1', manifest.coreRange)).toBe(false);
+    }
   });
   it('encodes exact binary member vote data', () => {
     expect(

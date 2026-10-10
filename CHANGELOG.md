@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.16 development — pinned core catalogue compatibility
+
+Accept the SDK's pinned reviewed core 0.12.0-alpha.1 and 0.12.0-alpha.2 in all five module manifests. The prior ranges marked installed, hash-verified modules incompatible and disabled their UI controls. Keep unqualified later patch/minor releases rejected. Contracts remain 0.9.0-alpha.5; WASM/ABI hashes, permissions and persisted data are unchanged.
+
 ## 0.9.0-alpha.14 development — recovery protocol compatibility
 
 Pin core protocol 0.12.0-alpha.1 and regenerate module references/help for its compatible account-recovery interface. Module contracts, ABIs, prices and persisted module data are unchanged.
