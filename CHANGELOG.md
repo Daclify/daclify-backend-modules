@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.14 development — recovery protocol compatibility
+
+Pin core protocol 0.12.0-alpha.1 and regenerate module references/help for its compatible account-recovery interface. Module contracts, ABIs, prices and persisted module data are unchanged.
+
 ## 0.9.0-alpha.7 development — payment transport audit
 
 Bound central Connect responses to 64 KiB of streamed bytes before buffering, cancel rejected/error bodies and preserve UTF-8 across chunk boundaries. Keep the exact core 0.9.0-alpha.6 peer and unchanged 0.9.0-alpha.5 contract version. Add adversarial response regressions and record cross-contract permission qualification in the audit report. No fiat fulfillment or governance policy changes.

@@ -1,6 +1,6 @@
 {
   "name": "@daclify/modules",
-  "version": "0.9.0-alpha.13",
+  "version": "0.9.0-alpha.14",
   "license": "AGPL-3.0-only",
   "type": "module",
   "engines": {
@@ -61,7 +61,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "@daclify/core-protocol": "file:../daclify-backend-core/.artifacts/daclify-core-protocol-0.11.0-alpha.2.tgz",
+    "@daclify/core-protocol": "file:../daclify-backend-core/.artifacts/daclify-core-protocol-0.12.0-alpha.1.tgz",
     "@proton/vert": "0.3.24",
     "@types/node": "24.19.1",
     "fast-check": "4.10.2",
@@ -76,6 +76,6 @@
     "fsevents": false
   },
   "peerDependencies": {
-    "@daclify/core-protocol": "0.11.0-alpha.2"
+    "@daclify/core-protocol": "0.12.0-alpha.1"
   }
 }

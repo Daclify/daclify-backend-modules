@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.9.0-alpha.13';
+export const VERSION = '0.9.0-alpha.14';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.9.0-alpha.5';
 export const ModulePermissions = Object.freeze({
