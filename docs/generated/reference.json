@@ -1,6 +1,6 @@
 {
   "producer": "modules",
-  "packageVersion": "0.9.0-alpha.8",
+  "packageVersion": "0.9.0-alpha.9",
   "interfaceVersion": 1,
   "topics": [
     {
