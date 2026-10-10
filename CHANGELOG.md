@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.18 development
+
+Accept core 0.13.0-alpha.2 and refresh pinned SDK/help compatibility for restricted Names observations. Module contract binaries remain 0.9.0-alpha.5.
+
 ## 0.9.0-alpha.16 development — pinned core catalogue compatibility
 
 Accept the SDK's pinned reviewed core 0.12.0-alpha.1 and 0.12.0-alpha.2 in all five module manifests. The prior ranges marked installed, hash-verified modules incompatible and disabled their UI controls. Keep unqualified later patch/minor releases rejected. Contracts remain 0.9.0-alpha.5; WASM/ABI hashes, permissions and persisted data are unchanged.
