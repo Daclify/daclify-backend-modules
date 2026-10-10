@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.9.0-alpha.9 · interface 1.
+Package 0.9.0-alpha.10 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
