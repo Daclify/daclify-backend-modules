@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { encodeDecide, encodeWorks, encodePayroll } from '../sdk/index.js';
+import { compatible } from '@daclify/core-protocol';
 import {
   Catalog,
   CONTRACT_VERSION,
@@ -7,6 +8,14 @@ import {
   ModuleInstallationSchema,
 } from '../protocol/index.js';
 describe('public module codecs', () => {
+  it('supports the coordinated login API release without claiming unknown future minor compatibility', () => {
+    for (const manifest of Catalog) {
+      expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(true);
+      expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(true);
+      expect(compatible('0.11.0-alpha.1', manifest.coreRange)).toBe(false);
+      expect(manifest.version).toBe('0.9.0-alpha.5');
+    }
+  });
   it('keeps unchanged deployed contract versions installable after an SDK-only update', () => {
     expect(Catalog.every((manifest) => manifest.version === CONTRACT_VERSION)).toBe(true);
     expect(

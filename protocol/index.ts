@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.9.0-alpha.7';
+export const VERSION = '0.9.0-alpha.8';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.9.0-alpha.5';
 export const ModulePermissions = Object.freeze({
@@ -78,7 +78,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'decide',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5',
+    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['ballot.create', 'ballot.finalize', 'ballot.execute'],
@@ -87,7 +87,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'works',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5',
+    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -96,7 +96,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'payroll',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5',
+    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create', 'obligation.execute'],
@@ -105,7 +105,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'grants-rounds',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5',
+    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['obligation.create'],
@@ -114,7 +114,7 @@ export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
     id: 'endorsement-admission',
     version: CONTRACT_VERSION,
-    coreRange: '^0.9.0-alpha.5',
+    coreRange: '^0.9.0-alpha.5 || 0.10.0-alpha.1',
     interfaceVersion: 1,
     configVersion: 1,
     capabilities: ['member.manage'],
