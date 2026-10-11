@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.9.0-alpha.19';
+export const VERSION = '0.9.0-alpha.20';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.9.0-alpha.5';
 const CORE_RANGE =
-  '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3';
+  '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4';
 export const ModulePermissions = Object.freeze({
   decide: {
     actions: [
