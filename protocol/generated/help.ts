@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.1",
+  "packageVersion": "0.10.0-alpha.2",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -134,14 +134,15 @@ export const ModulesHelpBundle={
     },
     {
       "id": "telos-network-ballots",
-      "title": "Vote on Telos network ballots",
+      "title": "Telos DAO ballots and elections",
       "paragraphs": [
-        "Telos governance in the Hub opens public retained proposal and election records from the configured Telos Zero network. Browsing requires no account. The source is telos.decide and its standard 4,VOTE treasury; records appear in contract order with bounded pages. Filters apply to the displayed page. Closed and archived records show stored option totals. An ended voting period whose status is still voting is awaiting closure. Deleted ballots and cleaned receipts are outside this history.",
-        "Each ballot shows its publisher, category, period, method, selection limits and stored settings. Public VOTE ballots are not automatically endorsed by Telos. Unknown candidate labels remain contract option names. HTTPS content references can open separately; the app does not render remote content or execute ballot metadata.",
+        "Telos DAO has separate Ballots, Elections and Block Producers views on the configured Telos Zero network. Browsing requires no account. Ballots and election history come from telos.decide and the standard 4,VOTE treasury. Foundation elections identify publisher tf and include leaderboard records. History covers retained contract records, not deleted ballots or cleaned receipts. An ended voting period whose status is still voting is awaiting closure.",
+        "Foundation and all network elections can be viewed separately. Each record shows its publisher, candidates or options, recorded totals, period and selection limits. Public VOTE ballots are not automatically endorsed by Telos. Unknown candidate labels remain contract option names. Filters and search apply to loaded records; load more appends records. A filtered request scans at most four table pages; the browser continues through at most eight empty batches before offering further loading. HTTPS content references open separately; metadata remains inert text.",
         "Vote with Telos Zero uses Anchor and a supported direct-key active permission. Continuing creates or opens a Daclify account paired with the freshly authenticated native wallet. A cancelled vote can leave that service account in place. If you already use another sign-in method, pair this wallet in Account first to retain one account. Existing paired accounts and vault keys are preserved.",
         "The app reads the contract voter balance selected by the ballot, staked when votestake is enabled and liquid otherwise. Standard VOTE stake reflects the external TLOS stake and REX balance recorded by Decide. Existing registered voters may need to refresh that balance in the Telos app after staking changes. Daclify does not calculate a new token weight. A first registration and cast are atomic native actions. Supported methods are 1token1vote, 1tokennvote and 1acct1vote; light ballots and other methods remain read-only.",
         "External votes use your native account authority. They do not spend Daclify credits, create a Daclify DAO membership or grant permission in another DAO. Explore other DAOs after voting; Account and key setup provides the existing encrypted-vault path needed for new Daclify memberships and private documents.",
-        "Voting is enabled only when operator-approved Decide code and ABI pins match the configured chain. The wallet checks the exact transaction and fresh ballot state before broadcast. Keep a pending transaction reference if confirmation or the broadcast response is uncertain. The page checks irreversibility without resubmitting. Pending references persist in this tab; a provider without transaction-status support needs an external chain check. Actual mainnet voting still requires live-wallet qualification by the operator."
+        "Voting is enabled only when operator-approved Decide code and ABI pins match the configured chain. The wallet checks the exact transaction and fresh ballot state before broadcast. Keep a pending transaction reference if confirmation or the broadcast response is uncertain. The page checks irreversibility without resubmitting. Pending references persist in this tab; a provider without transaction-status support needs an external chain check. Actual mainnet voting still requires live-wallet qualification by the operator.",
+        "Block producer standings come from eosio using get_producers and the chain’s active producer schedule. A registered producer is not necessarily in the active schedule. Vote weights are contract weighted votes rather than direct TLOS balances. Producer voting and Foundation leaderboard voting are read-only in Daclify pending separate signing qualification; the Telos app remains available. This view does not provide historic producer schedules."
       ]
     }
   ],
@@ -11511,6 +11512,14 @@ export const ModulesHelpBundle={
           "cursor": {
             "type": "string",
             "maxLength": 20
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ballots",
+              "elections",
+              "foundation"
+            ]
           }
         },
         "additionalProperties": false
@@ -11776,6 +11785,150 @@ export const ModulesHelpBundle={
           "nextCursor",
           "observedAt",
           "signingAvailable"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "telos-network-ballots"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/telos/producers",
+      "query": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "rpcUrl": {
+                "type": "string",
+                "maxLength": 512,
+                "format": "uri"
+              },
+              "environment": {
+                "type": "string",
+                "enum": [
+                  "local",
+                  "testnet",
+                  "mainnet"
+                ]
+              },
+              "contract": {
+                "type": "string",
+                "const": "eosio"
+              }
+            },
+            "required": [
+              "chainId",
+              "rpcUrl",
+              "environment",
+              "contract"
+            ],
+            "additionalProperties": false
+          },
+          "producers": {
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "owner": {
+                  "type": "string",
+                  "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                },
+                "total_votes": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^(0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "url": {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                "location": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                }
+              },
+              "required": [
+                "owner",
+                "total_votes",
+                "is_active",
+                "url",
+                "location"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "activeSchedule": {
+            "maxItems": 125,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            }
+          },
+          "scheduleVersion": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "totalVoteWeight": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^(0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "source",
+          "producers",
+          "activeSchedule",
+          "scheduleVersion",
+          "totalVoteWeight",
+          "nextCursor",
+          "observedAt"
         ],
         "additionalProperties": false
       },
@@ -12407,7 +12560,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "activity",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -12439,7 +12592,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "decide",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -12495,7 +12648,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "works",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -12534,7 +12687,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "payroll",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -12574,7 +12727,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "grants-rounds",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -12616,7 +12769,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

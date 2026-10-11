@@ -97,6 +97,112 @@ function fixture(
   });
 }
 describe('external Telos governance', () => {
+  it('retains Foundation leaderboard history without enabling its signing path', async () => {
+    const foundation = {
+      ...ballot,
+      ballot_name: 'tfvt........2',
+      category: 'leaderboard',
+      publisher: 'tf',
+      status: 'closed',
+    };
+    const reader = new TelosGovernanceClient(source, async (path) => {
+      if (path === 'get_info') return { chain_id: chainId };
+      if (path === 'get_raw_abi')
+        return { account_name: source.contract, code_hash: codeHash, abi_hash: abiHash };
+      return { rows: [foundation], more: false };
+    });
+    expect((await reader.ballots()).ballots[0]?.publisher).toBe('tf');
+    expect((await reader.ballot('tfvt........2')).ballot.category).toBe('leaderboard');
+    expect(() =>
+      telosVoteActions(
+        source,
+        TelosBallotSchema.parse(foundation),
+        { account: 'voter', registered: false, weight: null, alreadyVoted: false },
+        ['alice'],
+      ),
+    ).toThrow('TELOS_BALLOT_UNSUPPORTED');
+  });
+  it('bounds empty election scans and preserves the first matching page continuation', async () => {
+    let reads = 0;
+    const reader = new TelosGovernanceClient(
+      { ...source, codeHash: null, abiHash: null },
+      async (path) => {
+        if (path === 'get_info') return { chain_id: chainId };
+        reads++;
+        return {
+          rows: [{ ...ballot, category: reads < 5 ? 'proposal' : 'leaderboard' }],
+          more: true,
+          next_key: String(reads + 1),
+        };
+      },
+    );
+    const empty = await reader.ballots(undefined, 'elections');
+    expect(empty.ballots).toEqual([]);
+    expect(empty.nextCursor).toBe('5');
+    expect(reads).toBe(4);
+    const found = await reader.ballots(empty.nextCursor ?? undefined, 'elections');
+    expect(found.ballots[0]?.category).toBe('leaderboard');
+    expect(found.nextCursor).toBe('6');
+    expect(reads).toBe(5);
+  });
+  it('reads producer weight order and active schedule independently', async () => {
+    const reader = new TelosGovernanceClient(source, async (path) => {
+      if (path === 'get_info') return { chain_id: chainId };
+      if (path === 'get_producers')
+        return {
+          rows: [
+            {
+              owner: 'alice',
+              total_votes: '1200.50000000000000000',
+              is_active: 1,
+              url: 'javascript:alert(1)',
+              location: 840,
+            },
+            {
+              owner: 'bob',
+              total_votes: '999.00000000000000000',
+              is_active: 1,
+              url: 'https://example.test',
+              location: 826,
+            },
+          ],
+          total_producer_vote_weight: '5000.00000000000000000',
+          more: 'carol',
+        };
+      if (path === 'get_producer_schedule')
+        return {
+          active: { version: 42, producers: [{ producer_name: 'bob', authority: [] }] },
+          pending: null,
+          proposed: null,
+        };
+      throw Error('Unexpected RPC');
+    });
+    const page = await reader.producers();
+    expect(page.source.contract).toBe('eosio');
+    expect(page.producers.map((p) => p.owner)).toEqual(['alice', 'bob']);
+    expect(page.activeSchedule).toEqual(['bob']);
+    expect(page.nextCursor).toBe('carol');
+    expect(page.producers[0]?.total_votes).toBe('1200.50000000000000000');
+  });
+  it('rejects producer chain mismatches, malformed weights and repeated cursors', async () => {
+    const create = (chain: string, votes: string, cursor: string) =>
+      new TelosGovernanceClient(source, async (path) => {
+        if (path === 'get_info') return { chain_id: chain };
+        if (path === 'get_producer_schedule') return { active: null };
+        return {
+          rows: [{ owner: 'alice', total_votes: votes, is_active: 1, url: '', location: 0 }],
+          total_producer_vote_weight: '100.0',
+          more: cursor,
+        };
+      });
+    await expect(create('cd'.repeat(32), '1.0', '').producers()).rejects.toThrow(
+      'TELOS_CHAIN_MISMATCH',
+    );
+    await expect(create(chainId, 'NaN', '').producers()).rejects.toThrow();
+    await expect(create(chainId, '1.0', 'alice').producers('alice')).rejects.toThrow(
+      'TELOS_CURSOR_INVALID',
+    );
+  });
   it('returns bounded retained records and an explicit continuation cursor', async () => {
     const page = await fixture().ballots();
     expect(page.ballots[0]?.ballot_name).toBe('election1');

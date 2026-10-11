@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.2 development
+
+Retain Foundation leaderboard elections, add bounded election/publisher filtering and expose validated producer standings with a separate active schedule. Preserve existing Decide voting eligibility. Consume and explicitly accept core 0.14.0-alpha.2; contract versions and binaries are unchanged.
+
 ## 0.9.0-alpha.19 development
 
 Consume core 0.13.0-alpha.3, validate normal core fixture WASM/ABI provenance, and refresh the current fixture. Make the default test budget match the measured native/crypto workloads. Module contract binaries remain 0.9.0-alpha.5.

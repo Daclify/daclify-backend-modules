@@ -11,6 +11,10 @@ import {
   TelosBallotDetailSchema,
   TelosVotePreparationSchema,
   TelosVoteWeightSchema,
+  TelosBallotKindSchema,
+  TelosProducerPageSchema,
+  TelosProducerSchema,
+  type TelosBallotKind,
   type TelosGovernanceSource,
   type TelosBallot,
   type TelosVoterState,
@@ -19,7 +23,7 @@ import {
 import { telosDecideAbi } from './telos-decide-abi.js';
 export { telosDecideAbi };
 export type TelosGovernanceRpc = (
-  path: 'get_info' | 'get_raw_abi' | 'get_table_rows',
+  path: 'get_info' | 'get_raw_abi' | 'get_table_rows' | 'get_producers' | 'get_producer_schedule',
   body: Record<string, unknown>,
 ) => Promise<unknown>;
 const rowsSchema = z.object({
@@ -102,9 +106,12 @@ export class TelosGovernanceClient {
   ) {
     this.source = TelosGovernanceSourceSchema.parse(source);
   }
-  private async checkSource(): Promise<boolean> {
+  private async checkChain(): Promise<void> {
     const info = z.object({ chain_id: z.string() }).parse(await this.rpc('get_info', {}));
     if (info.chain_id !== this.source.chainId) throw new Error('TELOS_CHAIN_MISMATCH');
+  }
+  private async checkSource(): Promise<boolean> {
+    await this.checkChain();
     if (!this.source.codeHash || !this.source.abiHash) return false;
     const pins = z
       .object({ account_name: z.string(), code_hash: z.string(), abi_hash: z.string() })
@@ -127,37 +134,110 @@ export class TelosGovernanceClient {
       }),
     );
   }
-  async ballots(cursor?: string) {
+  async ballots(cursor?: string, kind?: TelosBallotKind) {
     if (cursor !== undefined) Uint64Schema.parse(cursor);
+    if (kind !== undefined) TelosBallotKindSchema.parse(kind);
     const signingAvailable = await this.checkSource();
-    const page = await this.rows(
-      'ballots',
-      this.source.contract,
-      cursor === undefined ? {} : { lower_bound: cursor },
-    );
+    for (let scanned = 0; scanned < (kind ? 4 : 1); scanned++) {
+      const page = await this.rows(
+        'ballots',
+        this.source.contract,
+        cursor === undefined ? {} : { lower_bound: cursor },
+      );
+      if (
+        page.more &&
+        (!page.next_key ||
+          !Uint64Schema.safeParse(page.next_key).success ||
+          (cursor !== undefined && BigInt(page.next_key) <= BigInt(cursor)))
+      )
+        throw new Error('TELOS_CURSOR_INVALID');
+      const ballots = page.rows
+        .filter((row) => {
+          const header = z
+            .object({
+              treasury_symbol: z.string().max(16),
+              category: NativeAccountSchema,
+              publisher: NativeAccountSchema,
+            })
+            .parse(row);
+          return (
+            header.treasury_symbol === '4,VOTE' &&
+            (kind === 'ballots'
+              ? header.category === 'proposal'
+              : kind === 'foundation'
+                ? header.publisher === 'tf' && ['election', 'leaderboard'].includes(header.category)
+                : kind === 'elections'
+                  ? ['election', 'leaderboard'].includes(header.category)
+                  : ['proposal', 'election', 'leaderboard'].includes(header.category))
+          );
+        })
+        .map((row) => TelosBallotSchema.parse(row));
+      if (ballots.length || !page.more || scanned === (kind ? 3 : 0))
+        return TelosBallotPageSchema.parse({
+          source: this.source,
+          ballots,
+          nextCursor: page.more ? page.next_key : null,
+          observedAt: new Date().toISOString(),
+          signingAvailable,
+        });
+      cursor = page.next_key;
+    }
+    throw new Error('TELOS_CURSOR_INVALID');
+  }
+  async producers(cursor?: string) {
+    if (cursor !== undefined) NativeAccountSchema.parse(cursor);
+    await this.checkChain();
+    const [page, schedule] = await Promise.all([
+      this.rpc('get_producers', {
+        json: true,
+        limit: 25,
+        ...(cursor ? { lower_bound: cursor } : {}),
+      }).then((value) =>
+        z
+          .object({
+            rows: z
+              .array(
+                TelosProducerSchema.extend({
+                  is_active: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+                }).transform((row) => ({ ...row, is_active: Boolean(row.is_active) })),
+              )
+              .max(25),
+            total_producer_vote_weight: TelosProducerPageSchema.shape.totalVoteWeight,
+            more: z.union([z.literal(''), NativeAccountSchema]),
+          })
+          .parse(value),
+      ),
+      this.rpc('get_producer_schedule', {}).then((value) =>
+        z
+          .object({
+            active: z
+              .object({
+                version: z.int().min(0).max(4294967295),
+                producers: z.array(z.object({ producer_name: NativeAccountSchema })).max(125),
+              })
+              .nullable(),
+          })
+          .parse(value),
+      ),
+    ]);
     if (
-      page.more &&
-      (!page.next_key ||
-        !Uint64Schema.safeParse(page.next_key).success ||
-        (cursor !== undefined && BigInt(page.next_key) <= BigInt(cursor)))
+      (cursor && page.more === cursor) ||
+      new Set(page.rows.map((p) => p.owner)).size !== page.rows.length
     )
       throw new Error('TELOS_CURSOR_INVALID');
-    const ballots = page.rows
-      .filter((row) => {
-        const header = z
-          .object({ treasury_symbol: z.string().max(16), category: NativeAccountSchema })
-          .parse(row);
-        return (
-          header.treasury_symbol === '4,VOTE' && ['proposal', 'election'].includes(header.category)
-        );
-      })
-      .map((row) => TelosBallotSchema.parse(row));
-    return TelosBallotPageSchema.parse({
-      source: this.source,
-      ballots,
-      nextCursor: page.more ? page.next_key : null,
+    return TelosProducerPageSchema.parse({
+      source: {
+        chainId: this.source.chainId,
+        rpcUrl: this.source.rpcUrl,
+        environment: this.source.environment,
+        contract: 'eosio',
+      },
+      producers: page.rows,
+      activeSchedule: schedule.active?.producers.map((p) => p.producer_name) ?? [],
+      scheduleVersion: schedule.active?.version ?? null,
+      totalVoteWeight: page.total_producer_vote_weight,
+      nextCursor: page.more || null,
       observedAt: new Date().toISOString(),
-      signingAvailable,
     });
   }
   async ballot(name: string) {
@@ -179,7 +259,7 @@ export class TelosGovernanceClient {
     if (
       header.ballot_name !== name ||
       header.treasury_symbol !== '4,VOTE' ||
-      !['proposal', 'election'].includes(header.category)
+      !['proposal', 'election', 'leaderboard'].includes(header.category)
     )
       throw new Error('TELOS_BALLOT_UNKNOWN');
     const ballot = TelosBallotSchema.parse(rows.rows[0]);

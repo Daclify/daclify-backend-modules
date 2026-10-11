@@ -69,6 +69,35 @@ export const TelosBallotPageSchema = z.strictObject({
   observedAt: z.iso.datetime(),
   signingAvailable: z.boolean(),
 });
+export const TelosBallotKindSchema = z.enum(['ballots', 'elections', 'foundation']);
+const producerWeight = z
+  .string()
+  .max(128)
+  .regex(/^(0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$/)
+  .refine((value) => Number.isFinite(Number(value)));
+export const TelosProducerSchema = z.object({
+  owner: NativeAccountSchema,
+  total_votes: producerWeight,
+  is_active: z.boolean(),
+  url: boundedText(2048),
+  location: z.int().min(0).max(65535),
+});
+export const TelosProducerPageSchema = z.strictObject({
+  source: TelosGovernanceSourceSchema.omit({
+    contract: true,
+    codeHash: true,
+    abiHash: true,
+  }).extend({ contract: z.literal('eosio') }),
+  producers: z.array(TelosProducerSchema).max(25),
+  activeSchedule: z
+    .array(NativeAccountSchema)
+    .max(125)
+    .refine((names) => new Set(names).size === names.length),
+  scheduleVersion: z.int().min(0).max(4294967295).nullable(),
+  totalVoteWeight: producerWeight,
+  nextCursor: NativeAccountSchema.nullable(),
+  observedAt: z.iso.datetime(),
+});
 export const TelosVoterStateSchema = z.strictObject({
   account: NativeAccountSchema,
   registered: z.boolean(),
@@ -101,8 +130,18 @@ export const TelosGovernanceRoutes = Object.freeze({
   ballots: {
     method: 'GET' as const,
     path: '/v1/telos/ballots',
-    query: z.strictObject({ cursor: Uint64Schema.optional() }),
+    query: z.strictObject({
+      cursor: Uint64Schema.optional(),
+      kind: TelosBallotKindSchema.optional(),
+    }),
     response: TelosBallotPageSchema,
+    helpTopic: 'telos-network-ballots',
+  },
+  producers: {
+    method: 'GET' as const,
+    path: '/v1/telos/producers',
+    query: z.strictObject({ cursor: NativeAccountSchema.optional() }),
+    response: TelosProducerPageSchema,
     helpTopic: 'telos-network-ballots',
   },
   ballot: {
@@ -126,6 +165,8 @@ export const TelosGovernanceRoutes = Object.freeze({
   },
 });
 export type TelosGovernanceSource = z.infer<typeof TelosGovernanceSourceSchema>;
+export type TelosBallotKind = z.infer<typeof TelosBallotKindSchema>;
+export type TelosProducerPage = z.infer<typeof TelosProducerPageSchema>;
 export type TelosBallot = z.infer<typeof TelosBallotSchema>;
 export type TelosVoterState = z.infer<typeof TelosVoterStateSchema>;
 export type TelosVoteInput = z.infer<typeof TelosVoteInputSchema>;
