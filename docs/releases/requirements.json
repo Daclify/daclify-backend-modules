@@ -23,6 +23,10 @@
     {
       "id": "GRANTS-INTERCONTRACT-CAPABILITIES",
       "tests": ["tests/grants.test.ts"]
+    },
+    {
+      "id": "CORE-FIXTURE-PROVENANCE",
+      "tests": ["tests/core-fixture-provenance.test.ts"]
     }
   ]
 }

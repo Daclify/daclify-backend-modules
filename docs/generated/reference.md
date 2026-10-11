@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.9.0-alpha.18 · interface 1.
+Package 0.9.0-alpha.19 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -136,7 +136,7 @@ Archived files remain pinned and use ordinary approved storage capacity. The app
 
 In Resources, active administrators select a finalized poll, preview its eligibility and approve the displayed maximum stored-byte reservation. Export uses existing hosting capacity and creates no subscription or pruning approval. Source changes require a new preview; a newer irreversible snapshot alone does not alter consent. Saved exports survive page/server restarts. Refresh advances bounded work; uncertain provider outcomes keep their holds. The original requesting administrator must remain authorized for completion.
 
-Download the verified recovery bundle and store its displayed manifest SHA-256 separately, off the server. Standalone verification requires that expected commitment and the matching qualified schema package, not a hash supplied only by the file itself. The current manifest is not yet anchored on chain. These exports contain ordinary-poll votes and a manifest, not account keys, social-login pairings or original document files. A download is not an independently verified backup or permission to delete source rows.
+Download the verified recovery bundle and store its displayed manifest SHA-256 separately, off the server. Standalone verification requires that expected commitment and the matching qualified schema package, not a hash supplied only by the file itself. An export alone does not establish a native anchor; the separate reviewed availability and anchoring steps are required. These exports contain ordinary-poll votes and a manifest, not account keys, social-login pairings or original document files. A download is not an independently verified backup or permission to delete source rows.
 
 When an independent encrypted backup store is configured, Resources offers Create and verify encrypted backup for the exact displayed manifest. The host writes only ciphertext, verifies its restored records, and saves the encrypted-file commitment. Retries preserve the original file. A separate folder on the same disk is not an independent failure domain; the operator must qualify the storage and keep its backup encryption key offline. This copy does not include member decryption keys, social pairings or original document files. Verified primary-provider downloads can fall back to the matching saved backup. A receipt does not authorize pruning or guarantee perpetual availability.
 
@@ -9063,7 +9063,7 @@ Response:
 
 ## decide configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -9115,7 +9115,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9151,7 +9151,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9188,7 +9188,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3.
 
 Capabilities: obligation.create.
 
@@ -9228,7 +9228,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3.
 
 Capabilities: member.manage.
 

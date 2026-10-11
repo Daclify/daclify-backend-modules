@@ -1,5 +1,7 @@
 # Module audit — 2026-10-10
 
+This is the initial dated audit checkpoint. Its confirmed source findings are addressed in [the remediation and verification record](../../../daclify-backend-core/docs/operations/project-audit-remediation-verification.md); remaining provider/release gates and the pending live rollout are recorded there. Preserve the results below as evidence of this earlier review.
+
 The [complete cross-repository report](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/evidence/2026-10-10-three-repository-audit.md) records architecture, priorities, evidence and the login finding and its subsequent approved fix.
 
 Reviewed Decide, Works, Payroll, Grants and Endorsement actor/permission boundaries, treasury/document references, configurations/manifests, Archive retained decoders and SDK/provider integration. Kept the canonical core types, required historical decoders and contract binaries intact.

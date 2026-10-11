@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0-alpha.19 development
+
+Consume core 0.13.0-alpha.3, validate normal core fixture WASM/ABI provenance, and refresh the current fixture. Make the default test budget match the measured native/crypto workloads. Module contract binaries remain 0.9.0-alpha.5.
+
 ## 0.9.0-alpha.18 development
 
 Accept core 0.13.0-alpha.2 and refresh pinned SDK/help compatibility for restricted Names observations. Module contract binaries remain 0.9.0-alpha.5.

@@ -1,4 +1,7 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { ABI, Serializer } from '@wharfkit/antelope';
+import { RuntimeCodeHash, RuntimeRawAbiHash } from '@daclify/core-protocol/sdk';
 import { Blockchain, type Account } from '@proton/vert';
 import { API, PermissionLevel } from '@greymass/eosio';
 import { z } from 'zod';
@@ -26,10 +29,20 @@ const AbiSchema = z.object({
   ),
 });
 export function load(chain: Blockchain, name: string, path: string): Account {
+  const wasm = readFileSync(`${path}.wasm`),
+    abiSource = readFileSync(`${path}.abi`, 'utf8');
+  if (
+    path.endsWith('/core-release/runtime') &&
+    (createHash('sha256').update(wasm).digest('hex') !== RuntimeCodeHash ||
+      createHash('sha256')
+        .update(Serializer.encode({ object: ABI.from(abiSource) }).array)
+        .digest('hex') !== RuntimeRawAbiHash)
+  )
+    throw new Error('CORE_FIXTURE_RELEASE_MISMATCH');
   const account = chain.createAccount({
     name,
-    abi: AbiSchema.parse(JSON.parse(readFileSync(`${path}.abi`, 'utf8'))),
-    wasm: readFileSync(`${path}.wasm`),
+    abi: AbiSchema.parse(JSON.parse(abiSource)),
+    wasm,
     enableInline: true,
   });
   account.setPermissions([
