@@ -28,6 +28,7 @@ execFileSync(
     'daclify-v2-toolchain:4.1.1-spring1.2.2',
     'cdt-cpp',
     directory + '/decide.cpp',
+    '-O=s',
     '-I',
     'node_modules/@daclify/core-protocol/contracts/common',
     '-I',

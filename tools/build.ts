@@ -15,6 +15,7 @@ for (const name of ['decide', 'works', 'payroll', 'grants', 'endorse'])
       'daclify-v2-toolchain:4.1.1-spring1.2.2',
       'cdt-cpp',
       `contracts/${name}/${name}.cpp`,
+      '-O=s',
       '-I',
       'node_modules/@daclify/core-protocol/contracts/common',
       '-I',
