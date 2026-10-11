@@ -45,7 +45,7 @@ it('reconciles a lost broadcast reply and never replaces the event on retry', as
     submit,
   };
   const activity = new CommunityActivityClient(client, 'activity');
-  expect((await activity.deliver(intent)).status).toBe('confirmed');
+  expect((await activity.deliver({ ...intent, keyEpoch: '0' })).status).toBe('confirmed');
   expect((await activity.deliver(intent)).status).toBe('confirmed');
   expect(submit).toHaveBeenCalledTimes(1);
 });

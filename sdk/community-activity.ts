@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ChainIdSchema, IdSchema, type AppClaimsSchema } from '@daclify/core-protocol';
+import { ChainIdSchema, Uint64Schema, type AppClaimsSchema } from '@daclify/core-protocol';
 import type { ConnectedAppClient } from '@daclify/core-protocol/connected-apps';
 import { encodeActivity } from './index.js';
 export const ActivityIntentSchema = z.strictObject({
@@ -9,7 +9,7 @@ export const ActivityIntentSchema = z.strictObject({
   eventId: ChainIdSchema,
   evidenceCid: z.string().max(128).default(''),
   evidenceHash: ChainIdSchema.default('00'.repeat(32)),
-  keyEpoch: IdSchema.default('0'),
+  keyEpoch: Uint64Schema.default('0'),
 });
 export type ActivityIntent = z.input<typeof ActivityIntentSchema>;
 type Client = Pick<ConnectedAppClient, 'membership' | 'activities' | 'submit'>;
