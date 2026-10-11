@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.9.0-alpha.20 · interface 1.
+Package 0.9.0-alpha.21 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -141,6 +141,12 @@ Download the verified recovery bundle and store its displayed manifest SHA-256 s
 When an independent encrypted backup store is configured, Resources offers Create and verify encrypted backup for the exact displayed manifest. The host writes only ciphertext, verifies its restored records, and saves the encrypted-file commitment. Retries preserve the original file. A separate folder on the same disk is not an independent failure domain; the operator must qualify the storage and keep its backup encryption key offline. This copy does not include member decryption keys, social pairings or original document files. Verified primary-provider downloads can fall back to the matching saved backup. A receipt does not authorize pruning or guarantee perpetual availability.
 
 Resources offers a separate signed archive approval after independent backup verification. The verifier cannot approve for the administrator. Approval binds the exact manifest, descriptor, backup and retention delay; a changed verifier or availability older than 15 minutes requires a fresh matching attestation. Revoke approval works without access to the backup store. The bounded on-chain anchor covers one supported ordinary-poll or document-version family and preserves transaction receipts and preallocated completion cursors. Approving does not delete data; full supported-release migration/recovery and live provider qualification still gate release. Native pruning checks actual packed proofs, fresh availability, the current administrator and source pins, terminal retention, revocation and exact cursors; ballots/tallies and permanent vote IDs remain.
+
+## Connected app activity
+
+The Activity module records activity from approved connected community apps. Its configured policy requires an independent reviewer for approval.
+
+App registration, member consent and module authorization remain separate. Connecting an app does not grant it treasury, membership or governance authority.
 
 ## decide contract
 
@@ -9063,7 +9069,7 @@ Response:
 
 ## decide configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -9115,7 +9121,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9151,7 +9157,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9188,7 +9194,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
 
 Capabilities: obligation.create.
 
@@ -9228,7 +9234,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
 
 Capabilities: member.manage.
 

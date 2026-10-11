@@ -9,13 +9,21 @@ import {
   VERSION,
   GrantsConfigSchema,
   EndorsementConfigSchema,
+  ModuleInstallationSchema,
 } from '../../protocol/index.js';
 import { ModuleApiRoutes } from '../../protocol/api.js';
 import { ArchiveRoutes } from '../../protocol/archive.js';
 
 const topics: unknown = JSON.parse(await readFile('docs/guides/topics.json', 'utf8'));
 const contracts = await Promise.all(
-  ['decide', 'works', 'payroll', 'grants', 'endorse'].map(async (name) => ({
+  [
+    ...Catalog.filter((manifest) => manifest.id === 'activity').map((manifest) => manifest.id),
+    'decide',
+    'works',
+    'payroll',
+    'grants',
+    'endorse',
+  ].map(async (name) => ({
     name,
     abi: await readFile(`.artifacts/contracts/${name}.abi`, 'utf8'),
   })),
@@ -37,7 +45,9 @@ const modules = Catalog.map((manifest) => {
             ? GrantsConfigSchema
             : manifest.id === 'endorsement-admission'
               ? EndorsementConfigSchema
-              : undefined;
+              : ModuleInstallationSchema.options.find(
+                  (option) => option.shape.id.value === manifest.id,
+                )?.shape.config;
   if (!schema) throw new Error('Missing documented module configuration');
   return { manifest, configuration: z.toJSONSchema(schema, { io: 'input' }) };
 });

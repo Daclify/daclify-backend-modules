@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.9.0-alpha.20",
+  "packageVersion": "0.9.0-alpha.21",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -122,6 +122,14 @@ export const ModulesHelpBundle={
         "Download the verified recovery bundle and store its displayed manifest SHA-256 separately, off the server. Standalone verification requires that expected commitment and the matching qualified schema package, not a hash supplied only by the file itself. An export alone does not establish a native anchor; the separate reviewed availability and anchoring steps are required. These exports contain ordinary-poll votes and a manifest, not account keys, social-login pairings or original document files. A download is not an independently verified backup or permission to delete source rows.",
         "When an independent encrypted backup store is configured, Resources offers Create and verify encrypted backup for the exact displayed manifest. The host writes only ciphertext, verifies its restored records, and saves the encrypted-file commitment. Retries preserve the original file. A separate folder on the same disk is not an independent failure domain; the operator must qualify the storage and keep its backup encryption key offline. This copy does not include member decryption keys, social pairings or original document files. Verified primary-provider downloads can fall back to the matching saved backup. A receipt does not authorize pruning or guarantee perpetual availability.",
         "Resources offers a separate signed archive approval after independent backup verification. The verifier cannot approve for the administrator. Approval binds the exact manifest, descriptor, backup and retention delay; a changed verifier or availability older than 15 minutes requires a fresh matching attestation. Revoke approval works without access to the backup store. The bounded on-chain anchor covers one supported ordinary-poll or document-version family and preserves transaction receipts and preallocated completion cursors. Approving does not delete data; full supported-release migration/recovery and live provider qualification still gate release. Native pruning checks actual packed proofs, fresh availability, the current administrator and source pins, terminal retention, revocation and exact cursors; ballots/tallies and permanent vote IDs remain."
+      ]
+    },
+    {
+      "id": "activity",
+      "title": "Connected app activity",
+      "paragraphs": [
+        "The Activity module records activity from approved connected community apps. Its configured policy requires an independent reviewer for approval.",
+        "App registration, member consent and module authorization remain separate. Connecting an app does not grant it treasury, membership or governance authority."
       ]
     }
   ],
@@ -10472,7 +10480,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "decide",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10528,7 +10536,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "works",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10567,7 +10575,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "payroll",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10607,7 +10615,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "grants-rounds",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -10649,7 +10657,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.9.0-alpha.5",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
