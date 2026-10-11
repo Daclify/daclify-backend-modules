@@ -4,17 +4,12 @@
 #include "admission.hpp"
 #include "executives.hpp"
 #include "archive_state.hpp"
+#include "decide_ballots.hpp"
 using namespace daclify;
 CONTRACT decide:public contract {
 public:
  using contract::contract;
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
- TABLE ballot_record {
-  uint64_t id;uint64_t dao_id;uint64_t creator;uint8_t kind;uint8_t choices;uint32_t closes;uint16_t quorum;uint16_t approval;uint64_t denominator;uint64_t max_member;uint64_t cast=0;std::vector<uint64_t> tallies;uint8_t status=0;int16_t winner=-1;std::string metadata;
-  uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
-  EOSLIB_SERIALIZE(ballot_record,(id)(dao_id)(creator)(kind)(choices)(closes)(quorum)(approval)(denominator)(max_member)(cast)(tallies)(status)(winner)(metadata))
- };
- using ballots=ram_table<"ballots"_n,ballot_record,indexed_by<"bydao"_n,const_mem_fun<ballot_record,uint64_t,&ballot_record::by_dao>>>;
  TABLE vote_record {uint64_t id;uint64_t ballot;uint64_t member;uint64_t weight;uint8_t choice;uint64_t ram_owner(name code,uint64_t scope)const{return ballots(code,scope).get(ballot,"BALLOT_UNKNOWN").dao_id;}uint64_t primary_key()const{return id;}uint128_t by_member()const{return (uint128_t(ballot)<<64)|member;}EOSLIB_SERIALIZE(vote_record,(id)(ballot)(member)(weight)(choice))};
  using votes=ram_table<"votes"_n,vote_record,indexed_by<"bymember"_n,const_mem_fun<vote_record,uint128_t,&vote_record::by_member>>>;
  TABLE poll_end {

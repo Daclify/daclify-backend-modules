@@ -6,6 +6,17 @@ export const CONTRACT_VERSION = '0.9.0-alpha.5';
 const CORE_RANGE =
   '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5';
 export const ModulePermissions = Object.freeze({
+  activity: {
+    actions: [
+      'recordact',
+      'askreview',
+      'reviewact',
+      'newappkey',
+      'grantappkey',
+      'linkdecision',
+    ] as const,
+    grants: [] as const,
+  },
   decide: {
     actions: [
       'open',
@@ -78,6 +89,15 @@ export const EndorsementConfigSchema = z.strictObject({
 });
 export const Catalog = Object.freeze([
   ModuleManifestSchema.parse({
+    id: 'activity',
+    version: CONTRACT_VERSION,
+    coreRange: CORE_RANGE,
+    interfaceVersion: 1,
+    configVersion: 1,
+    capabilities: ['content.publish'],
+    helpTopic: 'activity',
+  }),
+  ModuleManifestSchema.parse({
     id: 'decide',
     version: CONTRACT_VERSION,
     coreRange: CORE_RANGE,
@@ -124,6 +144,24 @@ export const Catalog = Object.freeze([
   }),
 ]);
 export const ModuleInstallationSchema = z.discriminatedUnion('id', [
+  z.strictObject({
+    id: z.literal('activity'),
+    account: NativeAccountSchema,
+    version: z.literal(CONTRACT_VERSION),
+    config: z.strictObject({
+      configVersion: z.literal(1),
+      reviewPolicy: z.literal('independent-reviewer'),
+    }),
+    actions: z.tuple([
+      z.literal('recordact'),
+      z.literal('askreview'),
+      z.literal('reviewact'),
+      z.literal('newappkey'),
+      z.literal('grantappkey'),
+      z.literal('linkdecision'),
+    ]),
+    grants: z.tuple([]),
+  }),
   z.strictObject({
     id: z.literal('decide'),
     account: NativeAccountSchema,

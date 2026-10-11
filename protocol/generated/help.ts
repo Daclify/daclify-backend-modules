@@ -136,6 +136,574 @@ export const ModulesHelpBundle={
   "schemaVersion": 1,
   "contracts": [
     {
+      "name": "activity",
+      "abiVersion": "eosio::abi/1.2",
+      "sourceAbiHash": "abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372304925cf5f",
+      "actions": [
+        {
+          "name": "askreview",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "source_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "source_revision",
+              "type": "checksum256"
+            },
+            {
+              "name": "event_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "evidence_cid",
+              "type": "string"
+            },
+            {
+              "name": "evidence_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "grantappkey",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "recipient",
+              "type": "uint64"
+            },
+            {
+              "name": "encryption_key",
+              "type": "string"
+            },
+            {
+              "name": "envelope",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "linkdecision",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "receipt_id",
+              "type": "uint64"
+            },
+            {
+              "name": "decide",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "newappkey",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "security_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "app_revision",
+              "type": "uint64"
+            },
+            {
+              "name": "key_commitment",
+              "type": "checksum256"
+            },
+            {
+              "name": "self_grant",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "recordact",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "source_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "source_revision",
+              "type": "checksum256"
+            },
+            {
+              "name": "event_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "evidence_cid",
+              "type": "string"
+            },
+            {
+              "name": "evidence_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "reviewact",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "receipt_id",
+              "type": "uint64"
+            },
+            {
+              "name": "source_revision",
+              "type": "checksum256"
+            },
+            {
+              "name": "accepted",
+              "type": "bool"
+            },
+            {
+              "name": "evidence_cid",
+              "type": "string"
+            },
+            {
+              "name": "evidence_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "name": "actdecisions",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "decide",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "metadata_hash",
+              "type": "checksum256"
+            }
+          ]
+        },
+        {
+          "name": "activities",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "actor",
+              "type": "uint64"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "name": "source_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "source_revision",
+              "type": "checksum256"
+            },
+            {
+              "name": "event_id",
+              "type": "checksum256"
+            },
+            {
+              "name": "evidence_cid",
+              "type": "string"
+            },
+            {
+              "name": "evidence_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "created_at",
+              "type": "uint32"
+            },
+            {
+              "name": "status",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "actreviews",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "reviewer",
+              "type": "uint64"
+            },
+            {
+              "name": "accepted",
+              "type": "bool"
+            },
+            {
+              "name": "evidence_cid",
+              "type": "string"
+            },
+            {
+              "name": "evidence_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "reviewed_at",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "appcounts",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "receipts",
+              "type": "uint64"
+            },
+            {
+              "name": "epochs",
+              "type": "uint16"
+            },
+            {
+              "name": "current_key_epoch",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "appgrants",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "key_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "recipient",
+              "type": "uint64"
+            },
+            {
+              "name": "encryption_key",
+              "type": "string"
+            },
+            {
+              "name": "envelope",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "appkeys",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "app_id",
+              "type": "uint64"
+            },
+            {
+              "name": "security_epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "app_revision",
+              "type": "uint64"
+            },
+            {
+              "name": "max_member",
+              "type": "uint64"
+            },
+            {
+              "name": "key_commitment",
+              "type": "checksum256"
+            },
+            {
+              "name": "created_at",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
       "sourceAbiHash": "73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150",
@@ -2701,11 +3269,174 @@ export const ModulesHelpBundle={
   "api": [
     {
       "method": "GET",
+      "path": "/v1/daos/:id/apps/:appId/keys",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "appId": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "currentEpoch": {
+            "default": "0",
+            "type": "string",
+            "maxLength": 20
+          },
+          "keys": {
+            "maxItems": 128,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "app_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "security_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "app_revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "max_member": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "key_commitment": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "app_id",
+                "security_epoch",
+                "app_revision",
+                "max_member",
+                "key_commitment",
+                "created_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "grants": {
+            "maxItems": 128,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "key_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "recipient": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "encryption_key": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "envelope": {
+                  "type": "string",
+                  "maxLength": 16384
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "key_epoch",
+                "recipient",
+                "encryption_key",
+                "envelope"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "dao",
+          "appId",
+          "currentEpoch",
+          "keys",
+          "grants"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "activity"
+    },
+    {
+      "method": "GET",
       "path": "/v1/daos/:id/modules",
       "query": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "activities": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "string",
+                "const": "done"
+              }
+            ]
+          },
           "ballots": {
             "anyOf": [
               {
@@ -2850,10 +3581,23 @@ export const ModulesHelpBundle={
               "applications": null,
               "joinApplications": null,
               "elections": null,
-              "terms": null
+              "terms": null,
+              "activities": null
             },
             "type": "object",
             "properties": {
+              "activities": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "ballots": {
                 "anyOf": [
                   {
@@ -2949,6 +3693,7 @@ export const ModulesHelpBundle={
               }
             },
             "required": [
+              "activities",
               "ballots",
               "projects",
               "schedules",
@@ -2975,7 +3720,8 @@ export const ModulesHelpBundle={
                         "works",
                         "payroll",
                         "grants-rounds",
-                        "endorsement-admission"
+                        "endorsement-admission",
+                        "activity"
                       ]
                     },
                     "account": {
@@ -3091,6 +3837,270 @@ export const ModulesHelpBundle={
                 "codeVerified",
                 "actions",
                 "grants"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "activities": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "app_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "actor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "kind": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "source_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "source_revision": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "event_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "evidence_cid": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "evidence_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "key_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "created_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "app_id",
+                "actor",
+                "kind",
+                "source_id",
+                "source_revision",
+                "event_id",
+                "evidence_cid",
+                "evidence_hash",
+                "key_epoch",
+                "created_at",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "activityReviews": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "reviewer": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "accepted": {
+                  "type": "boolean"
+                },
+                "evidence_cid": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "evidence_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "key_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "reviewed_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "reviewer",
+                "accepted",
+                "evidence_cid",
+                "evidence_hash",
+                "key_epoch",
+                "reviewed_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "activityDecisions": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "decide": {
+                  "type": "string",
+                  "maxLength": 13
+                },
+                "ballot_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "metadata_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "decide",
+                "ballot_id",
+                "metadata_hash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "appKeys": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "app_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "security_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "app_revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "max_member": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "key_commitment": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "app_id",
+                "security_epoch",
+                "app_revision",
+                "max_member",
+                "key_commitment",
+                "created_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "appKeyGrants": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "key_epoch": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "recipient": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "encryption_key": {
+                  "type": "string",
+                  "maxLength": 16384
+                },
+                "envelope": {
+                  "type": "string",
+                  "maxLength": 16384
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "key_epoch",
+                "recipient",
+                "encryption_key",
+                "envelope"
               ],
               "additionalProperties": false
             }
@@ -4181,6 +5191,11 @@ export const ModulesHelpBundle={
           "dao",
           "next",
           "modules",
+          "activities",
+          "activityReviews",
+          "activityDecisions",
+          "appKeys",
+          "appKeyGrants",
           "ballots",
           "votes",
           "projects",
@@ -10476,6 +11491,38 @@ export const ModulesHelpBundle={
     }
   ],
   "modules": [
+    {
+      "manifest": {
+        "id": "activity",
+        "version": "0.9.0-alpha.5",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5",
+        "interfaceVersion": 1,
+        "configVersion": 1,
+        "capabilities": [
+          "content.publish"
+        ],
+        "helpTopic": "activity"
+      },
+      "configuration": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "configVersion": {
+            "type": "number",
+            "const": 1
+          },
+          "reviewPolicy": {
+            "type": "string",
+            "const": "independent-reviewer"
+          }
+        },
+        "required": [
+          "configVersion",
+          "reviewPolicy"
+        ],
+        "additionalProperties": false
+      }
+    },
     {
       "manifest": {
         "id": "decide",

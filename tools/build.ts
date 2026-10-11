@@ -2,18 +2,35 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 mkdirSync('.artifacts/contracts', { recursive: true });
-for (const name of ['decide', 'works', 'payroll', 'grants', 'endorse'])
+const compiler = process.env.DACLIFY_CDT_BINARY;
+const environment = compiler
+  ? { ...process.env, LD_LIBRARY_PATH: process.env.DACLIFY_NATIVE_LIBS ?? '' }
+  : process.env;
+if (
+  compiler &&
+  execFileSync(compiler, ['--version'], { env: environment, encoding: 'utf8' }).trim() !==
+    'cdt-cpp version 4.1.1'
+)
+  throw new Error('PINNED_CDT_REQUIRED');
+const contracts = ['decide', 'works', 'payroll', 'grants', 'endorse', 'activity'];
+const selected = process.argv.slice(2);
+if (selected.some((name) => !contracts.includes(name))) throw new Error('CONTRACT_UNKNOWN');
+for (const name of selected.length ? selected : contracts)
   execFileSync(
-    'docker',
+    compiler ?? 'docker',
     [
-      'run',
-      '--rm',
-      '--platform',
-      'linux/amd64',
-      '-v',
-      `${resolve('.')}:/work`,
-      'daclify-v2-toolchain:4.1.1-spring1.2.2',
-      'cdt-cpp',
+      ...(compiler
+        ? []
+        : [
+            'run',
+            '--rm',
+            '--platform',
+            'linux/amd64',
+            '-v',
+            `${resolve('.')}:/work`,
+            'daclify-v2-toolchain:4.1.1-spring1.2.2',
+            'cdt-cpp',
+          ]),
       `contracts/${name}/${name}.cpp`,
       '-O=s',
       '-I',
@@ -28,5 +45,5 @@ for (const name of ['decide', 'works', 'payroll', 'grants', 'endorse'])
       '-contract',
       name,
     ],
-    { stdio: 'inherit' },
+    { stdio: 'inherit', env: environment },
   );

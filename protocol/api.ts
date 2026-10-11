@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ActivityTableSchemas } from '../sdk/generated/activity-schemas.js';
 import {
   DaoRefSchema,
   IdSchema,
@@ -13,7 +14,7 @@ import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { WorksTableSchemas } from '../sdk/generated/works-schemas.js';
 import { PayrollTableSchemas } from '../sdk/generated/payroll-schemas.js';
 export const ModuleDeploymentSchema = z.strictObject({
-  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission']),
+  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission', 'activity']),
   account: NativeAccountSchema,
   version: z.string(),
   codeHash: ChainIdSchema,
@@ -29,6 +30,7 @@ export const ModuleStatusSchema = z.strictObject({
   grants: z.array(NativeAccountSchema),
 });
 export const ModulePageQuerySchema = z.strictObject({
+  activities: z.union([Uint64Schema, z.literal('done')]).optional(),
   ballots: z.union([Uint64Schema, z.literal('done')]).optional(),
   projects: z.union([Uint64Schema, z.literal('done')]).optional(),
   schedules: z.union([Uint64Schema, z.literal('done')]).optional(),
@@ -44,6 +46,7 @@ export const ModuleStateSchema = z.strictObject({
   dao: DaoRefSchema,
   next: z
     .strictObject({
+      activities: Uint64Schema.nullable().default(null),
       ballots: Uint64Schema.nullable(),
       projects: Uint64Schema.nullable(),
       schedules: Uint64Schema.nullable(),
@@ -62,8 +65,14 @@ export const ModuleStateSchema = z.strictObject({
       joinApplications: null,
       elections: null,
       terms: null,
+      activities: null,
     }),
   modules: z.array(ModuleStatusSchema),
+  activities: z.array(ActivityTableSchemas.activities).default([]),
+  activityReviews: z.array(ActivityTableSchemas.actreviews).default([]),
+  activityDecisions: z.array(ActivityTableSchemas.actdecisions).default([]),
+  appKeys: z.array(ActivityTableSchemas.appkeys).default([]),
+  appKeyGrants: z.array(ActivityTableSchemas.appgrants).default([]),
   ballots: z.array(DecideTableSchemas.ballots),
   votes: z.array(DecideTableSchemas.votes),
   projects: z.array(WorksTableSchemas.projects),
@@ -84,6 +93,18 @@ export const ModuleStateSchema = z.strictObject({
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;
 export const ModuleApiRoutes = {
+  appKeys: {
+    method: 'GET',
+    path: '/v1/daos/:id/apps/:appId/keys',
+    response: z.strictObject({
+      dao: DaoRefSchema,
+      appId: IdSchema,
+      currentEpoch: Uint64Schema.default('0'),
+      keys: z.array(ActivityTableSchemas.appkeys).max(128),
+      grants: z.array(ActivityTableSchemas.appgrants).max(128),
+    }),
+    helpTopic: 'activity',
+  },
   state: {
     method: 'GET',
     path: '/v1/daos/:id/modules',

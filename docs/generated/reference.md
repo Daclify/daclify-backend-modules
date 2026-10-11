@@ -148,6 +148,221 @@ The Activity module records activity from approved connected community apps. Its
 
 App registration, member consent and module authorization remain separate. Connecting an app does not grant it treasury, membership or governance authority.
 
+## activity contract
+
+Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372304925cf5f`.
+
+### Action: askreview
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| source_id | checksum256 |
+| source_revision | checksum256 |
+| event_id | checksum256 |
+| evidence_cid | string |
+| evidence_hash | checksum256 |
+| key_epoch | uint64 |
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: grantappkey
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| key_epoch | uint64 |
+| recipient | uint64 |
+| encryption_key | string |
+| envelope | string |
+
+### Action: linkdecision
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| receipt_id | uint64 |
+| decide | name |
+| ballot_id | uint64 |
+
+### Action: newappkey
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| key_epoch | uint64 |
+| security_epoch | uint64 |
+| app_revision | uint64 |
+| key_commitment | checksum256 |
+| self_grant | string |
+
+### Action: recordact
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| source_id | checksum256 |
+| source_revision | checksum256 |
+| event_id | checksum256 |
+| evidence_cid | string |
+| evidence_hash | checksum256 |
+| key_epoch | uint64 |
+
+### Action: reviewact
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| app_id | uint64 |
+| receipt_id | uint64 |
+| source_revision | checksum256 |
+| accepted | bool |
+| evidence_cid | string |
+| evidence_hash | checksum256 |
+| key_epoch | uint64 |
+
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
+
+### Table: actdecisions
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| decide | name |
+| ballot_id | uint64 |
+| metadata_hash | checksum256 |
+
+### Table: activities
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| app_id | uint64 |
+| actor | uint64 |
+| kind | uint8 |
+| source_id | checksum256 |
+| source_revision | checksum256 |
+| event_id | checksum256 |
+| evidence_cid | string |
+| evidence_hash | checksum256 |
+| key_epoch | uint64 |
+| created_at | uint32 |
+| status | uint8 |
+
+### Table: actreviews
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| reviewer | uint64 |
+| accepted | bool |
+| evidence_cid | string |
+| evidence_hash | checksum256 |
+| key_epoch | uint64 |
+| reviewed_at | uint32 |
+
+### Table: appcounts
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| app_id | uint64 |
+| receipts | uint64 |
+| epochs | uint16 |
+| current_key_epoch | uint64 |
+
+### Table: appgrants
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| key_epoch | uint64 |
+| recipient | uint64 |
+| encryption_key | string |
+| envelope | string |
+
+### Table: appkeys
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| app_id | uint64 |
+| security_epoch | uint64 |
+| app_revision | uint64 |
+| max_member | uint64 |
+| key_commitment | checksum256 |
+| created_at | uint32 |
+
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
 ## decide contract
 
 Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150`.
@@ -1161,6 +1376,163 @@ Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa
 | --- | --- |
 | runtime | name |
 
+## GET /v1/daos/:id/apps/:appId/keys
+
+Guide: activity.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "appId": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "currentEpoch": {
+      "default": "0",
+      "type": "string",
+      "maxLength": 20
+    },
+    "keys": {
+      "maxItems": 128,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "app_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "security_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "app_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "max_member": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "key_commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "created_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "app_id",
+          "security_epoch",
+          "app_revision",
+          "max_member",
+          "key_commitment",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "grants": {
+      "maxItems": 128,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "key_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "recipient": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "encryption_key": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "envelope": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "key_epoch",
+          "recipient",
+          "encryption_key",
+          "envelope"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "dao",
+    "appId",
+    "currentEpoch",
+    "keys",
+    "grants"
+  ],
+  "additionalProperties": false
+}
+```
+
 ## GET /v1/daos/:id/modules
 
 Guide: module-reference.
@@ -1174,6 +1546,18 @@ Query:
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "activities": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "string",
+          "const": "done"
+        }
+      ]
+    },
     "ballots": {
       "anyOf": [
         {
@@ -1323,10 +1707,23 @@ Response:
         "applications": null,
         "joinApplications": null,
         "elections": null,
-        "terms": null
+        "terms": null,
+        "activities": null
       },
       "type": "object",
       "properties": {
+        "activities": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ballots": {
           "anyOf": [
             {
@@ -1422,6 +1819,7 @@ Response:
         }
       },
       "required": [
+        "activities",
         "ballots",
         "projects",
         "schedules",
@@ -1448,7 +1846,8 @@ Response:
                   "works",
                   "payroll",
                   "grants-rounds",
-                  "endorsement-admission"
+                  "endorsement-admission",
+                  "activity"
                 ]
               },
               "account": {
@@ -1564,6 +1963,270 @@ Response:
           "codeVerified",
           "actions",
           "grants"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "activities": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "app_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "actor": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "kind": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "source_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_revision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "evidence_cid": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "evidence_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "key_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "created_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "app_id",
+          "actor",
+          "kind",
+          "source_id",
+          "source_revision",
+          "event_id",
+          "evidence_cid",
+          "evidence_hash",
+          "key_epoch",
+          "created_at",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "activityReviews": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "reviewer": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "evidence_cid": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "evidence_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "key_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "reviewed_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "reviewer",
+          "accepted",
+          "evidence_cid",
+          "evidence_hash",
+          "key_epoch",
+          "reviewed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "activityDecisions": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "decide": {
+            "type": "string",
+            "maxLength": 13
+          },
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "metadata_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "decide",
+          "ballot_id",
+          "metadata_hash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "appKeys": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "app_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "security_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "app_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "max_member": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "key_commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "created_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "app_id",
+          "security_epoch",
+          "app_revision",
+          "max_member",
+          "key_commitment",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "appKeyGrants": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "key_epoch": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "recipient": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "encryption_key": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "envelope": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "key_epoch",
+          "recipient",
+          "encryption_key",
+          "envelope"
         ],
         "additionalProperties": false
       }
@@ -2654,6 +3317,11 @@ Response:
     "dao",
     "next",
     "modules",
+    "activities",
+    "activityReviews",
+    "activityDecisions",
+    "appKeys",
+    "appKeyGrants",
     "ballots",
     "votes",
     "projects",
@@ -9062,6 +9730,36 @@ Response:
     "dao",
     "exports",
     "next"
+  ],
+  "additionalProperties": false
+}
+```
+
+## activity configuration
+
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5.
+
+Capabilities: content.publish.
+
+Guide: activity.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "configVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "reviewPolicy": {
+      "type": "string",
+      "const": "independent-reviewer"
+    }
+  },
+  "required": [
+    "configVersion",
+    "reviewPolicy"
   ],
   "additionalProperties": false
 }

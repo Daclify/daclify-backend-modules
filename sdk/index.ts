@@ -1,4 +1,19 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
+import { activityAbi, type ActivityActions } from './generated/activity.js';
+import { ActivityActionSchemas } from './generated/activity-schemas.js';
+export { activityAbi, activityAbiHash } from './generated/activity.js';
+export { ActivityActionSchemas, ActivityTableSchemas } from './generated/activity-schemas.js';
+export type { ActivityActions };
+export function encodeActivity<K extends keyof ActivityActions>(
+  name: K,
+  data: ActivityActions[K],
+): Uint8Array {
+  return Serializer.encode({
+    abi: ABI.from(activityAbi),
+    type: name,
+    object: ActivityActionSchemas[name].parse(data),
+  }).array;
+}
 export { ConnectedPaymentClient } from './connected-payments.js';
 import { endorseAbi, type EndorseActions } from './generated/endorse.js';
 import { EndorseActionSchemas } from './generated/endorse-schemas.js';
@@ -75,3 +90,5 @@ export function encodePayroll<K extends keyof PayrollActions>(
 }
 
 export { ModuleCodeHashes } from './generated/releases.js';
+
+export { CommunityActivityClient, ActivityIntentSchema, type ActivityIntent } from './community-activity.js';
