@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.9.0-alpha.22 · interface 1.
+Package 0.10.0-alpha.1 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -147,6 +147,20 @@ Resources offers a separate signed archive approval after independent backup ver
 The Activity module records activity from approved connected community apps. Its configured policy requires an independent reviewer for approval.
 
 App registration, member consent and module authorization remain separate. Connecting an app does not grant it treasury, membership or governance authority.
+
+## Vote on Telos network ballots
+
+Telos governance in the Hub opens public retained proposal and election records from the configured Telos Zero network. Browsing requires no account. The source is telos.decide and its standard 4,VOTE treasury; records appear in contract order with bounded pages. Filters apply to the displayed page. Closed and archived records show stored option totals. An ended voting period whose status is still voting is awaiting closure. Deleted ballots and cleaned receipts are outside this history.
+
+Each ballot shows its publisher, category, period, method, selection limits and stored settings. Public VOTE ballots are not automatically endorsed by Telos. Unknown candidate labels remain contract option names. HTTPS content references can open separately; the app does not render remote content or execute ballot metadata.
+
+Vote with Telos Zero uses Anchor and a supported direct-key active permission. Continuing creates or opens a Daclify account paired with the freshly authenticated native wallet. A cancelled vote can leave that service account in place. If you already use another sign-in method, pair this wallet in Account first to retain one account. Existing paired accounts and vault keys are preserved.
+
+The app reads the contract voter balance selected by the ballot, staked when votestake is enabled and liquid otherwise. Standard VOTE stake reflects the external TLOS stake and REX balance recorded by Decide. Existing registered voters may need to refresh that balance in the Telos app after staking changes. Daclify does not calculate a new token weight. A first registration and cast are atomic native actions. Supported methods are 1token1vote, 1tokennvote and 1acct1vote; light ballots and other methods remain read-only.
+
+External votes use your native account authority. They do not spend Daclify credits, create a Daclify DAO membership or grant permission in another DAO. Explore other DAOs after voting; Account and key setup provides the existing encrypted-vault path needed for new Daclify memberships and private documents.
+
+Voting is enabled only when operator-approved Decide code and ABI pins match the configured chain. The wallet checks the exact transaction and fresh ballot state before broadcast. Keep a pending transaction reference if confirmation or the broadcast response is uncertain. The page checks irreversibility without resubmitting. Pending references persist in this tab; a provider without transaction-status support needs an external chain check. Actual mainnet voting still requires live-wallet qualification by the operator.
 
 ## activity contract
 
@@ -9735,9 +9749,941 @@ Response:
 }
 ```
 
+## GET /v1/telos/ballots
+
+Guide: telos-network-ballots.
+
+No request body.
+
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "cursor": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rpcUrl": {
+          "type": "string",
+          "maxLength": 512,
+          "format": "uri"
+        },
+        "contract": {
+          "type": "string",
+          "const": "telos.decide"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "local",
+            "testnet",
+            "mainnet"
+          ]
+        },
+        "codeHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "abiHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "chainId",
+        "rpcUrl",
+        "contract",
+        "environment",
+        "codeHash",
+        "abiHash"
+      ],
+      "additionalProperties": false
+    },
+    "ballots": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 13,
+            "pattern": "^[a-z1-5.]*$"
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 13,
+            "pattern": "^[a-z1-5.]*$"
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 13,
+            "pattern": "^[a-z1-5.]*$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "setup",
+              "voting",
+              "closed",
+              "cancelled",
+              "archived"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "treasury_symbol": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "voting_method": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 13,
+            "pattern": "^[a-z1-5.]*$"
+          },
+          "min_options": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 255
+          },
+          "max_options": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 255
+          },
+          "options": {
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 13,
+                  "pattern": "^[a-z1-5.]*$"
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 32,
+                  "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total_voters": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "total_delegates": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "total_raw_weight": {
+            "type": "string",
+            "maxLength": 32,
+            "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+          },
+          "cleaned_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "settings": {
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 13,
+                  "pattern": "^[a-z1-5.]*$"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "const": 0
+                    },
+                    {
+                      "type": "number",
+                      "const": 1
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "begin_time": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+          }
+        },
+        "required": [
+          "ballot_name",
+          "category",
+          "publisher",
+          "status",
+          "title",
+          "description",
+          "content",
+          "treasury_symbol",
+          "voting_method",
+          "min_options",
+          "max_options",
+          "options",
+          "total_voters",
+          "total_delegates",
+          "total_raw_weight",
+          "cleaned_count",
+          "settings",
+          "begin_time",
+          "end_time"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "signingAvailable": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "source",
+    "ballots",
+    "nextCursor",
+    "observedAt",
+    "signingAvailable"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/telos/ballots/:ballot
+
+Guide: telos-network-ballots.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rpcUrl": {
+          "type": "string",
+          "maxLength": 512,
+          "format": "uri"
+        },
+        "contract": {
+          "type": "string",
+          "const": "telos.decide"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "local",
+            "testnet",
+            "mainnet"
+          ]
+        },
+        "codeHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "abiHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "chainId",
+        "rpcUrl",
+        "contract",
+        "environment",
+        "codeHash",
+        "abiHash"
+      ],
+      "additionalProperties": false
+    },
+    "ballot": {
+      "type": "object",
+      "properties": {
+        "ballot_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "setup",
+            "voting",
+            "closed",
+            "cancelled",
+            "archived"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "treasury_symbol": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "voting_method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "min_options": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "max_options": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "options": {
+          "maxItems": 256,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "maxLength": 13,
+                "pattern": "^[a-z1-5.]*$"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 32,
+                "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "total_voters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "total_delegates": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "total_raw_weight": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+        },
+        "cleaned_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "settings": {
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "maxLength": 13,
+                "pattern": "^[a-z1-5.]*$"
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 0
+                  },
+                  {
+                    "type": "number",
+                    "const": 1
+                  }
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "begin_time": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+        },
+        "end_time": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+        }
+      },
+      "required": [
+        "ballot_name",
+        "category",
+        "publisher",
+        "status",
+        "title",
+        "description",
+        "content",
+        "treasury_symbol",
+        "voting_method",
+        "min_options",
+        "max_options",
+        "options",
+        "total_voters",
+        "total_delegates",
+        "total_raw_weight",
+        "cleaned_count",
+        "settings",
+        "begin_time",
+        "end_time"
+      ],
+      "additionalProperties": false
+    },
+    "signingAvailable": {
+      "type": "boolean"
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    }
+  },
+  "required": [
+    "source",
+    "ballot",
+    "signingAvailable",
+    "observedAt"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/telos/ballots/:ballot/voters/:voter
+
+Guide: telos-network-ballots.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "registered": {
+      "type": "boolean"
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alreadyVoted": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "account",
+    "registered",
+    "weight",
+    "alreadyVoted"
+  ],
+  "additionalProperties": false
+}
+```
+
+## POST /v1/telos/votes/prepare
+
+Guide: telos-network-ballots.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ballot": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 13,
+      "pattern": "^[a-z1-5.]*$"
+    },
+    "voter": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "options": {
+      "minItems": 1,
+      "maxItems": 255,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 13,
+        "pattern": "^[a-z1-5.]*$"
+      }
+    }
+  },
+  "required": [
+    "ballot",
+    "voter",
+    "options"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rpcUrl": {
+          "type": "string",
+          "maxLength": 512,
+          "format": "uri"
+        },
+        "contract": {
+          "type": "string",
+          "const": "telos.decide"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "local",
+            "testnet",
+            "mainnet"
+          ]
+        },
+        "codeHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "abiHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "chainId",
+        "rpcUrl",
+        "contract",
+        "environment",
+        "codeHash",
+        "abiHash"
+      ],
+      "additionalProperties": false
+    },
+    "ballot": {
+      "type": "object",
+      "properties": {
+        "ballot_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "setup",
+            "voting",
+            "closed",
+            "cancelled",
+            "archived"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "treasury_symbol": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "voting_method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 13,
+          "pattern": "^[a-z1-5.]*$"
+        },
+        "min_options": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "max_options": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "options": {
+          "maxItems": 256,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "maxLength": 13,
+                "pattern": "^[a-z1-5.]*$"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 32,
+                "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "total_voters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "total_delegates": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "total_raw_weight": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+        },
+        "cleaned_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "settings": {
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "maxLength": 13,
+                "pattern": "^[a-z1-5.]*$"
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 0
+                  },
+                  {
+                    "type": "number",
+                    "const": 1
+                  }
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "begin_time": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+        },
+        "end_time": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?$"
+        }
+      },
+      "required": [
+        "ballot_name",
+        "category",
+        "publisher",
+        "status",
+        "title",
+        "description",
+        "content",
+        "treasury_symbol",
+        "voting_method",
+        "min_options",
+        "max_options",
+        "options",
+        "total_voters",
+        "total_delegates",
+        "total_raw_weight",
+        "cleaned_count",
+        "settings",
+        "begin_time",
+        "end_time"
+      ],
+      "additionalProperties": false
+    },
+    "voter": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "registered": {
+          "type": "boolean"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{4} VOTE$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "alreadyVoted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account",
+        "registered",
+        "weight",
+        "alreadyVoted"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "minItems": 1,
+      "maxItems": 255,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 13,
+        "pattern": "^[a-z1-5.]*$"
+      }
+    },
+    "expires": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    }
+  },
+  "required": [
+    "source",
+    "ballot",
+    "voter",
+    "options",
+    "expires"
+  ],
+  "additionalProperties": false
+}
+```
+
 ## activity configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: content.publish.
 
@@ -9767,7 +10713,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -9819,7 +10765,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9855,7 +10801,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -9892,7 +10838,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: obligation.create.
 
@@ -9932,7 +10878,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.14.0-alpha.1.
 
 Capabilities: member.manage.
 

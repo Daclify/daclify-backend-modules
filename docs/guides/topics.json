@@ -125,5 +125,17 @@
       "The Activity module records activity from approved connected community apps. Its configured policy requires an independent reviewer for approval.",
       "App registration, member consent and module authorization remain separate. Connecting an app does not grant it treasury, membership or governance authority."
     ]
+  },
+  {
+    "id": "telos-network-ballots",
+    "title": "Vote on Telos network ballots",
+    "paragraphs": [
+      "Telos governance in the Hub opens public retained proposal and election records from the configured Telos Zero network. Browsing requires no account. The source is telos.decide and its standard 4,VOTE treasury; records appear in contract order with bounded pages. Filters apply to the displayed page. Closed and archived records show stored option totals. An ended voting period whose status is still voting is awaiting closure. Deleted ballots and cleaned receipts are outside this history.",
+      "Each ballot shows its publisher, category, period, method, selection limits and stored settings. Public VOTE ballots are not automatically endorsed by Telos. Unknown candidate labels remain contract option names. HTTPS content references can open separately; the app does not render remote content or execute ballot metadata.",
+      "Vote with Telos Zero uses Anchor and a supported direct-key active permission. Continuing creates or opens a Daclify account paired with the freshly authenticated native wallet. A cancelled vote can leave that service account in place. If you already use another sign-in method, pair this wallet in Account first to retain one account. Existing paired accounts and vault keys are preserved.",
+      "The app reads the contract voter balance selected by the ballot, staked when votestake is enabled and liquid otherwise. Standard VOTE stake reflects the external TLOS stake and REX balance recorded by Decide. Existing registered voters may need to refresh that balance in the Telos app after staking changes. Daclify does not calculate a new token weight. A first registration and cast are atomic native actions. Supported methods are 1token1vote, 1tokennvote and 1acct1vote; light ballots and other methods remain read-only.",
+      "External votes use your native account authority. They do not spend Daclify credits, create a Daclify DAO membership or grant permission in another DAO. Explore other DAOs after voting; Account and key setup provides the existing encrypted-vault path needed for new Daclify memberships and private documents.",
+      "Voting is enabled only when operator-approved Decide code and ABI pins match the configured chain. The wallet checks the exact transaction and fresh ballot state before broadcast. Keep a pending transaction reference if confirmation or the broadcast response is uncertain. The page checks irreversibility without resubmitting. Pending references persist in this tab; a provider without transaction-status support needs an external chain check. Actual mainnet voting still requires live-wallet qualification by the operator."
+    ]
   }
 ]

@@ -12,6 +12,7 @@ import {
   ModuleInstallationSchema,
 } from '../../protocol/index.js';
 import { ModuleApiRoutes } from '../../protocol/api.js';
+import { TelosGovernanceRoutes } from '../../protocol/telos-governance.js';
 import { ArchiveRoutes } from '../../protocol/archive.js';
 
 const topics: unknown = JSON.parse(await readFile('docs/guides/topics.json', 'utf8'));
@@ -51,16 +52,18 @@ const modules = Catalog.map((manifest) => {
   if (!schema) throw new Error('Missing documented module configuration');
   return { manifest, configuration: z.toJSONSchema(schema, { io: 'input' }) };
 });
-const api = [...Object.values(ModuleApiRoutes), ...Object.values(ArchiveRoutes)].map(
-  (endpoint) => ({
-    method: endpoint.method,
-    path: endpoint.path,
-    ...('query' in endpoint ? { query: z.toJSONSchema(endpoint.query, { io: 'input' }) } : {}),
-    ...('input' in endpoint ? { input: z.toJSONSchema(endpoint.input, { io: 'input' }) } : {}),
-    response: z.toJSONSchema(endpoint.response, { io: 'output' }),
-    helpTopic: endpoint.helpTopic,
-  }),
-);
+const api = [
+  ...Object.values(ModuleApiRoutes),
+  ...Object.values(ArchiveRoutes),
+  ...Object.values(TelosGovernanceRoutes),
+].map((endpoint) => ({
+  method: endpoint.method,
+  path: endpoint.path,
+  ...('query' in endpoint ? { query: z.toJSONSchema(endpoint.query, { io: 'input' }) } : {}),
+  ...('input' in endpoint ? { input: z.toJSONSchema(endpoint.input, { io: 'input' }) } : {}),
+  response: z.toJSONSchema(endpoint.response, { io: 'output' }),
+  helpTopic: endpoint.helpTopic,
+}));
 const output = generateDocumentation(
   { producer: 'modules', packageVersion: VERSION, interfaceVersion: 1, topics },
   contracts,

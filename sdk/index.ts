@@ -15,6 +15,13 @@ export function encodeActivity<K extends keyof ActivityActions>(
   }).array;
 }
 export { ConnectedPaymentClient } from './connected-payments.js';
+export {
+  TelosGovernanceClient,
+  telosBallotSupportsVoting,
+  telosVoteActions,
+  telosDecideAbi,
+} from './telos-governance.js';
+export type { TelosGovernanceRpc } from './telos-governance.js';
 import { endorseAbi, type EndorseActions } from './generated/endorse.js';
 import { EndorseActionSchemas } from './generated/endorse-schemas.js';
 export { endorseAbi, endorseAbiHash } from './generated/endorse.js';
@@ -91,4 +98,8 @@ export function encodePayroll<K extends keyof PayrollActions>(
 
 export { ModuleCodeHashes } from './generated/releases.js';
 
-export { CommunityActivityClient, ActivityIntentSchema, type ActivityIntent } from './community-activity.js';
+export {
+  CommunityActivityClient,
+  ActivityIntentSchema,
+  type ActivityIntent,
+} from './community-activity.js';
