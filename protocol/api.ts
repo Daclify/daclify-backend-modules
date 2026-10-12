@@ -92,7 +92,60 @@ export const ModuleStateSchema = z.strictObject({
 });
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;
+export const GoverningDocumentCategories = Object.freeze([
+  'Constitution',
+  'Policy',
+  'Agreement',
+  'Legal document',
+  'Other',
+]);
+export const GoverningDocumentStatuses = Object.freeze([
+  'Awaiting approval',
+  'Adopted',
+  'Rejected',
+  'Cancelled',
+  'Expired',
+]);
+export const GoverningDocumentQuerySchema = z
+  .strictObject({
+    registerId: IdSchema.optional(),
+    adoptionId: IdSchema.optional(),
+    after: Uint64Schema.optional(),
+    memberId: IdSchema.optional(),
+  })
+  .refine((query) => !(query.registerId && query.adoptionId), {
+    message: 'Choose a registration or an adoption',
+  });
+export const GoverningDocumentPageSchema = z.strictObject({
+  dao: DaoRefSchema,
+  available: z.boolean(),
+  module: ModuleStatusSchema.nullable(),
+  policyRevision: Uint64Schema.nullable().default(null),
+  registrations: z.array(DecideTableSchemas.docregs).max(25),
+  changes: z.array(DecideTableSchemas.docchanges).max(50),
+  acceptances: z.array(DecideTableSchemas.docaccepts).max(25),
+  acceptedAdoptionIds: z.array(IdSchema).max(25),
+  ballots: z.array(DecideTableSchemas.ballots).max(50),
+  votes: z.array(DecideTableSchemas.votes).max(50),
+  next: Uint64Schema.nullable(),
+});
+export type GoverningDocumentQuery = z.infer<typeof GoverningDocumentQuerySchema>;
+export type GoverningDocumentPage = z.infer<typeof GoverningDocumentPageSchema>;
 export const ModuleApiRoutes = {
+  clearDocuments: {
+    method: 'POST',
+    path: '/v1/decide/clear-documents',
+    input: z.strictObject({ dao: DaoRefSchema, proposalIds: z.array(IdSchema).min(1).max(25) }),
+    response: z.strictObject({ transactionId: ChainIdSchema }),
+    helpTopic: 'governing-documents',
+  },
+  documents: {
+    method: 'GET',
+    path: '/v1/daos/:id/governing-documents',
+    query: GoverningDocumentQuerySchema,
+    response: GoverningDocumentPageSchema,
+    helpTopic: 'governing-documents',
+  },
   appKeys: {
     method: 'GET',
     path: '/v1/daos/:id/apps/:appId/keys',

@@ -1,10 +1,54 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150';
+export const decideAbiHash = 'ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc1a960f8173';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
   "structs": [
+    {
+      "name": "ackdoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "adoption_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "adoptdoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "proposal_id",
+          "type": "uint64"
+        }
+      ]
+    },
     {
       "name": "archive_prune_proof",
       "base": "",
@@ -118,6 +162,28 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "canceldoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "proposal_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "checkmig",
       "base": "",
       "fields": [
@@ -142,6 +208,120 @@ export const decideAbi = {
         {
           "name": "dao_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "cleardocs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "proposal_ids",
+          "type": "uint64[]"
+        }
+      ]
+    },
+    {
+      "name": "document_acceptance",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "adoption_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "accepted_at",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "document_change",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "register_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "source_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "expected_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "policy_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "proposer",
+          "type": "uint64"
+        },
+        {
+          "name": "proposed_at",
+          "type": "uint32"
+        },
+        {
+          "name": "deadline",
+          "type": "uint32"
+        },
+        {
+          "name": "adopted_at",
+          "type": "uint32"
+        },
+        {
+          "name": "adopted_by",
+          "type": "uint64"
+        },
+        {
+          "name": "status",
+          "type": "uint8"
         }
       ]
     },
@@ -257,6 +437,48 @@ export const decideAbi = {
         },
         {
           "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "governing_document",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "category",
+          "type": "uint8"
+        },
+        {
+          "name": "approval",
+          "type": "uint8"
+        },
+        {
+          "name": "track_acceptance",
+          "type": "bool"
+        },
+        {
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "name": "adopted_id",
+          "type": "uint64"
+        },
+        {
+          "name": "pending_id",
           "type": "uint64"
         }
       ]
@@ -608,6 +830,40 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "proposedoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "register_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "expected_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "prunevotes",
       "base": "",
       "fields": [
@@ -714,6 +970,40 @@ export const decideAbi = {
         {
           "name": "document_version",
           "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "regdoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "category",
+          "type": "uint8"
+        },
+        {
+          "name": "approval",
+          "type": "uint8"
+        },
+        {
+          "name": "track_acceptance",
+          "type": "bool"
         }
       ]
     },
@@ -940,6 +1230,16 @@ export const decideAbi = {
   ],
   "actions": [
     {
+      "name": "ackdoc",
+      "type": "ackdoc",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "adoptdoc",
+      "type": "adoptdoc",
+      "ricardian_contract": ""
+    },
+    {
       "name": "backfillrefs",
       "type": "backfillrefs",
       "ricardian_contract": ""
@@ -950,6 +1250,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "canceldoc",
+      "type": "canceldoc",
+      "ricardian_contract": ""
+    },
+    {
       "name": "checkmig",
       "type": "checkmig",
       "ricardian_contract": ""
@@ -957,6 +1262,11 @@ export const decideAbi = {
     {
       "name": "checkquota",
       "type": "checkquota",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "cleardocs",
+      "type": "cleardocs",
       "ricardian_contract": ""
     },
     {
@@ -1005,6 +1315,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "proposedoc",
+      "type": "proposedoc",
+      "ricardian_contract": ""
+    },
+    {
       "name": "prunevotes",
       "type": "prunevotes",
       "ricardian_contract": ""
@@ -1012,6 +1327,11 @@ export const decideAbi = {
     {
       "name": "recall",
       "type": "recall",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "regdoc",
+      "type": "regdoc",
       "ricardian_contract": ""
     },
     {
@@ -1034,6 +1354,27 @@ export const decideAbi = {
     {
       "name": "ballots",
       "type": "ballot_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "docaccepts",
+      "type": "document_acceptance",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "docchanges",
+      "type": "document_change",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "docregs",
+      "type": "governing_document",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -1127,6 +1468,18 @@ export const decideAbi = {
   "ricardian_clauses": [],
   "action_results": []
 } satisfies ABI.Def;
+export interface ackdoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  adoption_id: string;
+}
+export interface adoptdoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  proposal_id: string;
+}
 export interface archive_prune_proof {
   primary_key: string;
   siblings: string[];
@@ -1157,6 +1510,12 @@ export interface ballot_record {
 export interface bindrampool {
   runtime: string;
 }
+export interface canceldoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  proposal_id: string;
+}
 export interface checkmig {
   runtime: string;
   kind: number;
@@ -1164,6 +1523,36 @@ export interface checkmig {
 export interface checkquota {
   runtime: string;
   dao_id: string;
+}
+export interface cleardocs {
+  runtime: string;
+  dao_id: string;
+  proposal_ids: string[];
+}
+export interface document_acceptance {
+  id: string;
+  dao_id: string;
+  adoption_id: string;
+  member_id: string;
+  accepted_at: number;
+}
+export interface document_change {
+  id: string;
+  dao_id: string;
+  register_id: string;
+  document_id: string;
+  document_version: number;
+  commitment: string;
+  source_hash: string;
+  expected_revision: string;
+  policy_revision: string;
+  ballot_id: string;
+  proposer: string;
+  proposed_at: number;
+  deadline: number;
+  adopted_at: number;
+  adopted_by: string;
+  status: number;
 }
 export interface election_record {
   id: string;
@@ -1195,6 +1584,17 @@ export interface finalize {
   runtime: string;
   dao_id: string;
   ballot_id: string;
+}
+export interface governing_document {
+  id: string;
+  dao_id: string;
+  document_id: string;
+  category: number;
+  approval: number;
+  track_acceptance: boolean;
+  revision: string;
+  adopted_id: string;
+  pending_id: string;
 }
 export interface grant_execution {
   ballot_id: string;
@@ -1287,6 +1687,15 @@ export interface poll_end {
   completed_at: number;
   legacy: boolean;
 }
+export interface proposedoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  register_id: string;
+  document_version: number;
+  expected_revision: string;
+  ballot_id: string;
+}
 export interface prunevotes {
   runtime: string;
   dao_id: string;
@@ -1316,6 +1725,15 @@ export interface recall {
   term_id: string;
   document_id: string;
   document_version: number;
+}
+export interface regdoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  document_id: string;
+  category: number;
+  approval: number;
+  track_acceptance: boolean;
 }
 export interface scanram {
   runtime: string;
@@ -1377,10 +1795,14 @@ export interface work_execution_record {
   executed: boolean;
 }
 export interface DecideActions {
+  ackdoc: ackdoc;
+  adoptdoc: adoptdoc;
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
+  canceldoc: canceldoc;
   checkmig: checkmig;
   checkquota: checkquota;
+  cleardocs: cleardocs;
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;
@@ -1390,8 +1812,10 @@ export interface DecideActions {
   open: open;
   openaward: openaward;
   openwork: openwork;
+  proposedoc: proposedoc;
   prunevotes: prunevotes;
   recall: recall;
+  regdoc: regdoc;
   scanram: scanram;
   startelect: startelect;
   vote: vote;

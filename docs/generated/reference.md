@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.4 · interface 1.
+Package 0.10.0-alpha.5 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -163,6 +163,20 @@ External votes use your native account authority. They do not spend Daclify cred
 Voting is enabled only when operator-approved Decide code and ABI pins match the configured chain. The wallet checks the exact transaction and fresh ballot state before broadcast. Keep a pending transaction reference if confirmation or the broadcast response is uncertain. The page checks irreversibility without resubmitting. Pending references persist in this tab; a provider without transaction-status support needs an external chain check. Actual mainnet voting still requires live-wallet qualification by the operator.
 
 Block producer standings come from eosio using get_producers and the chain’s active producer schedule. A registered producer is not necessarily in the active schedule. Vote weights are contract weighted votes rather than direct TLOS balances. Producer voting and Foundation leaderboard voting are read-only in Daclify pending separate signing qualification; the Telos app remains available. This view does not provide historic producer schedules.
+
+## Constitutions and legal documents
+
+In Documents, an administrator registers an existing document as Constitution, Policy, Agreement, Legal document or Other. Choose administrator approval or a member vote, and optionally track member acceptance. These choices remain fixed for that registration. Each DAO can register one Constitution and up to 64 managed documents.
+
+Publishing a version creates content, not adoption. Propose an exact version, review it and adopt it through the chosen approval rule. A vote uses the DAO’s configured quorum, threshold and duration. Finalize after voting closes, then adopt the passed version. Uploading another revision never replaces a pending or adopted version.
+
+Each proposal pins its version, content commitment, adoption revision and contract code hash. A voting proposal also pins the governance policy revision. Adoption is once-only; changed policy or code requires a new proposal. Proposals expire seven days after the vote closes, or seven days after administrator submission. Cancel an open proposal or clear a rejected/expired proposal; finalizing its ballot remains necessary to release its governance lock.
+
+Open the adopted content before confirming that you have reviewed and accept that version. Signing creates one acceptance record for your existing DAO member ID. Later amendments need a new acknowledgement; old records remain. Tracking acceptance does not change membership or voting rights and does not certify legal enforceability or external signatures.
+
+Existing encryption and historic-access rules apply. Private bodies and filenames stay encrypted; document IDs, categories, proposal/vote outcomes and acceptance records are public chain metadata. If an old epoch is unavailable, ask an authorized key holder for permitted access or restore the protected version; do not acknowledge unread content.
+
+Formal management requires the matching upgraded core and Decide binaries, installed action permissions, document-reference coverage and RAM migration. Unsupported deployments keep ordinary Documents available. Proposed/adopted versions and their bound ballots remain protected from ordinary archive pruning; rejected or expired proposal references can be released in batches of at most 25.
 
 ## activity contract
 
@@ -381,7 +395,25 @@ Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372
 
 ## decide contract
 
-Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc6cce30e150`.
+Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc1a960f8173`.
+
+### Action: ackdoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| adoption_id | uint64 |
+
+### Action: adoptdoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| proposal_id | uint64 |
 
 ### Action: backfillrefs
 
@@ -398,6 +430,15 @@ Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc
 | --- | --- |
 | runtime | name |
 
+### Action: canceldoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| proposal_id | uint64 |
+
 ### Action: checkmig
 
 | Field | ABI type |
@@ -411,6 +452,14 @@ Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc
 | --- | --- |
 | runtime | name |
 | dao_id | uint64 |
+
+### Action: cleardocs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| proposal_ids | uint64[] |
 
 ### Action: execute
 
@@ -517,6 +566,18 @@ Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc
 | approval | uint16 |
 | metadata | string |
 
+### Action: proposedoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| register_id | uint64 |
+| document_version | uint32 |
+| expected_revision | uint64 |
+| ballot_id | uint64 |
+
 ### Action: prunevotes
 
 | Field | ABI type |
@@ -538,6 +599,18 @@ Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc
 | term_id | uint64 |
 | document_id | uint64 |
 | document_version | uint32 |
+
+### Action: regdoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| document_id | uint64 |
+| category | uint8 |
+| approval | uint8 |
+| track_acceptance | bool |
 
 ### Action: scanram
 
@@ -585,6 +658,51 @@ Source ABI JSON SHA-256: `73335499b29cdbfa4012638d45159e79b94905ecbe7893b4a20fcc
 | status | uint8 |
 | winner | int16 |
 | metadata | string |
+
+### Table: docaccepts
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| adoption_id | uint64 |
+| member_id | uint64 |
+| accepted_at | uint32 |
+
+### Table: docchanges
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| register_id | uint64 |
+| document_id | uint64 |
+| document_version | uint32 |
+| commitment | checksum256 |
+| source_hash | checksum256 |
+| expected_revision | uint64 |
+| policy_revision | uint64 |
+| ballot_id | uint64 |
+| proposer | uint64 |
+| proposed_at | uint32 |
+| deadline | uint32 |
+| adopted_at | uint32 |
+| adopted_by | uint64 |
+| status | uint8 |
+
+### Table: docregs
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| document_id | uint64 |
+| category | uint8 |
+| approval | uint8 |
+| track_acceptance | bool |
+| revision | uint64 |
+| adopted_id | uint64 |
+| pending_id | uint64 |
 
 ### Table: elections
 
@@ -1391,6 +1509,672 @@ Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+## POST /v1/decide/clear-documents
+
+Guide: governing-documents.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "proposalIds": {
+      "minItems": 1,
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 20
+      }
+    }
+  },
+  "required": [
+    "dao",
+    "proposalIds"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "transactionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "transactionId"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/daos/:id/governing-documents
+
+Guide: governing-documents.
+
+No request body.
+
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "registerId": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "adoptionId": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "after": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "memberId": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "available": {
+      "type": "boolean"
+    },
+    "module": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "deployment": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "decide",
+                    "works",
+                    "payroll",
+                    "grants-rounds",
+                    "endorsement-admission",
+                    "activity"
+                  ]
+                },
+                "account": {
+                  "type": "string",
+                  "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "codeHash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "id",
+                "account",
+                "version",
+                "codeHash"
+              ],
+              "additionalProperties": false
+            },
+            "manifest": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,31}$"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "coreRange": {
+                  "type": "string"
+                },
+                "interfaceVersion": {
+                  "type": "number",
+                  "const": 1
+                },
+                "configVersion": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "capabilities": {
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "ballot.create",
+                      "ballot.finalize",
+                      "ballot.execute",
+                      "obligation.create",
+                      "obligation.execute",
+                      "member.manage",
+                      "credit.issue",
+                      "content.publish",
+                      "notification.send"
+                    ]
+                  }
+                },
+                "helpTopic": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9.-]{1,63}$"
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "coreRange",
+                "interfaceVersion",
+                "configVersion",
+                "capabilities",
+                "helpTopic"
+              ],
+              "additionalProperties": false
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "installed": {
+              "default": false,
+              "type": "boolean"
+            },
+            "compatible": {
+              "type": "boolean"
+            },
+            "codeVerified": {
+              "type": "boolean"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              }
+            },
+            "grants": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              }
+            }
+          },
+          "required": [
+            "deployment",
+            "manifest",
+            "enabled",
+            "installed",
+            "compatible",
+            "codeVerified",
+            "actions",
+            "grants"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policyRevision": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "registrations": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "category": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "approval": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "track_acceptance": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "adopted_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "pending_id": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "document_id",
+          "category",
+          "approval",
+          "track_acceptance",
+          "revision",
+          "adopted_id",
+          "pending_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "changes": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "register_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "expected_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "policy_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "proposer": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "proposed_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "deadline": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "adopted_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "adopted_by": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "register_id",
+          "document_id",
+          "document_version",
+          "commitment",
+          "source_hash",
+          "expected_revision",
+          "policy_revision",
+          "ballot_id",
+          "proposer",
+          "proposed_at",
+          "deadline",
+          "adopted_at",
+          "adopted_by",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "acceptances": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "adoption_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "member_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "accepted_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "adoption_id",
+          "member_id",
+          "accepted_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "acceptedAdoptionIds": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 20
+      }
+    },
+    "ballots": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "creator": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "kind": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "choices": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "closes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "quorum": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "approval": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "denominator": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "max_member": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "cast": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "tallies": {
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "winner": {
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "metadata": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "creator",
+          "kind",
+          "choices",
+          "closes",
+          "quorum",
+          "approval",
+          "denominator",
+          "max_member",
+          "cast",
+          "tallies",
+          "status",
+          "winner",
+          "metadata"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "votes": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "ballot": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "member": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "weight": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "choice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "id",
+          "ballot",
+          "member",
+          "weight",
+          "choice"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "next": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "dao",
+    "available",
+    "module",
+    "policyRevision",
+    "registrations",
+    "changes",
+    "acceptances",
+    "acceptedAdoptionIds",
+    "ballots",
+    "votes",
+    "next"
+  ],
+  "additionalProperties": false
+}
+```
 
 ## GET /v1/daos/:id/apps/:appId/keys
 
@@ -10848,7 +11632,7 @@ Response:
 
 ## activity configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: content.publish.
 
@@ -10878,7 +11662,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -10930,7 +11714,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -10966,7 +11750,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11003,7 +11787,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: obligation.create.
 
@@ -11043,7 +11827,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
+Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5.
 
 Capabilities: member.manage.
 
