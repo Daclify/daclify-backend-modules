@@ -13,7 +13,7 @@ describe('public module codecs', () => {
       expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(true);
       expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(true);
       expect(compatible('0.11.0-alpha.1', manifest.coreRange)).toBe(false);
-      expect(manifest.version).toBe('0.10.0-alpha.1');
+      expect(manifest.version).toBe('0.10.0-alpha.3');
     }
   });
   it('installs the governing-document contract release with its complete action list', () => {
@@ -22,7 +22,7 @@ describe('public module codecs', () => {
       ModuleInstallationSchema.parse({
         id: 'decide',
         account: 'decide',
-        version: '0.10.0-alpha.1',
+        version: '0.10.0-alpha.3',
         config: DecideConfigSchema.parse({
           configVersion: 1,
           weight: 'member',
@@ -47,7 +47,7 @@ describe('public module codecs', () => {
         ],
         grants: ['govlock', 'electexec'],
       }).version,
-    ).toBe('0.10.0-alpha.1');
+    ).toBe('0.10.0-alpha.3');
   });
   it('accepts its pinned core release while refusing unqualified patch and minor releases', () => {
     for (const manifest of Catalog) {
@@ -76,7 +76,11 @@ describe('public module codecs', () => {
       expect(compatible('0.15.0-alpha.1', manifest.coreRange)).toBe(true);
       expect(compatible('0.15.0-alpha.2', manifest.coreRange)).toBe(true);
       expect(compatible('0.15.0-alpha.3', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.4', manifest.coreRange)).toBe(false);
+      expect(compatible('0.15.0-alpha.4', manifest.coreRange)).toBe(true);
+      expect(compatible('0.15.0-alpha.5', manifest.coreRange)).toBe(true);
+      expect(compatible('0.15.0-alpha.6', manifest.coreRange)).toBe(true);
+      expect(compatible('0.15.0-alpha.7', manifest.coreRange)).toBe(true);
+      expect(compatible('0.15.0-alpha.8', manifest.coreRange)).toBe(false);
     }
   });
   it('encodes exact binary member vote data', () => {

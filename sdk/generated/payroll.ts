@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = '8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b0c8548f084';
+export const payrollAbiHash = '6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e332e7a1fa44';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -54,6 +54,50 @@ export const payrollAbi = {
         {
           "name": "dao_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
         }
       ]
     },
@@ -224,6 +268,24 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "scanram",
       "base": "",
       "fields": [
@@ -324,6 +386,11 @@ export const payrollAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "commit",
       "type": "commit",
       "ricardian_contract": ""
@@ -331,6 +398,11 @@ export const payrollAbi = {
     {
       "name": "edit",
       "type": "edit",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanclose",
+      "type": "scanclose",
       "ricardian_contract": ""
     },
     {
@@ -345,6 +417,13 @@ export const payrollAbi = {
     }
   ],
   "tables": [
+    {
+      "name": "closechecks",
+      "type": "closure_check",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
     {
       "name": "controls",
       "type": "control_record",
@@ -407,6 +486,18 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
+}
 export interface commit {
   runtime: string;
   dao_id: string;
@@ -452,6 +543,11 @@ export interface ram_migration_overlay {
 export interface ram_payer_owner {
   runtime: string;
 }
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
+}
 export interface scanram {
   runtime: string;
   table: string;
@@ -478,8 +574,10 @@ export interface PayrollActions {
   bindrampool: bindrampool;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
   commit: commit;
   edit: edit;
+  scanclose: scanclose;
   scanram: scanram;
   settle: settle;
 }

@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const grantsAbiHash = 'ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a2744215216116';
+export const grantsAbiHash = '242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd33157eccc2a94';
 export const grantsAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -162,6 +162,20 @@ export const grantsAbi = {
       ]
     },
     {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "closeapp",
       "base": "",
       "fields": [
@@ -202,6 +216,36 @@ export const grantsAbi = {
         {
           "name": "round_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
         }
       ]
     },
@@ -506,6 +550,24 @@ export const grantsAbi = {
       ]
     },
     {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "scanram",
       "base": "",
       "fields": [
@@ -578,6 +640,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "closeapp",
       "type": "closeapp",
       "ricardian_contract": ""
@@ -603,6 +670,11 @@ export const grantsAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "scanclose",
+      "type": "scanclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanram",
       "type": "scanram",
       "ricardian_contract": ""
@@ -617,6 +689,13 @@ export const grantsAbi = {
     {
       "name": "applications",
       "type": "grant_application",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "closechecks",
+      "type": "closure_check",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -696,6 +775,10 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
 export interface closeapp {
   runtime: string;
   dao_id: string;
@@ -707,6 +790,14 @@ export interface closeround {
   dao_id: string;
   member_id: string;
   round_id: string;
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
 }
 export interface govaward {
   runtime: string;
@@ -787,6 +878,11 @@ export interface reviewapp {
   document_id: string;
   document_version: number;
 }
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
+}
 export interface scanram {
   runtime: string;
   table: string;
@@ -805,11 +901,13 @@ export interface GrantsActions {
   bindrampool: bindrampool;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
   closeapp: closeapp;
   closeround: closeround;
   govaward: govaward;
   newround: newround;
   reviewapp: reviewapp;
+  scanclose: scanclose;
   scanram: scanram;
   submitapp: submitapp;
 }

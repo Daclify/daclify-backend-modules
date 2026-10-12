@@ -36,6 +36,12 @@ public:
   check(paid,"NOT_PAYABLE");
   if(flag==flags.end())flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule.id;r.paused=0;r.last_payout=now;r.label="";});else flags.modify(*flag,same_payer,[&](auto& r){r.last_payout=now;});
  }
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");if(closure_stage(runtime,dao_id,get_self(),3)>=1)return;
+  scan_closure<schedules>(runtime,dao_id,get_self(),3,0,1,limit,[&](const auto& s){if(s.entries.empty()||s.entries.size()>12)return false;obligations debts(runtime,dao_id);auto index=debts.get_index<"bysource"_n>();
+   for(auto id:s.entries){const auto bytes=pack(std::make_tuple(get_self(),id));auto debt=index.find(sha256(bytes.data(),bytes.size()));if(debt==index.end()||debt->source!=get_self()||debt->source_id!=id||debt->status!=2)return false;}return true;});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==3,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION checkquota(name runtime,uint64_t dao_id){
   require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);
@@ -44,6 +50,7 @@ public:
  }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,3,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="adoptpay"_n){
    auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;
    schedules rows(get_self(),runtime.value);controls flags(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();uint32_t count=0;
@@ -57,4 +64,4 @@ public:
  }
 
 };
-EOSIO_DISPATCH(payroll,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))
+EOSIO_DISPATCH(payroll,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))

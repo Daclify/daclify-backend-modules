@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'd9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc95f19399a45';
+export const worksAbiHash = 'f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2a220600427';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -166,6 +166,50 @@ export const worksAbi = {
         {
           "name": "dao_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
         }
       ]
     },
@@ -466,6 +510,24 @@ export const worksAbi = {
       ]
     },
     {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "scanram",
       "base": "",
       "fields": [
@@ -569,6 +631,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "govaccept",
       "type": "govaccept",
       "ricardian_contract": ""
@@ -594,6 +661,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "scanclose",
+      "type": "scanclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanram",
       "type": "scanram",
       "ricardian_contract": ""
@@ -613,6 +685,13 @@ export const worksAbi = {
     {
       "name": "agreements",
       "type": "agreement_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "closechecks",
+      "type": "closure_check",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -702,6 +781,18 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
+}
 export interface govaccept {
   runtime: string;
   dao_id: string;
@@ -781,6 +872,11 @@ export interface review {
   document_id: string;
   document_version: number;
 }
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
+}
 export interface scanram {
   runtime: string;
   table: string;
@@ -807,11 +903,13 @@ export interface WorksActions {
   cancel: cancel;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
   govaccept: govaccept;
   grantwork: grantwork;
   offeragr: offeragr;
   propose: propose;
   review: review;
+  scanclose: scanclose;
   scanram: scanram;
   settle: settle;
   submitwork: submitwork;

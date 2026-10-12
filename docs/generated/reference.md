@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.11 · interface 1.
+Package 0.10.0-alpha.14 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -180,7 +180,7 @@ Formal management requires the matching upgraded core and Decide binaries, insta
 
 ## activity contract
 
-Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372304925cf5f`.
+Source ABI JSON SHA-256: `f1a449c47cecebdd78c4df51df81b6b6d0aedf1ce2251289c33614773f41911a`.
 
 ### Action: askreview
 
@@ -211,6 +211,13 @@ Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372
 | kind | uint8 |
 
 ### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclose
 
 | Field | ABI type |
 | --- | --- |
@@ -285,6 +292,14 @@ Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372
 | evidence_cid | string |
 | evidence_hash | checksum256 |
 | key_epoch | uint64 |
+
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
 
 ### Action: scanram
 
@@ -370,6 +385,17 @@ Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372
 | key_commitment | checksum256 |
 | created_at | uint32 |
 
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
+
 ### Table: ramcursors
 
 | Field | ABI type |
@@ -395,7 +421,7 @@ Source ABI JSON SHA-256: `abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372
 
 ## decide contract
 
-Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc1a960f8173`.
+Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acdcb60a1cafa`.
 
 ### Action: ackdoc
 
@@ -447,6 +473,13 @@ Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc
 | kind | uint8 |
 
 ### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclose
 
 | Field | ABI type |
 | --- | --- |
@@ -612,6 +645,14 @@ Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc
 | approval | uint8 |
 | track_acceptance | bool |
 
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
 ### Action: scanram
 
 | Field | ABI type |
@@ -658,6 +699,17 @@ Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc
 | status | uint8 |
 | winner | int16 |
 | metadata | string |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
 
 ### Table: docaccepts
 
@@ -841,7 +893,7 @@ Source ABI JSON SHA-256: `ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc
 
 ## works contract
 
-Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc95f19399a45`.
+Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2a220600427`.
 
 ### Action: accept
 
@@ -893,6 +945,13 @@ Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc9
 | kind | uint8 |
 
 ### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclose
 
 | Field | ABI type |
 | --- | --- |
@@ -956,6 +1015,14 @@ Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc9
 | document_id | uint64 |
 | document_version | uint32 |
 
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
 ### Action: scanram
 
 | Field | ABI type |
@@ -995,6 +1062,17 @@ Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc9
 | terms | checksum256 |
 | accepted | bool |
 | accepted_at | uint32 |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
 
 ### Table: milestones
 
@@ -1050,7 +1128,7 @@ Source ABI JSON SHA-256: `d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc9
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b0c8548f084`.
+Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e332e7a1fa44`.
 
 ### Action: backfillrefs
 
@@ -1073,6 +1151,13 @@ Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b
 | kind | uint8 |
 
 ### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclose
 
 | Field | ABI type |
 | --- | --- |
@@ -1104,6 +1189,14 @@ Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b
 | paused | uint8 |
 | label | string |
 
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
 ### Action: scanram
 
 | Field | ABI type |
@@ -1119,6 +1212,17 @@ Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b
 | runtime | name |
 | dao_id | uint64 |
 | entry_id | uint64 |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
 
 ### Table: controls
 
@@ -1177,7 +1281,7 @@ Source ABI JSON SHA-256: `8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b
 
 ## grants contract
 
-Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a2744215216116`.
+Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd33157eccc2a94`.
 
 ### Action: amend
 
@@ -1233,6 +1337,13 @@ Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a274
 | kind | uint8 |
 
 ### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclose
 
 | Field | ABI type |
 | --- | --- |
@@ -1296,6 +1407,14 @@ Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a274
 | document_id | uint64 |
 | document_version | uint32 |
 
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
 ### Action: scanram
 
 | Field | ABI type |
@@ -1334,6 +1453,17 @@ Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a274
 | decision_version | uint32 |
 | project_id | uint64 |
 | funding_ballot | uint64 |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
 
 ### Table: ramcursors
 
@@ -1379,7 +1509,7 @@ Source ABI JSON SHA-256: `ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a274
 
 ## endorse contract
 
-Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa6ce9e100f7`.
+Source ABI JSON SHA-256: `3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d3ca30a9f91`.
 
 ### Action: admit
 
@@ -1437,6 +1567,21 @@ Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa
 | runtime | name |
 | dao_id | uint64 |
 
+### Action: clearclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
 ### Action: scanram
 
 | Field | ABI type |
@@ -1464,6 +1609,17 @@ Source ABI JSON SHA-256: `c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa
 | member_id | uint64 |
 | application_id | uint64 |
 | revision | uint64 |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
 
 ### Table: joinapps
 
@@ -11632,7 +11788,7 @@ Response:
 
 ## activity configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: content.publish.
 
@@ -11662,7 +11818,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -11714,7 +11870,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11750,7 +11906,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11787,7 +11943,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: obligation.create.
 
@@ -11827,7 +11983,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.1 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3.
+Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7.
 
 Capabilities: member.manage.
 

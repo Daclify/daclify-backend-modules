@@ -30,9 +30,15 @@ public:
   check(count>=policy.threshold,"ENDORSEMENT_THRESHOLD");daos communities(runtime,runtime.value);const auto& dao=communities.get(dao_id);check(dao.max_member<std::numeric_limits<uint64_t>::max(),"MEMBER_LIMIT");apps.modify(app,same_payer,[&](auto& r){r.admitted=true;r.member_id=dao.max_member+1;});core_action(runtime,get_self(),"admitfrom"_n,pack(std::make_tuple(dao_id,get_self(),application_id,revision)));
  }
  ACTION checkquota(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);}
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");if(closure_stage(runtime,dao_id,get_self(),5)>=1)return;
+  scan_closure<admission_applications>(runtime,dao_id,get_self(),5,0,1,limit,[](const auto& r){return r.admitted||r.expires<=current_time_point().sec_since_epoch();});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==5,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,5,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="joinapps"_n){admission_applications(get_self(),runtime.value).backfill(limit);return;}
   check(false,"RAM_MIGRATION_TABLE");
  }
@@ -43,4 +49,4 @@ private:
  admission_policy current_policy(name runtime,uint64_t dao_id){admission_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"ADMISSION_POLICY_UNKNOWN");check(policy.mode==1&&policy.source==get_self(),"ADMISSION_POLICY_CHANGED");pinned_module(runtime,dao_id,get_self());return policy;}
  void validate(const admission_application& app,uint64_t dao_id,uint64_t revision,const admission_policy& policy){check(app.dao_id==dao_id,"APPLICATION_DOMAIN");check(!app.admitted,"APPLICATION_FROZEN");check(app.revision==revision,"APPLICATION_REVISION");check(app.policy_revision==policy.revision,"ADMISSION_POLICY_CHANGED");check(current_time_point().sec_since_epoch()<app.expires,"APPLICATION_EXPIRED");}
 };
-EOSIO_DISPATCH(endorse,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(applyjoin)(witness)(unwitness)(admit))
+EOSIO_DISPATCH(endorse,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(applyjoin)(witness)(unwitness)(admit))

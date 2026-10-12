@@ -52,9 +52,15 @@ public:
   activity_decisions links(get_self(),runtime.value);check(links.find(receipt_id)==links.end(),"DECISION_EXISTS");links.emplace(get_self(),[&](auto& out){out={receipt_id,dao_id,decide,ballot_id,sha256(b.metadata.data(),b.metadata.size())};});
  }
  ACTION checkquota(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);}
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");if(closure_stage(runtime,dao_id,get_self(),6)>=1)return;
+  scan_closure<activities>(runtime,dao_id,get_self(),6,0,1,limit,[](const auto& r){return r.status!=1;});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==6,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,6,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="activities"_n){activities(get_self(),runtime.value).backfill(limit);return;}
   if(table=="actreviews"_n){activity_reviews(get_self(),runtime.value).backfill(limit);return;}
   if(table=="appcounts"_n){app_counts(get_self(),runtime.value).backfill(limit);return;}
@@ -72,11 +78,12 @@ private:
   check(key.is_object()&&key.size()==4&&key.contains("kty")&&key["kty"]=="EC"&&key.contains("crv")&&key["crv"]=="P-256"&&text(key,"x",43)&&text(key,"y",43)&&body.is_object()&&body.size()==4&&body.contains("version")&&body["version"]==1&&body.contains("algorithm")&&body["algorithm"]=="AES-256-GCM"&&text(body,"iv",16)&&text(body,"ciphertext",64),"APP_GRANT_JSON");
  }
  std::string hex(checksum256 value){const auto bytes=value.extract_as_byte_array();std::string out;out.reserve(64);for(auto byte:bytes){out.push_back("0123456789abcdef"[byte>>4]);out.push_back("0123456789abcdef"[byte&15]);}return out;}
- connected_app_record actor(name runtime,uint64_t dao,uint64_t member,uint64_t app,name action_name,bool admin=false,bool reviewer=false){check(get_sender()==runtime,"ACTOR_SENDER");module_actor(runtime,dao,member,get_self(),action_name,admin,reviewer);return active_app(runtime,dao,app,get_self());}
+ connected_app_record registration(name runtime,uint64_t dao,uint64_t app){connected_apps rows(runtime,dao);const auto value=rows.get(app,"APP_UNKNOWN");check(value.enabled||dao_lifecycle(runtime,dao)==1,"APP_DISABLED");check(value.target==get_self(),"APP_SCOPE");return value;}
+ connected_app_record actor(name runtime,uint64_t dao,uint64_t member,uint64_t app,name action_name,bool admin=false,bool reviewer=false){check(get_sender()==runtime,"ACTOR_SENDER");module_actor(runtime,dao,member,get_self(),action_name,admin,reviewer);return registration(runtime,dao,app);}
  app_count capacity(name runtime,uint64_t dao,uint64_t app){app_counts rows(get_self(),runtime.value);auto index=rows.get_index<"byapp"_n>();auto found=index.find((uint128_t(dao)<<64)|app);if(found!=index.end())return *found;auto id=rows.available_primary_key();if(!id)id=1;return *rows.emplace(get_self(),[&](auto& r){r={id,dao,app,0,0};});}
  void evidence(name runtime,uint64_t dao,uint64_t app,const std::string& cid,checksum256 hash,uint64_t epoch){
   check(cid.size()<=128,"EVIDENCE_CID");if(cid.empty()){check(hash==checksum256()&&epoch==0,"EVIDENCE_HASH");return;}
-  check(hash!=checksum256(),"EVIDENCE_HASH");check(epoch>0,"APP_KEY_REQUIRED");const auto key=app_key_epochs(get_self(),runtime.value).get(epoch,"APP_KEY_UNKNOWN");check(key.dao_id==dao&&key.app_id==app,"APP_KEY_SCOPE");const auto registration=active_app(runtime,dao,app,get_self());app_counts counts(get_self(),runtime.value);auto domains=counts.get_index<"byapp"_n>();const auto current=domains.find((uint128_t(dao)<<64)|app);check(current!=domains.end()&&current->current_key_epoch==epoch&&key.security_epoch==registration.security_epoch&&key.app_revision==registration.revision,"APP_KEY_STALE");
+  check(hash!=checksum256(),"EVIDENCE_HASH");check(epoch>0,"APP_KEY_REQUIRED");const auto key=app_key_epochs(get_self(),runtime.value).get(epoch,"APP_KEY_UNKNOWN");check(key.dao_id==dao&&key.app_id==app,"APP_KEY_SCOPE");const auto app_registration=registration(runtime,dao,app);app_counts counts(get_self(),runtime.value);auto domains=counts.get_index<"byapp"_n>();const auto current=domains.find((uint128_t(dao)<<64)|app);check(current!=domains.end()&&current->current_key_epoch==epoch&&key.security_epoch==app_registration.security_epoch&&key.app_revision==app_registration.revision,"APP_KEY_STALE");
  }
  void record(name runtime,uint64_t dao,uint64_t member,uint64_t app,name action_name,uint8_t kind,checksum256 source,checksum256 revision,checksum256 event,const std::string& cid,checksum256 hash,uint64_t epoch){
   actor(runtime,dao,member,app,action_name);check(source!=checksum256()&&revision!=checksum256()&&event!=checksum256(),"ACTIVITY_REFERENCE");
@@ -85,4 +92,4 @@ private:
   evidence(runtime,dao,app,cid,hash,epoch);auto count=capacity(runtime,dao,app);check(count.receipts<10000,"APP_ACTIVITY_CAPACITY");app_counts counts(get_self(),runtime.value);counts.modify(counts.get(count.id),same_payer,[](auto& r){++r.receipts;});value.id=rows.available_primary_key();if(!value.id)value.id=1;rows.emplace(get_self(),[&](auto& r){r=value;});
  }
 };
-EOSIO_DISPATCH(activity,(bindrampool)(recordact)(askreview)(reviewact)(newappkey)(grantappkey)(linkdecision)(checkquota)(checkmig)(scanram))
+EOSIO_DISPATCH(activity,(scanclose)(clearclose)(bindrampool)(recordact)(askreview)(reviewact)(newappkey)(grantappkey)(linkdecision)(checkquota)(checkmig)(scanram))

@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = 'ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc1a960f8173';
+export const decideAbiHash = '84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acdcb60a1cafa';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -212,6 +212,20 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "cleardocs",
       "base": "",
       "fields": [
@@ -226,6 +240,36 @@ export const decideAbi = {
         {
           "name": "proposal_ids",
           "type": "uint64[]"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
         }
       ]
     },
@@ -1008,6 +1052,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "scanram",
       "base": "",
       "fields": [
@@ -1265,6 +1327,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "cleardocs",
       "type": "cleardocs",
       "ricardian_contract": ""
@@ -1335,6 +1402,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "scanclose",
+      "type": "scanclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanram",
       "type": "scanram",
       "ricardian_contract": ""
@@ -1354,6 +1426,13 @@ export const decideAbi = {
     {
       "name": "ballots",
       "type": "ballot_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "closechecks",
+      "type": "closure_check",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -1524,10 +1603,22 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
 export interface cleardocs {
   runtime: string;
   dao_id: string;
   proposal_ids: string[];
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
 }
 export interface document_acceptance {
   id: string;
@@ -1735,6 +1826,11 @@ export interface regdoc {
   approval: number;
   track_acceptance: boolean;
 }
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
+}
 export interface scanram {
   runtime: string;
   table: string;
@@ -1802,6 +1898,7 @@ export interface DecideActions {
   canceldoc: canceldoc;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
   cleardocs: cleardocs;
   execute: execute;
   executeaward: executeaward;
@@ -1816,6 +1913,7 @@ export interface DecideActions {
   prunevotes: prunevotes;
   recall: recall;
   regdoc: regdoc;
+  scanclose: scanclose;
   scanram: scanram;
   startelect: startelect;
   vote: vote;

@@ -35,7 +35,7 @@ public:
  ACTION closeround(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t round_id){
   module_actor(runtime,dao_id,member_id,get_self(),"closeround"_n,true);grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(round_id,"ROUND_UNKNOWN");check(round.dao_id==dao_id,"GRANT_DOMAIN");check(!round.closed,"ROUND_CLOSED");rounds.modify(round,same_payer,[](auto& r){r.closed=true;});
  }
- ACTION govaward(name runtime,uint64_t dao_id,uint64_t round_id,uint64_t application_id,uint64_t ballot_id){
+ ACTION govaward(name runtime,uint64_t dao_id,uint64_t round_id,uint64_t application_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(get_sender()==policy.config.decide,"EXECUTOR_SENDER");require_auth(policy.config.decide);check(!dao_paused(runtime,dao_id),"DAO_PAUSED");pinned_module(runtime,dao_id,get_self());pinned_module(runtime,dao_id,policy.config.decide);
   grant_executions plans(policy.config.decide,runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");check(plan.executed&&plan.dao_id==dao_id&&plan.grants==get_self()&&plan.round_id==round_id&&plan.application_id==application_id,"EXECUTION_DOMAIN");check(plan.policy_revision==policy.revision&&plan.grants_hash==get_code_hash(get_self()),"POLICY_CHANGED");check(plan.deadline>=current_time_point().sec_since_epoch(),"EXECUTION_EXPIRED");check(plan.commitment==grant_commitment(runtime,dao_id,get_self(),round_id,application_id),"APPLICATION_CHANGED");
   grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(round_id);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id);check(current_time_point().sec_since_epoch()<round.awards_close&&current_time_point().sec_since_epoch()<app.term_end,"AWARDS_CLOSED");check(plan.works==round.works&&plan.application_revision==app.revision,"EXECUTION_DOMAIN");check(grant_participant(runtime,dao_id,app.contributor,round.allow_agents),"PARTICIPANT_INELIGIBLE");pinned_module(runtime,dao_id,round.works);check(plan.works_hash==get_code_hash(round.works),"MODULE_CODE");
@@ -43,9 +43,16 @@ public:
   action(permission_level{get_self(),"active"_n},round.works,"grantwork"_n,std::make_tuple(runtime,dao_id,get_self(),round_id,application_id,ballot_id)).send();
  }
  ACTION checkquota(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);}
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");const auto stage=closure_stage(runtime,dao_id,get_self(),4);if(stage>=2)return;
+  if(!stage)scan_closure<grant_rounds>(runtime,dao_id,get_self(),4,0,2,limit,[](const auto& r){return r.closed||r.awards_close<=current_time_point().sec_since_epoch();});
+  else scan_closure<grant_applications>(runtime,dao_id,get_self(),4,1,2,limit,[&](const auto& r){grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(r.round_id);return round.dao_id==dao_id&&(r.status>=3||round.closed||round.awards_close<=current_time_point().sec_since_epoch());});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==4,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,4,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="rounds"_n){grant_rounds(get_self(),runtime.value).backfill(limit);return;}
   if(table=="applications"_n){grant_applications(get_self(),runtime.value).backfill(limit);return;}
   check(false,"RAM_MIGRATION_TABLE");
@@ -61,4 +68,4 @@ private:
   check_doc(runtime,dao_id,doc,version);check(!payments.empty()&&payments.size()<=16&&payments.size()==dues.size(),"MILESTONE_LIMIT");check(end>start&&uint64_t(end)-start<=31536000&&end>current_time_point().sec_since_epoch(),"AGREEMENT_TERM");int64_t total=0;for(size_t i=0;i<payments.size();i++){const auto& payment=payments[i];check(payment.is_valid()&&payment.amount>0&&payment.symbol==round.maximum.symbol,"ASSET_QUANTITY");check(dues[i]>=start&&dues[i]<=end,"AGREEMENT_DUE");total=add_amount(total,payment.amount);}check(total<=round.maximum.amount,"ROUND_CAP");
  }
 };
-EOSIO_DISPATCH(grants,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))
+EOSIO_DISPATCH(grants,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))

@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.11",
+  "packageVersion": "0.10.0-alpha.14",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -163,7 +163,7 @@ export const ModulesHelpBundle={
     {
       "name": "activity",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372304925cf5f",
+      "sourceAbiHash": "f1a449c47cecebdd78c4df51df81b6b6d0aedf1ce2251289c33614773f41911a",
       "actions": [
         {
           "name": "askreview",
@@ -234,6 +234,19 @@ export const ModulesHelpBundle={
         },
         {
           "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclose",
           "fields": [
             {
               "name": "runtime",
@@ -443,6 +456,23 @@ export const ModulesHelpBundle={
             {
               "name": "key_epoch",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
             }
           ]
         },
@@ -680,6 +710,35 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
           "name": "ramcursors",
           "fields": [
             {
@@ -731,7 +790,7 @@ export const ModulesHelpBundle={
     {
       "name": "decide",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "ff3a7d1ff45c8d300f66c66dd5fc286a9772a7387dab81b2d8d8bc1a960f8173",
+      "sourceAbiHash": "84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acdcb60a1cafa",
       "actions": [
         {
           "name": "ackdoc",
@@ -841,6 +900,19 @@ export const ModulesHelpBundle={
         },
         {
           "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclose",
           "fields": [
             {
               "name": "runtime",
@@ -1279,6 +1351,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "scanram",
           "fields": [
             {
@@ -1405,6 +1494,35 @@ export const ModulesHelpBundle={
             {
               "name": "metadata",
               "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
             }
           ]
         },
@@ -1908,7 +2026,7 @@ export const ModulesHelpBundle={
     {
       "name": "works",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "d9f7e25bdd55e01c5386e838c2cdeb4abc5903e0438cc49c64efc95f19399a45",
+      "sourceAbiHash": "f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2a220600427",
       "actions": [
         {
           "name": "accept",
@@ -2018,6 +2136,19 @@ export const ModulesHelpBundle={
         },
         {
           "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclose",
           "fields": [
             {
               "name": "runtime",
@@ -2183,6 +2314,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "scanram",
           "fields": [
             {
@@ -2281,6 +2429,35 @@ export const ModulesHelpBundle={
             {
               "name": "accepted_at",
               "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
             }
           ]
         },
@@ -2422,7 +2599,7 @@ export const ModulesHelpBundle={
     {
       "name": "payroll",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "8ad24e62adb11c5bb6564b67a47ab0b00a09ea5046c0c19072ca7b0c8548f084",
+      "sourceAbiHash": "6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e332e7a1fa44",
       "actions": [
         {
           "name": "backfillrefs",
@@ -2461,6 +2638,19 @@ export const ModulesHelpBundle={
         },
         {
           "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclose",
           "fields": [
             {
               "name": "runtime",
@@ -2543,6 +2733,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "scanram",
           "fields": [
             {
@@ -2578,6 +2785,35 @@ export const ModulesHelpBundle={
         }
       ],
       "tables": [
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
         {
           "name": "controls",
           "fields": [
@@ -2713,7 +2949,7 @@ export const ModulesHelpBundle={
     {
       "name": "grants",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "ba423a9f5d0d24f9b8de04ce1e2700289f9d21886724f68f11a2744215216116",
+      "sourceAbiHash": "242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd33157eccc2a94",
       "actions": [
         {
           "name": "amend",
@@ -2854,6 +3090,19 @@ export const ModulesHelpBundle={
         },
         {
           "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclose",
           "fields": [
             {
               "name": "runtime",
@@ -3019,6 +3268,23 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "scanram",
           "fields": [
             {
@@ -3128,6 +3394,35 @@ export const ModulesHelpBundle={
             {
               "name": "funding_ballot",
               "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
             }
           ]
         },
@@ -3244,7 +3539,7 @@ export const ModulesHelpBundle={
     {
       "name": "endorse",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa6ce9e100f7",
+      "sourceAbiHash": "3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d3ca30a9f91",
       "actions": [
         {
           "name": "admit",
@@ -3381,6 +3676,36 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "clearclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
           "name": "scanram",
           "fields": [
             {
@@ -3449,6 +3774,35 @@ export const ModulesHelpBundle={
         }
       ],
       "tables": [
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
         {
           "name": "joinapps",
           "fields": [
@@ -13498,8 +13852,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "activity",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -13530,8 +13884,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "decide",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -13586,8 +13940,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "works",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -13625,8 +13979,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -13665,8 +14019,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -13707,8 +14061,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.10.0-alpha.1",
-        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3",
+        "version": "0.10.0-alpha.3",
+        "coreRange": "^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

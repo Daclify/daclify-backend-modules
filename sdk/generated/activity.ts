@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const activityAbiHash = 'abcc28e110ce500f06c7784fdc85c1184e23650a4e683171f5f372304925cf5f';
+export const activityAbiHash = 'f1a449c47cecebdd78c4df51df81b6b6d0aedf1ce2251289c33614773f41911a';
 export const activityAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -310,6 +310,50 @@ export const activityAbi = {
       ]
     },
     {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "grantappkey",
       "base": "",
       "fields": [
@@ -566,6 +610,24 @@ export const activityAbi = {
       ]
     },
     {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
       "name": "scanram",
       "base": "",
       "fields": [
@@ -606,6 +668,11 @@ export const activityAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "grantappkey",
       "type": "grantappkey",
       "ricardian_contract": ""
@@ -628,6 +695,11 @@ export const activityAbi = {
     {
       "name": "reviewact",
       "type": "reviewact",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanclose",
+      "type": "scanclose",
       "ricardian_contract": ""
     },
     {
@@ -675,6 +747,13 @@ export const activityAbi = {
     {
       "name": "appkeys",
       "type": "app_key_epoch",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "closechecks",
+      "type": "closure_check",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -786,6 +865,18 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
+}
 export interface grantappkey {
   runtime: string;
   dao_id: string;
@@ -854,6 +945,11 @@ export interface reviewact {
   evidence_hash: string;
   key_epoch: string;
 }
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
+}
 export interface scanram {
   runtime: string;
   table: string;
@@ -864,10 +960,12 @@ export interface ActivityActions {
   bindrampool: bindrampool;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
   grantappkey: grantappkey;
   linkdecision: linkdecision;
   newappkey: newappkey;
   recordact: recordact;
   reviewact: reviewact;
+  scanclose: scanclose;
   scanram: scanram;
 }

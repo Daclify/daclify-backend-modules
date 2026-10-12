@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const endorseAbiHash = 'c422182a7679d4999b5448509778548a3943bfdbc38ac8a79facaa6ce9e100f7';
+export const endorseAbiHash = '3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d3ca30a9f91';
 export const endorseAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -220,6 +220,50 @@ export const endorseAbi = {
       ]
     },
     {
+      "name": "clearclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "closure_check",
+      "base": "",
+      "fields": [
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "code_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "closing_at",
+          "type": "uint32"
+        },
+        {
+          "name": "stage",
+          "type": "uint8"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "complete",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "ram_migration_cursor",
       "base": "",
       "fields": [
@@ -266,6 +310,24 @@ export const endorseAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "scanclose",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "limit",
+          "type": "uint32"
         }
       ]
     },
@@ -372,6 +434,16 @@ export const endorseAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearclose",
+      "type": "clearclose",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "scanclose",
+      "type": "scanclose",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanram",
       "type": "scanram",
       "ricardian_contract": ""
@@ -388,6 +460,13 @@ export const endorseAbi = {
     }
   ],
   "tables": [
+    {
+      "name": "closechecks",
+      "type": "closure_check",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
     {
       "name": "joinapps",
       "type": "admission_application",
@@ -478,6 +557,18 @@ export interface checkquota {
   runtime: string;
   dao_id: string;
 }
+export interface clearclose {
+  runtime: string;
+  dao_id: string;
+}
+export interface closure_check {
+  dao_id: string;
+  code_hash: string;
+  closing_at: number;
+  stage: number;
+  cursor: string;
+  complete: boolean;
+}
 export interface ram_migration_cursor {
   table: string;
   cursor: string;
@@ -491,6 +582,11 @@ export interface ram_migration_overlay {
 }
 export interface ram_payer_owner {
   runtime: string;
+}
+export interface scanclose {
+  runtime: string;
+  dao_id: string;
+  limit: number;
 }
 export interface scanram {
   runtime: string;
@@ -518,6 +614,8 @@ export interface EndorseActions {
   bindrampool: bindrampool;
   checkmig: checkmig;
   checkquota: checkquota;
+  clearclose: clearclose;
+  scanclose: scanclose;
   scanram: scanram;
   unwitness: unwitness;
   witness: witness;

@@ -15,6 +15,13 @@ public:
  ACTION propose(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t project_id,uint64_t contributor,uint64_t document_id,uint32_t document_version,std::vector<asset> payments,std::vector<uint32_t> dues){
   module_actor(runtime,dao_id,member_id,get_self(),"propose"_n);create_project(runtime,dao_id,member_id,project_id,contributor,document_id,document_version,payments,dues);
  }
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");if(closure_stage(runtime,dao_id,get_self(),2)>=1)return;
+  scan_closure<projects>(runtime,dao_id,get_self(),2,0,1,limit,[&](const auto& p){if(p.status==2)return true;if(p.status!=1||p.milestones.empty()||p.milestones.size()>16)return false;
+   milestones items(get_self(),runtime.value);obligations debts(runtime,dao_id);auto index=debts.get_index<"bysource"_n>();
+   for(auto id:p.milestones){const auto& m=items.get(id,"MILESTONE_UNKNOWN");if(m.dao_id!=dao_id||m.project_id!=p.id||m.status<4)return false;if(m.status==4){const auto bytes=pack(std::make_tuple(get_self(),id));auto debt=index.find(sha256(bytes.data(),bytes.size()));if(debt==index.end()||debt->source!=get_self()||debt->source_id!=id||debt->status!=2)return false;}}return true;});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==2,"RAM_MIGRATION_SOURCE_KIND");}
  ACTION checkquota(name runtime,uint64_t dao_id){
   require_auth(runtime);pinned_module(runtime,dao_id,get_self());check_ram_payer_runtime(get_self(),runtime);
@@ -26,6 +33,7 @@ public:
  }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,2,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="adoptwork"_n){
     auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;
     milestones rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();uint32_t count=0;
@@ -62,7 +70,7 @@ public:
   module_actor(runtime,dao_id,member_id,get_self(),"acceptagr"_n);projects rows(get_self(),runtime.value);const auto& project=rows.get(project_id,"PROJECT_UNKNOWN");check(project.dao_id==dao_id,"PROJECT_DOMAIN");check(project.status==0,"PROJECT_NOT_PROPOSED");check(project.contributor==member_id,"CONTRIBUTOR_REQUIRED");works_agreements agreements(get_self(),runtime.value);const auto& agreement=agreements.get(project_id,"AGREEMENT_UNKNOWN");check(agreement.dao_id==dao_id,"PROJECT_DOMAIN");check(!agreement.accepted,"AGREEMENT_ACCEPTED");check(current_time_point().sec_since_epoch()<agreement.term_end,"AGREEMENT_EXPIRED");check(agreement.terms==agreement_commitment(runtime,dao_id,get_self(),project_id,agreement.term_start,agreement.term_end),"AGREEMENT_CHANGED");
   agreements.modify(agreement,same_payer,[](auto& r){r.accepted=true;r.accepted_at=current_time_point().sec_since_epoch();});
  }
- ACTION govaccept(name runtime,uint64_t dao_id,uint64_t project_id,uint64_t ballot_id){
+ ACTION govaccept(name runtime,uint64_t dao_id,uint64_t project_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.governed_works,"GOVERNANCE_REQUIRED");
   check(get_sender()==policy.config.decide,"EXECUTOR_SENDER");require_auth(policy.config.decide);pinned_module(runtime,dao_id,policy.config.decide);pinned_module(runtime,dao_id,get_self());
   work_executions plans(policy.config.decide,runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");
@@ -70,7 +78,7 @@ public:
   check(plan.deadline>=current_time_point().sec_since_epoch(),"EXECUTION_EXPIRED");check(plan.works_hash==get_code_hash(get_self()),"MODULE_CODE");check(plan.commitment==work_commitment(runtime,dao_id,get_self(),project_id),"PROJECT_CHANGED");
   accept_project(runtime,dao_id,project_id);
  }
- ACTION grantwork(name runtime,uint64_t dao_id,name grants,uint64_t round_id,uint64_t application_id,uint64_t ballot_id){
+ ACTION grantwork(name runtime,uint64_t dao_id,name grants,uint64_t round_id,uint64_t application_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   check(get_sender()==grants,"EXECUTOR_SENDER");require_auth(grants);pinned_module(runtime,dao_id,grants);pinned_module(runtime,dao_id,get_self());modules installed(runtime,dao_id);const auto& grant=installed.get(grants.value);check(std::find(grant.grants.begin(),grant.grants.end(),"awardwork"_n)!=grant.grants.end(),"MODULE_GRANT");
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");pinned_module(runtime,dao_id,policy.config.decide);grant_executions plans(policy.config.decide,runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");check(plan.executed&&plan.dao_id==dao_id&&plan.grants==grants&&plan.works==get_self()&&plan.round_id==round_id&&plan.application_id==application_id,"EXECUTION_DOMAIN");check(plan.policy_revision==policy.revision,"POLICY_CHANGED");check(plan.grants_hash==get_code_hash(grants)&&plan.works_hash==get_code_hash(get_self()),"MODULE_CODE");check(current_time_point().sec_since_epoch()<plan.deadline,"AWARDS_CLOSED");
   grant_rounds rounds(grants,runtime.value);const auto& round=rounds.get(round_id);grant_applications apps(grants,runtime.value);const auto& app=apps.get(application_id);check(round.dao_id==dao_id&&round.works==get_self()&&app.dao_id==dao_id&&app.round_id==round_id&&app.status==4&&app.project_id==plan.project_id&&app.funding_ballot==ballot_id&&app.revision==plan.application_revision,"EXECUTION_DOMAIN");check(grant_participant(runtime,dao_id,app.contributor,round.allow_agents),"PARTICIPANT_INELIGIBLE");check(plan.commitment==grant_commitment(runtime,dao_id,grants,round_id,application_id),"APPLICATION_CHANGED");
@@ -100,4 +108,4 @@ public:
 private:
  void check_document(name runtime,uint64_t dao_id,uint64_t id,uint32_t version){documents rows(runtime,dao_id);auto index=rows.get_index<"byversion"_n>();index.get((uint128_t(id)<<32)|version,"DOCUMENT_UNKNOWN");}
 };
-EOSIO_DISPATCH(works,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))
+EOSIO_DISPATCH(works,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(propose)(accept)(govaccept)(offeragr)(acceptagr)(submitwork)(review)(cancel)(settle)(grantwork))

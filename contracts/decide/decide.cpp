@@ -143,7 +143,7 @@ public:
   work_executions plans(get_self(),runtime.value);check(plans.find(ballot_id)==plans.end(),"EXECUTION_EXISTS");
   plans.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.works=works;r.project_id=project_id;r.commitment=commitment;r.works_hash=grant.code_hash;r.policy_revision=policy.revision;r.deadline=deadline;});
  }
- ACTION execute(name runtime,uint64_t dao_id,uint64_t ballot_id){
+ ACTION execute(name runtime,uint64_t dao_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   ballots rows(get_self(),runtime.value);const auto& ballot=rows.get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id,"BALLOT_DOMAIN");check(ballot.status==1,"BALLOT_NOT_PASSED");
   work_executions plans(get_self(),runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");check(plan.dao_id==dao_id,"EXECUTION_DOMAIN");check(!plan.executed,"ALREADY_EXECUTED");check(plan.deadline>=current_time_point().sec_since_epoch(),"EXECUTION_EXPIRED");
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self()&&policy.config.governed_works&&policy.revision==plan.policy_revision,"POLICY_CHANGED");
@@ -159,7 +159,7 @@ public:
   start(runtime,dao_id,member_id,ballot_id,policy.config.kind,2,duration,quorum,approval,metadata,"openaward"_n);
   grant_executions plans(get_self(),runtime.value);check(plans.find(ballot_id)==plans.end(),"EXECUTION_EXISTS");plans.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.grants=grants;r.works=round.works;r.round_id=round_id;r.application_id=application_id;r.application_revision=app.revision;r.project_id=project_id;r.commitment=commitment;r.grants_hash=get_code_hash(grants);r.works_hash=get_code_hash(round.works);r.policy_revision=policy.revision;r.deadline=round.awards_close;});
  }
- ACTION executeaward(name runtime,uint64_t dao_id,uint64_t ballot_id){
+ ACTION executeaward(name runtime,uint64_t dao_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   ballots rows(get_self(),runtime.value);const auto& ballot=rows.get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id,"BALLOT_DOMAIN");check(ballot.status==1,"BALLOT_NOT_PASSED");grant_executions plans(get_self(),runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");check(plan.dao_id==dao_id,"EXECUTION_DOMAIN");check(!plan.executed,"ALREADY_EXECUTED");check(current_time_point().sec_since_epoch()<plan.deadline,"AWARDS_CLOSED");
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self()&&policy.revision==plan.policy_revision,"POLICY_CHANGED");check(!dao_paused(runtime,dao_id),"DAO_PAUSED");pinned_module(runtime,dao_id,get_self());pinned_module(runtime,dao_id,plan.grants);pinned_module(runtime,dao_id,plan.works);check(plan.grants_hash==get_code_hash(plan.grants)&&plan.works_hash==get_code_hash(plan.works),"MODULE_CODE");
   grant_applications apps(plan.grants,runtime.value);check(apps.get(plan.application_id).status==2,"APPLICATION_NOT_ELIGIBLE");check(plan.commitment==grant_commitment(runtime,dao_id,plan.grants,plan.round_id,plan.application_id),"APPLICATION_CHANGED");plans.modify(plan,same_payer,[](auto& r){r.executed=true;});action(permission_level{get_self(),"active"_n},plan.grants,"govaward"_n,std::make_tuple(runtime,dao_id,plan.round_id,plan.application_id,ballot_id)).send();
@@ -173,6 +173,12 @@ public:
   ballots polls(get_self(),runtime.value);auto ballots_by_dao=polls.get_index<"bydao"_n>();poll_ends ends(get_self(),runtime.value);count=0;
   for(auto it=ballots_by_dao.lower_bound(dao_id);it!=ballots_by_dao.end()&&it->dao_id==dao_id;++it){check(++count<=5000,"RAM_COMPLETION_SCAN_LIMIT");if(it->status==0&&ordinary(runtime,it->id)){auto end=ends.find(it->id);check(end!=ends.end()&&end->dao_id==dao_id,"RAM_POLL_END_REQUIRED");}}
  }
+ ACTION scanclose(name runtime,uint64_t dao_id,uint32_t limit){
+  check(limit>=1&&limit<=25,"CLOSURE_SCAN_BOUNDS");const auto stage=closure_stage(runtime,dao_id,get_self(),1);if(stage>=2)return;
+  if(!stage)scan_closure<ballots>(runtime,dao_id,get_self(),1,0,2,limit,[](const auto& r){return r.status!=0;});
+  else scan_closure<governing_documents>(runtime,dao_id,get_self(),1,1,2,limit,[](const auto& r){return r.pending_id==0;});
+ }
+ ACTION clearclose(name runtime,uint64_t dao_id){clear_closure(runtime,dao_id,get_self());}
  ACTION checkmig(name runtime,uint8_t kind){require_auth(runtime);check(kind==1,"RAM_MIGRATION_SOURCE_KIND");
   ballots polls(get_self(),runtime.value);auto pending=[&](uint64_t id,uint64_t dao_id){const auto& poll=polls.get(id,"BALLOT_UNKNOWN");check(poll.dao_id==dao_id,"BALLOT_DOMAIN");return poll.status!=2;};
   uint32_t count=0;const auto now=current_time_point().sec_since_epoch();work_executions work(get_self(),runtime.value);
@@ -182,6 +188,7 @@ public:
  }
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,1,limit))return;
+  if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
   if(table=="adoptelect"_n||table=="adoptpolls"_n){
     auto progress=migration_cursor(runtime,get_self(),runtime.value,table,false,0,0);if(progress.complete)return;uint32_t count=0;bool complete=false;
     if(table=="adoptelect"_n){elections rows(get_self(),runtime.value);auto it=progress.advanced?rows.upper_bound(progress.cursor):rows.begin();
@@ -292,4 +299,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(regdoc)(proposedoc)(adoptdoc)(canceldoc)(ackdoc)(cleardocs)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(scanclose)(clearclose)(regdoc)(proposedoc)(adoptdoc)(canceldoc)(ackdoc)(cleardocs)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

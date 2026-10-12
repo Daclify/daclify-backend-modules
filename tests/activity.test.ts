@@ -227,6 +227,85 @@ it('separates encryption domains and rotates future access after membership chan
   });
   await act('recordact', { ...evidence, event_id: 'ff'.repeat(32), key_epoch: 2 }, 3);
 });
+it('rotates encrypted review keys for a disabled app while closing without allowing new receipts', async () => {
+  await act('newappkey', {
+    app_id: 1,
+    key_epoch: 1,
+    security_epoch: 1,
+    app_revision: 1,
+    key_commitment: 'de'.repeat(32),
+    self_grant: wrappedGrant,
+  });
+  await act(
+    'askreview',
+    { ...item(), evidence_cid: 'bafytest', evidence_hash: 'ee'.repeat(32), key_epoch: 1 },
+    3,
+  );
+  await act('startclose', {}, 1, 'daclifycore');
+  await act(
+    'setapp',
+    { app_id: 1, target: 'activity', revision: 2, config_hash: 'dd'.repeat(32), enabled: false },
+    1,
+    'daclifycore',
+  );
+  await expect(act('recordact', item('ff'), 3)).rejects.toThrow('DAO_CLOSING');
+  await act('newappkey', {
+    app_id: 1,
+    key_epoch: 2,
+    security_epoch: 2,
+    app_revision: 2,
+    key_commitment: 'df'.repeat(32),
+    self_grant: wrappedGrant,
+  });
+  await expect(
+    act('grantappkey', {
+      app_id: 1,
+      key_epoch: 2,
+      recipient: 2,
+      encryption_key: 'wrong',
+      envelope: wrappedGrant,
+    }),
+  ).rejects.toThrow('APP_RECIPIENT_KEY');
+  await act('grantappkey', {
+    app_id: 1,
+    key_epoch: 2,
+    recipient: 2,
+    encryption_key: 'encryption-key',
+    envelope: wrappedGrant,
+  });
+  const review = {
+    app_id: 1,
+    receipt_id: 1,
+    source_revision: 'cc'.repeat(32),
+    accepted: true,
+    evidence_cid: 'bafyreview',
+    evidence_hash: 'ef'.repeat(32),
+    key_epoch: 1,
+  };
+  await expect(act('reviewact', review)).rejects.toThrow('APP_KEY_STALE');
+  await act('reviewact', { ...review, key_epoch: 2 });
+  expect(row(activity, 'activities', core.toBigInt(), 1n)).toMatchObject({ status: 2 });
+});
+it('continues to refuse disabled-app review while the DAO is active', async () => {
+  await act('askreview', item(), 3);
+  await act(
+    'setapp',
+    { app_id: 1, target: 'activity', revision: 2, config_hash: 'dd'.repeat(32), enabled: false },
+    1,
+    'daclifycore',
+  );
+  await expect(
+    act('reviewact', {
+      app_id: 1,
+      receipt_id: 1,
+      source_revision: 'cc'.repeat(32),
+      accepted: true,
+      evidence_cid: '',
+      evidence_hash: '00'.repeat(32),
+      key_epoch: 0,
+    }),
+  ).rejects.toThrow('APP_DISABLED');
+});
 it('rejects encryption grants to inactive members and bounds grant bytes', async () => {
   await act('newappkey', {
     app_id: 1,
@@ -316,7 +395,21 @@ it('creates an app epoch only with an atomic wrapped grant to its creator', asyn
   ).rejects.toThrow('APP_GRANT_SIZE');
   expect(row(activity, 'appkeys', core.toBigInt(), 1n)).toBeUndefined();
 });
-it('invalidates the previous future-content epoch on explicit key rotation',async()=>{
- for(const key_epoch of [1,2])await act('newappkey',{app_id:1,key_epoch,security_epoch:1,app_revision:1,key_commitment:'de'.repeat(32),self_grant:wrappedGrant});
- await expect(act('recordact',{...item(),evidence_cid:'bafytest',evidence_hash:'ee'.repeat(32),key_epoch:1},3)).rejects.toThrow('APP_KEY_STALE');
+it('invalidates the previous future-content epoch on explicit key rotation', async () => {
+  for (const key_epoch of [1, 2])
+    await act('newappkey', {
+      app_id: 1,
+      key_epoch,
+      security_epoch: 1,
+      app_revision: 1,
+      key_commitment: 'de'.repeat(32),
+      self_grant: wrappedGrant,
+    });
+  await expect(
+    act(
+      'recordact',
+      { ...item(), evidence_cid: 'bafytest', evidence_hash: 'ee'.repeat(32), key_epoch: 1 },
+      3,
+    ),
+  ).rejects.toThrow('APP_KEY_STALE');
 });
