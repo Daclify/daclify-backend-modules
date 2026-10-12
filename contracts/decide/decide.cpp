@@ -1,15 +1,74 @@
-#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n}
+#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n,"docchanges"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "decide"
 #include "grants_records.hpp"
 #include "admission.hpp"
 #include "executives.hpp"
 #include "archive_state.hpp"
 #include "decide_ballots.hpp"
+#include "governing_documents.hpp"
 using namespace daclify;
 CONTRACT decide:public contract {
 public:
  using contract::contract;
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
+ ACTION regdoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t document_id,uint8_t category,uint8_t approval,bool track_acceptance){
+  module_actor(runtime,dao_id,member_id,get_self(),"regdoc"_n,true);pinned_module(runtime,dao_id,get_self());
+  check(category<=4&&approval<=1,"DOCUMENT_SETTINGS");check(document_id>0,"DOCUMENT_UNKNOWN");
+  documents docs(runtime,dao_id);auto versions=docs.get_index<"byversion"_n>();auto first=versions.lower_bound(uint128_t(document_id)<<32);
+  check(first!=versions.end()&&first->document_id==document_id,"DOCUMENT_UNKNOWN");
+  governing_documents rows(get_self(),runtime.value);auto bydoc=rows.get_index<"bydoc"_n>();check(bydoc.find((uint128_t(dao_id)<<64)|document_id)==bydoc.end(),"DOCUMENT_REGISTERED");
+  auto owned=rows.get_index<"bydao"_n>();uint32_t count=0;
+  for(auto it=owned.lower_bound(uint128_t(dao_id)<<64);it!=owned.end()&&it->dao_id==dao_id;++it){check(++count<64,"DOCUMENT_REGISTER_LIMIT");check(category!=0||it->category!=0,"CONSTITUTION_REGISTERED");}
+  auto id=rows.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"DOCUMENT_REGISTER_LIMIT");
+  rows.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.document_id=document_id;r.category=category;r.approval=approval;r.track_acceptance=track_acceptance;});
+ }
+ ACTION proposedoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t register_id,uint32_t document_version,uint64_t expected_revision,uint64_t ballot_id){
+  module_actor(runtime,dao_id,member_id,get_self(),"proposedoc"_n,true);pinned_module(runtime,dao_id,get_self());check(!dao_paused(runtime,dao_id),"DAO_PAUSED");
+  governing_documents rows(get_self(),runtime.value);const auto& registered=rows.get(register_id,"DOCUMENT_REGISTER_UNKNOWN");check(registered.dao_id==dao_id,"DOCUMENT_DOMAIN");
+  check(!registered.pending_id,"DOCUMENT_PROPOSAL_PENDING");check(registered.revision==expected_revision,"DOCUMENT_REVISION_CHANGED");
+  documents docs(runtime,dao_id);auto versions=docs.get_index<"byversion"_n>();const auto& doc=versions.get((uint128_t(registered.document_id)<<32)|document_version,"DOCUMENT_UNKNOWN");
+  document_changes changes(get_self(),runtime.value);if(registered.adopted_id)check(document_version>changes.get(registered.adopted_id).document_version,"DOCUMENT_VERSION_NOT_NEWER");
+  uint64_t policy_revision=0;const auto now=current_time_point().sec_since_epoch();uint64_t deadline=uint64_t(now)+604800;
+  if(registered.approval){
+   check(ballot_id>0,"BALLOT_ID");gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");policy_revision=policy.revision;
+   const auto metadata=nlohmann::json{{"schemaVersion",1},{"type","document-adoption"},{"documentId",std::to_string(doc.document_id)},{"version",document_version},{"options",{"Reject","Approve"}}}.dump();
+   start(runtime,dao_id,member_id,ballot_id,policy.config.kind,2,policy.config.duration,policy.config.quorum,policy.config.approval,metadata,"proposedoc"_n);
+   deadline+=policy.config.duration;
+  }else check(!ballot_id,"DOCUMENT_APPROVAL_METHOD");
+  check(deadline<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");auto id=changes.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"DOCUMENT_CHANGE_LIMIT");
+  changes.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.register_id=register_id;r.document_id=doc.document_id;r.document_version=document_version;r.commitment=doc.commitment;r.source_hash=get_code_hash(get_self());r.expected_revision=expected_revision;r.policy_revision=policy_revision;r.ballot_id=ballot_id;r.proposer=member_id;r.proposed_at=now;r.deadline=deadline;});
+  rows.modify(registered,same_payer,[&](auto& r){r.pending_id=id;});sync_docchange(runtime,changes.get(id));
+ }
+ ACTION adoptdoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t proposal_id){
+  document_changes changes(get_self(),runtime.value);const auto& proposal=changes.get(proposal_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(proposal.dao_id==dao_id,"DOCUMENT_DOMAIN");check(!proposal.status,"DOCUMENT_PROPOSAL_CLOSED");
+  governing_documents rows(get_self(),runtime.value);const auto& registered=rows.get(proposal.register_id,"DOCUMENT_REGISTER_UNKNOWN");
+  module_actor(runtime,dao_id,member_id,get_self(),"adoptdoc"_n,!registered.approval);pinned_module(runtime,dao_id,get_self());check(!dao_paused(runtime,dao_id),"DAO_PAUSED");
+  check(registered.pending_id==proposal_id&&registered.revision==proposal.expected_revision,"DOCUMENT_REVISION_CHANGED");check(current_time_point().sec_since_epoch()<=proposal.deadline,"DOCUMENT_PROPOSAL_EXPIRED");check(proposal.source_hash==get_code_hash(get_self()),"DOCUMENT_SOURCE_CHANGED");
+  if(registered.approval){gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.decide==get_self()&&policy.revision==proposal.policy_revision,"POLICY_CHANGED");ballots polls(get_self(),runtime.value);const auto& poll=polls.get(proposal.ballot_id,"BALLOT_UNKNOWN");check(poll.dao_id==dao_id&&poll.status==1&&poll.winner==1,"BALLOT_NOT_PASSED");}
+  documents docs(runtime,dao_id);auto versions=docs.get_index<"byversion"_n>();check(versions.get((uint128_t(proposal.document_id)<<32)|proposal.document_version,"DOCUMENT_UNKNOWN").commitment==proposal.commitment,"DOCUMENT_CHANGED");
+  changes.modify(proposal,same_payer,[&](auto& r){r.status=1;r.adopted_at=current_time_point().sec_since_epoch();r.adopted_by=member_id;});
+  rows.modify(registered,same_payer,[&](auto& r){r.adopted_id=proposal_id;r.pending_id=0;r.revision=add64(r.revision,1);});
+ }
+ ACTION canceldoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t proposal_id){
+  module_actor(runtime,dao_id,member_id,get_self(),"canceldoc"_n,true);pinned_module(runtime,dao_id,get_self());
+  document_changes changes(get_self(),runtime.value);const auto& proposal=changes.get(proposal_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(proposal.dao_id==dao_id,"DOCUMENT_DOMAIN");check(!proposal.status,"DOCUMENT_PROPOSAL_CLOSED");
+  if(proposal.ballot_id){ballots polls(get_self(),runtime.value);const auto& poll=polls.get(proposal.ballot_id,"BALLOT_UNKNOWN");gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(poll.status!=1||current_time_point().sec_since_epoch()>proposal.deadline||policy.revision!=proposal.policy_revision||proposal.source_hash!=get_code_hash(get_self()),"DOCUMENT_APPROVAL_READY");}
+  close_docchange(runtime,proposal,3);
+ }
+ ACTION ackdoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t adoption_id){
+  module_actor(runtime,dao_id,member_id,get_self(),"ackdoc"_n);pinned_module(runtime,dao_id,get_self());
+  document_changes changes(get_self(),runtime.value);const auto& adopted=changes.get(adoption_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(adopted.dao_id==dao_id,"DOCUMENT_DOMAIN");check(adopted.status==1,"DOCUMENT_NOT_ADOPTED");
+  governing_documents rows(get_self(),runtime.value);const auto& registered=rows.get(adopted.register_id);check(registered.adopted_id==adoption_id,"DOCUMENT_ADOPTION_CHANGED");check(registered.track_acceptance,"DOCUMENT_ACCEPTANCE_DISABLED");
+  document_acceptances accepted(get_self(),runtime.value);auto index=accepted.get_index<"bymember"_n>();check(index.find((uint128_t(adoption_id)<<64)|member_id)==index.end(),"DOCUMENT_ALREADY_ACCEPTED");auto id=accepted.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"DOCUMENT_ACCEPTANCE_LIMIT");
+  accepted.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.adoption_id=adoption_id;r.member_id=member_id;r.accepted_at=current_time_point().sec_since_epoch();});
+ }
+ ACTION cleardocs(name runtime,uint64_t dao_id,std::vector<uint64_t> proposal_ids){
+  pinned_module(runtime,dao_id,get_self());check(!proposal_ids.empty()&&proposal_ids.size()<=25,"DOCUMENT_CLEANUP_BOUNDS");document_changes changes(get_self(),runtime.value);
+  for(auto id:proposal_ids){const auto& proposal=changes.get(id,"DOCUMENT_PROPOSAL_UNKNOWN");check(proposal.dao_id==dao_id,"DOCUMENT_DOMAIN");if(proposal.status)continue;
+   if(current_time_point().sec_since_epoch()>proposal.deadline)close_docchange(runtime,proposal,4);
+   else if(proposal.ballot_id){ballots polls(get_self(),runtime.value);if(polls.get(proposal.ballot_id,"BALLOT_UNKNOWN").status==2)close_docchange(runtime,proposal,2);}
+  }
+ }
  TABLE vote_record {uint64_t id;uint64_t ballot;uint64_t member;uint64_t weight;uint8_t choice;uint64_t ram_owner(name code,uint64_t scope)const{return ballots(code,scope).get(ballot,"BALLOT_UNKNOWN").dao_id;}uint64_t primary_key()const{return id;}uint128_t by_member()const{return (uint128_t(ballot)<<64)|member;}EOSLIB_SERIALIZE(vote_record,(id)(ballot)(member)(weight)(choice))};
  using votes=ram_table<"votes"_n,vote_record,indexed_by<"bymember"_n,const_mem_fun<vote_record,uint128_t,&vote_record::by_member>>>;
  TABLE poll_end {
@@ -51,7 +110,8 @@ public:
  using term_holds=ram_table<"termholds"_n,term_hold>;
  ACTION backfillrefs(name runtime,uint64_t dao_id,name table,uint32_t limit){
   if(table=="elections"_n)backfill_document_refs<elections>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_election(runtime,r);});
-  else if(table=="terms"_n)backfill_document_refs<terms>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_term(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
+  else if(table=="terms"_n)backfill_document_refs<terms>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_term(runtime,r);});
+  else if(table=="docchanges"_n)backfill_document_refs<document_changes>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_docchange(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
  }
  ACTION newelect(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t election_id,std::string title,uint64_t document_id,uint32_t document_version,uint32_t nomination_close,uint32_t term_start,uint32_t term_end,uint8_t seats){
   module_actor(runtime,dao_id,member_id,get_self(),"newelect"_n,true);check(election_id>0&&!title.empty()&&title.size()<=80,"ELECTION_TITLE");for(unsigned char c:title)check(c>=0x20,"ELECTION_TITLE");check(seats>=1&&seats<=8,"ELECTION_SEATS");
@@ -141,10 +201,15 @@ public:
   if(table=="termholds"_n){term_holds(get_self(),runtime.value).backfill(limit);return;}
   if(table=="executions"_n){work_executions(get_self(),runtime.value).backfill(limit);return;}
   if(table=="grantplans"_n){grant_executions(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="docregs"_n){governing_documents(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="docchanges"_n){document_changes(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="docaccepts"_n){document_acceptances(get_self(),runtime.value).backfill(limit);return;}
   check(false,"RAM_MIGRATION_TABLE");
  }
 
 private:
+ void sync_docchange(name runtime,const document_change& r){const bool protect=r.status<=1;document_ref(runtime,r.dao_id,get_self(),"docchanges"_n,r.id,0,protect?r.document_id:0,protect?r.document_version:0);}
+ void close_docchange(name runtime,const document_change& r,uint8_t status){governing_documents rows(get_self(),runtime.value);const auto& registered=rows.get(r.register_id);check(registered.pending_id==r.id,"DOCUMENT_REVISION_CHANGED");document_changes changes(get_self(),runtime.value);changes.modify(changes.get(r.id),same_payer,[&](auto& value){value.status=status;});rows.modify(registered,same_payer,[](auto& value){value.pending_id=0;});sync_docchange(runtime,changes.get(r.id));}
  void reserve_term_hold(name runtime,const election_record& election){
   term_record sample{};sample.title=election.title;const auto bytes=ram_row_bytes<term_record,term_index>(sample)*election.seats+ram_scope_bytes<term_index>();
   term_holds holds(get_self(),runtime.value);auto found=holds.find(election.id);if(found!=holds.end()){check(found->dao_id==election.dao_id&&found->padding.size()>=bytes,"ELECTION_DOMAIN");return;}
@@ -218,6 +283,7 @@ private:
   preserve_vote_ids(runtime);vote_identities ids(get_self(),runtime.value);const auto& current=ids.get(0);check(current.high_water<std::numeric_limits<uint64_t>::max(),"VOTE_ID_LIMIT");const auto id=current.high_water+1;ids.modify(current,same_payer,[&](auto& r){r.high_water=id;});return id;
  }
  bool ordinary(name runtime,uint64_t ballot_id){
+  document_changes changes(get_self(),runtime.value);auto bound=changes.get_index<"byballot"_n>();if(bound.find(ballot_id)!=bound.end())return false;
   elections election_rows(get_self(),runtime.value);work_executions works(get_self(),runtime.value);grant_executions grants(get_self(),runtime.value);return election_rows.find(ballot_id)==election_rows.end()&&works.find(ballot_id)==works.end()&&grants.find(ballot_id)==grants.end();
  }
  void record_end(name runtime,uint64_t dao_id,uint64_t ballot_id,bool legacy){
@@ -226,4 +292,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(regdoc)(proposedoc)(adoptdoc)(canceldoc)(ackdoc)(cleardocs)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

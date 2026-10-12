@@ -13,16 +13,16 @@ describe('public module codecs', () => {
       expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(true);
       expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(true);
       expect(compatible('0.11.0-alpha.1', manifest.coreRange)).toBe(false);
-      expect(manifest.version).toBe('0.9.0-alpha.5');
+      expect(manifest.version).toBe('0.10.0-alpha.1');
     }
   });
-  it('keeps unchanged deployed contract versions installable after an SDK-only update', () => {
+  it('installs the governing-document contract release with its complete action list', () => {
     expect(Catalog.every((manifest) => manifest.version === CONTRACT_VERSION)).toBe(true);
     expect(
       ModuleInstallationSchema.parse({
         id: 'decide',
         account: 'decide',
-        version: '0.9.0-alpha.5',
+        version: '0.10.0-alpha.1',
         config: DecideConfigSchema.parse({
           configVersion: 1,
           weight: 'member',
@@ -39,10 +39,15 @@ describe('public module codecs', () => {
           'nominate',
           'startelect',
           'recall',
+          'regdoc',
+          'proposedoc',
+          'adoptdoc',
+          'canceldoc',
+          'ackdoc',
         ],
         grants: ['govlock', 'electexec'],
       }).version,
-    ).toBe('0.9.0-alpha.5');
+    ).toBe('0.10.0-alpha.1');
   });
   it('accepts its pinned core release while refusing unqualified patch and minor releases', () => {
     for (const manifest of Catalog) {
@@ -61,7 +66,7 @@ describe('public module codecs', () => {
       expect(compatible('0.14.0-alpha.2', manifest.coreRange)).toBe(true);
       expect(compatible('0.14.0-alpha.3', manifest.coreRange)).toBe(true);
       expect(compatible('0.14.0-alpha.4', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.5', manifest.coreRange)).toBe(false);
+      expect(compatible('0.14.0-alpha.5', manifest.coreRange)).toBe(true);
       expect(compatible('0.14.0-alpha.6', manifest.coreRange)).toBe(false);
       expect(compatible('0.14.0-alpha.7', manifest.coreRange)).toBe(true);
       expect(compatible('0.14.0-alpha.8', manifest.coreRange)).toBe(true);

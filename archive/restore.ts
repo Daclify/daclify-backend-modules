@@ -45,6 +45,10 @@ import {
   completionPollIdentity,
 } from './releases/qualified-resource-checkpoint.js';
 import { documentPoolsIdentity } from './releases/document-versions-pools.js';
+import {
+  precedingPollIdentity,
+  precedingDocumentIdentity,
+} from './releases/governing-documents-previous.js';
 const sources = {
   'ordinary-poll-votes': {
     abi: ABI.from(decideAbi),
@@ -105,6 +109,7 @@ function releasedSource(
       { identity: migrationControllerPollIdentity, abi: pruningPollRelease.abi },
       { identity: quotaPollIdentity, abi: pruningPollRelease.abi },
       { identity: completionPollIdentity, abi: pruningPollRelease.abi },
+      { identity: precedingPollIdentity, abi: pruningPollRelease.abi },
     ])
       if (
         codeHash === release.identity.codeHash &&
@@ -128,6 +133,7 @@ function releasedSource(
       acceptedWorkDocumentIdentity,
       completionDocumentIdentity,
       grantsQualifiedDocumentIdentity,
+      precedingDocumentIdentity,
     ])
       if (
         codeHash === identity.codeHash &&

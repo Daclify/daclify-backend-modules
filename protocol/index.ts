@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
 export const VERSION = '0.10.0-alpha.7';
 // SDK/help releases do not require redeploying unchanged contract binaries.
-export const CONTRACT_VERSION = '0.9.0-alpha.5';
+export const CONTRACT_VERSION = '0.10.0-alpha.1';
 const CORE_RANGE =
-  '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9';
+  '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9';
 export const ModulePermissions = Object.freeze({
   activity: {
     actions: [
@@ -27,6 +27,11 @@ export const ModulePermissions = Object.freeze({
       'nominate',
       'startelect',
       'recall',
+      'regdoc',
+      'proposedoc',
+      'adoptdoc',
+      'canceldoc',
+      'ackdoc',
     ] as const,
     grants: ['govlock', 'electexec'] as const,
   },
@@ -176,6 +181,11 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal(ModulePermissions.decide.actions[5]),
       z.literal(ModulePermissions.decide.actions[6]),
       z.literal(ModulePermissions.decide.actions[7]),
+      z.literal(ModulePermissions.decide.actions[8]),
+      z.literal(ModulePermissions.decide.actions[9]),
+      z.literal(ModulePermissions.decide.actions[10]),
+      z.literal(ModulePermissions.decide.actions[11]),
+      z.literal(ModulePermissions.decide.actions[12]),
     ]),
     grants: z.tuple([z.literal('govlock'), z.literal('electexec')]),
   }),

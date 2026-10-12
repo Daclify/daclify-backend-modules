@@ -48,17 +48,31 @@ it('decodes a whitelisted released row and preserves exact original packed bytes
     original: value.row,
   });
 });
-it('retains the native-qualified completion poll decoder after a readonly migration-guard update', () => {
+it('retains the native-qualified completion poll decoder after new document actions change the current ABI', () => {
   const value = input();
   expect(value.domain.code_hash).not.toBe(completionPollIdentity.codeHash);
-  expect(value.domain.abi_hash).toBe(completionPollIdentity.rawAbiHash);
-  expect(value.domain.schema_hash).toBe(completionPollIdentity.schemaHash);
-  const domain = { ...value.domain, code_hash: completionPollIdentity.codeHash };
+  expect(value.domain.abi_hash).not.toBe(completionPollIdentity.rawAbiHash);
+  const domain = {
+    ...value.domain,
+    code_hash: completionPollIdentity.codeHash,
+    abi_hash: completionPollIdentity.rawAbiHash,
+    schema_hash: completionPollIdentity.schemaHash,
+  };
   expect(decodeReleasedArchiveRow(domain, value.row, '7').value).toEqual(row);
   for (const field of ['code_hash', 'abi_hash', 'schema_hash'] as const)
     expect(() =>
       decodeReleasedArchiveRow({ ...domain, [field]: 'cd'.repeat(32) }, value.row, '7'),
     ).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
+});
+it('preserves the immediately preceding deployed poll archive identity', () => {
+  const value = input();
+  const domain = {
+    ...value.domain,
+    code_hash: 'f99a964c4eadd6d33ff261f79e546bd8a98f41a02785b41994490b319860cbf2',
+    abi_hash: '29abcba925283ff84c58743d432f570ec159d5cb4d998e8df1488027a9b1d44b',
+    schema_hash: 'f53519be37af2c4df3efafdbc6e0a6f5ed0915469c082248e5e30633c05ed014',
+  };
+  expect(decodeReleasedArchiveRow(domain, value.row, '7').value).toEqual(row);
 });
 it('rejects unknown code/ABI/schema/scope, another parent and altered primary identity', () => {
   const value = input();
