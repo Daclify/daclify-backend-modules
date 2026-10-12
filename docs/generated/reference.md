@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.3 · interface 1.
+Package 0.10.0-alpha.4 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -10848,7 +10848,7 @@ Response:
 
 ## activity configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: content.publish.
 
@@ -10878,7 +10878,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -10930,7 +10930,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -10966,7 +10966,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11003,7 +11003,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: obligation.create.
 
@@ -11043,7 +11043,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3.
+Module 0.9.0-alpha.5 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4.
 
 Capabilities: member.manage.
 
