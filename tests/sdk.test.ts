@@ -89,7 +89,8 @@ describe('public module codecs', () => {
       expect(compatible('0.15.0-alpha.15', manifest.coreRange)).toBe(true);
       expect(compatible('0.15.0-alpha.16', manifest.coreRange)).toBe(true);
       expect(compatible('0.15.0-alpha.17', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.18', manifest.coreRange)).toBe(false);
+      expect(compatible('0.15.0-alpha.18', manifest.coreRange)).toBe(true);
+      expect(compatible('0.15.0-alpha.19', manifest.coreRange)).toBe(false);
     }
   });
   it('encodes exact binary member vote data', () => {

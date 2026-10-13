@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.25 development
+
+Releases an immutable module SDK cohort for core protocol `0.15.0-alpha.18`, including its hosted MCP paired-account approval addition. Module contract interfaces, bytecode, stored state and native authorization are unchanged. Existing module 24/core 17 MCP downloads remain immutable.
+
 ## 0.10.0-alpha.2 development
 
 Retain Foundation leaderboard elections, add bounded election/publisher filtering and expose validated producer standings with a separate active schedule. Preserve existing Decide voting eligibility. Consume and explicitly accept core 0.14.0-alpha.2; contract versions and binaries are unchanged.
