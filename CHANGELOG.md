@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.28 development
+
+Consume immutable core protocol20 and explicitly accept the reviewed core19/20 interfaces. Regenerate SDK/help and qualify current core fixtures against their release hashes. Module contract bytecode, stored rows and native authority are unchanged. Preserve earlier archives.
+
 ## 0.10.0-alpha.25 development
 
 Releases an immutable module SDK cohort for core protocol `0.15.0-alpha.18`, including its hosted MCP paired-account approval addition. Module contract interfaces, bytecode, stored state and native authorization are unchanged. Existing module 24/core 17 MCP downloads remain immutable.
