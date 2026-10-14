@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.32 · interface 1.
+Package 0.10.0-alpha.36 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -15181,7 +15181,7 @@ Response:
 
 ## activity configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: content.publish.
 
@@ -15211,7 +15211,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -15263,7 +15263,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -15299,7 +15299,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -15336,7 +15336,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: obligation.create.
 
@@ -15376,7 +15376,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
 
 Capabilities: member.manage.
 
