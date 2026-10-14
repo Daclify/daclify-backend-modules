@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.30 development
+
+Refresh the documentation/SDK cohort for core22 with unchanged module contracts. Link to authoritative current status and retain exact reviewed core compatibility; later unqualified versions remain rejected.
+
 ## 0.10.0-alpha.29 development
 
 Support pinned local CDT as well as Docker for historical archive/document fixtures and retain original compiler flags. Consume core protocol21 and regenerate its compatible SDK/help cohort; module contract binaries and stored rows are unchanged.

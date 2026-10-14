@@ -1,6 +1,6 @@
 # Module documentation
 
-Current development package: **0.9.0-alpha.20**, core protocol 0.13.0-alpha.4, contract interface 1. [Repository README](../README.md) describes contract behavior and deploy accounts. Shared setup, login, recovery, operations and release manifests belong to [core documentation](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/README.md).
+Source package/peer versions are pinned in `package.json`; [current status](../../daclify-backend-core/docs/current-status.md) records the dated deployment. [Repository README](../README.md) describes contract behavior and deploy accounts. Shared setup, login, recovery, operations and release manifests belong to [core documentation](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/README.md).
 
 ## Guides and reference
 
