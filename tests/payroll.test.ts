@@ -1,7 +1,7 @@
 import { beforeEach, describe, it, expect } from 'vitest';
 import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
-import { ABI, PrivateKey, Serializer } from '@wharfkit/antelope';
+import { ABI, PrivateKey, Serializer, Checksum256 } from '@wharfkit/antelope';
 import { z } from 'zod';
 import { load, send, row, listFirstParty } from './helpers/vert.js';
 import { ZERO_CODE_HASH, wasmCodeHash } from './helpers/code-hash.js';
@@ -30,7 +30,7 @@ beforeEach(async () => {
   await send(
     core,
     'setmodule',
-    [1, 'payroll', 1, ['commit'], ['reserve', 'approve'], payrollHash],
+    [1, 'payroll', 1, ['commit', 'commitdoc'], ['reserve', 'approve'], payrollHash],
     'alice@active',
   );
   await send(token, 'create', ['alice', '1000.0000 TLOS'], 'eosio.token@active');
@@ -52,6 +52,49 @@ const totals = () =>
   z
     .object({ available: z.number(), reserved: z.number(), claims: z.number() })
     .parse(row(core, 'daos', core.toBigInt(), 1n));
+const termsHash=Checksum256.hash(new TextEncoder().encode('{}')).toString();
+async function publishTerms() { await send(core,'putjson',['daclifycore',1,1,42,1,'{}',0,0],'daclifycore@active'); }
+function commitWithTerms(id=1,previous=0,quantity='1.0000 TLOS') {
+  const args=commit(quantity);args[3]=id;
+  if(previous) args[8]=Math.floor(chain.timestamp.toMilliseconds()/1000)+60+86400*2;
+  return [...args,'Garden care',42,1,termsHash,previous];
+}
+it('pins payroll terms and the label before any obligation is approved', async ()=>{
+  await publishTerms();await send(payroll,'commitdoc',commitWithTerms(),'daclifycore@active');
+  expect(row(payroll,'payterms',core.toBigInt(),1n)).toMatchObject({schedule_id:1,dao_id:1,document_id:42,document_version:1,commitment:termsHash,label:'Garden care',successor_of:0});
+  expect(row(payroll,'controls',core.toBigInt(),1n)).toMatchObject({label:'Garden care'});
+  expect(row(core,'obligations',1n,1n)).toMatchObject({status:1});
+});
+it('requires exact terms bytes and rolls back funding on a mismatched reference', async ()=>{
+  await publishTerms();const args=commitWithTerms();args[12]='cd'.repeat(32);
+  await expect(send(payroll,'commitdoc',args,'daclifycore@active')).rejects.toThrow('PAYROLL_TERMS_CHANGED');
+  expect(totals()).toMatchObject({available:100000,reserved:0});expect(row(payroll,'schedules',core.toBigInt(),1n)).toBeUndefined();
+});
+it('funds a separately authorized successor without changing older obligations or funding twice', async ()=>{
+  await publishTerms();await send(payroll,'commitdoc',commitWithTerms(),'daclifycore@active');
+  const schedule=row(payroll,'schedules',core.toBigInt(),1n), debt=row(core,'obligations',1n,1n);
+  await send(payroll,'commitdoc',commitWithTerms(2,1,'2.0000 TLOS'),'daclifycore@active');
+  expect(totals()).toMatchObject({available:40000,reserved:60000});
+  expect(row(payroll,'schedules',core.toBigInt(),1n)).toEqual(schedule);expect(row(core,'obligations',1n,1n)).toEqual(debt);
+  await expect(send(payroll,'commitdoc',commitWithTerms(3,1),'daclifycore@active')).rejects.toThrow('PAYROLL_ALREADY_RENEWED');
+  expect(row(payroll,'schedules',core.toBigInt(),3n)).toBeUndefined();
+});
+it('rolls back an unfunded successor and rejects overlap while preserving previous claims', async ()=>{
+  await publishTerms();await send(payroll,'commitdoc',commitWithTerms(),'daclifycore@active');
+  const before=totals(), overlapping=commitWithTerms(2,1);overlapping[8]=Math.floor(chain.timestamp.toMilliseconds()/1000)+61;
+  await expect(send(payroll,'commitdoc',overlapping,'daclifycore@active')).rejects.toThrow('PAYROLL_TERM_OVERLAP');
+  await expect(send(payroll,'commitdoc',commitWithTerms(2,1,'9.0000 TLOS'),'daclifycore@active')).rejects.toThrow();
+  expect(totals()).toEqual(before);expect(row(payroll,'schedules',core.toBigInt(),2n)).toBeUndefined();
+  chain.addTime(TimePointSec.from(61));await send(payroll,'settle',['daclifycore',1,1],'bob@active');expect(totals().claims).toBe(10000);
+});
+it('releases settled document references without deleting the renewal lineage', async ()=>{
+  await publishTerms();await send(payroll,'commitdoc',commitWithTerms(),'daclifycore@active');
+  await expect(send(payroll,'releaseterms',['daclifycore',1,1],'bob@active')).rejects.toThrow('PAYROLL_UNSETTLED');
+  chain.addTime(TimePointSec.from(86461));await send(payroll,'settle',['daclifycore',1,1],'bob@active');
+  await send(payroll,'releaseterms',['daclifycore',1,1],'bob@active');
+  await send(payroll,'releaseterms',['daclifycore',1,1],'bob@active');
+  expect(row(payroll,'payterms',core.toBigInt(),1n)).toMatchObject({schema_version:1,references_released:true,commitment:termsHash});
+});
 describe('fixed-term funded payroll', () => {
   it('allocates its fixed control row when work is accepted and keeps its size stable on first settlement', async () => {
     await send(payroll, 'commit', commit('1.0000 TLOS', 1), 'daclifycore@active');

@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
+import { load, send, row, ballotExpectation, listFirstParty, replaceContract } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain,
   core: ReturnType<typeof load>,
@@ -35,10 +35,11 @@ async function act(target: string, action: string, fields: object, member = 1) {
       'utf8',
     ),
   );
+  const boundFields = action === 'votecommit' ? { ...fields, expected: ballotExpectation(decide, 'daclifycore', z.object({ballot_id:z.union([z.number(),z.string()])}).parse(fields).ballot_id) } : fields;
   const data = Serializer.encode({
     abi,
     type: action,
-    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...fields },
+    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...boundFields },
   }).hexString;
   const request = {
     version: 1,
@@ -74,7 +75,7 @@ async function open(ballotId = 1, projectId = 1) {
   });
 }
 async function pass() {
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   chain.addTime(TimePointSec.from(301));
   await send(decide, 'finalize', ['daclifycore', 1, 1], 'relay@active');
 }
@@ -104,7 +105,7 @@ beforeEach(async () => {
       1,
       'decide',
       1,
-      ['open', 'vote', 'openwork'],
+      ['open', 'vote', 'votecommit', 'openwork'],
       ['govlock'],
       wasmCodeHash('.artifacts/contracts/decide.wasm'),
     ],

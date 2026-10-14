@@ -9,7 +9,7 @@ import {
   makeInstruction,
   RuntimeTableSchemas,
 } from '@daclify/core-protocol/sdk';
-import { load, row, send, listFirstParty } from './helpers/vert.js';
+import { load, row, send, sendBoundVote, listFirstParty } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 import { buildArchiveTree } from '../archive/format.js';
 import { ArchiveDomainSchema } from '../protocol/archive.js';
@@ -136,7 +136,7 @@ beforeEach(async () => {
   await send(
     core,
     'setmodule',
-    [1, 'decide', 1, ['open', 'vote'], ['govlock'], codeHash],
+    [1, 'decide', 1, ['open', 'vote', 'votecommit'], ['govlock'], codeHash],
     'alice@active',
   );
   await send(core, 'setarchcfg', ['bob', 7776000, true], runtimeName + '@active');
@@ -147,7 +147,7 @@ beforeEach(async () => {
     runtimeName + '@active',
   );
   for (const member of [1, 2])
-    await send(decide, 'vote', [runtimeName, 1, member, 1, 1], runtimeName + '@active');
+    await sendBoundVote(decide, [runtimeName, 1, member, 1, 1], runtimeName + '@active');
   chain.addTime(TimePointSec.from(61));
   await send(decide, 'finalize', [runtimeName, 1, 1], 'bob@active');
 });
@@ -184,7 +184,7 @@ it('requires approved mature source rows, advances exact bounded progress and pr
     [runtimeName, 1, 1, 2, 0, 2, 60, 5000, 5001, '{}'],
     runtimeName + '@active',
   );
-  await send(decide, 'vote', [runtimeName, 1, 1, 2, 1], runtimeName + '@active');
+  await sendBoundVote(decide, [runtimeName, 1, 1, 2, 1], runtimeName + '@active');
   expect(row(decide, 'votes', BigInt(scope), 3n)).toMatchObject({ ballot: 2 });
   expect(row(decide, 'votes', BigInt(scope), 1n)).toBeUndefined();
 });

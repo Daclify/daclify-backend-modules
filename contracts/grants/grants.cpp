@@ -1,5 +1,6 @@
 #define DACLIFY_DOCUMENT_TABLES {"rounds"_n,"applications"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "grants"
+#define DACLIFY_ARBITRATION_SOURCE_CONTRACT "grants"
 #include "grants_records.hpp"
 using namespace daclify;
 CONTRACT grants:public contract {
@@ -21,10 +22,23 @@ public:
  }
  ACTION amend(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,uint64_t document_id,uint32_t document_version,std::vector<asset> payments,std::vector<uint32_t> dues,uint32_t term_start,uint32_t term_end){
   module_actor(runtime,dao_id,member_id,get_self(),"amend"_n);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.contributor==member_id,"APPLICATION_OWNER");check(app.status<4,"APPLICATION_FROZEN");grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(app.round_id);open_application(runtime,dao_id,round,member_id);validate_terms(runtime,dao_id,document_id,document_version,payments,dues,term_start,term_end,round);
+  protected_terms protections(get_self(),runtime.value);auto protection=protections.find(application_id);if(protection!=protections.end())protections.erase(protection);
   apps.modify(app,same_payer,[&](auto& r){r.revision=add64(r.revision,1);r.document_id=document_id;r.document_version=document_version;r.payments=payments;r.dues=dues;r.term_start=term_start;r.term_end=term_end;r.status=0;r.consent_at=0;r.decision_doc=0;r.decision_version=0;});sync_app(runtime,apps.get(application_id));
  }
+ ACTION offerprot(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,name decide,uint64_t backup,uint64_t representative,uint32_t review_seconds,uint32_t challenge_seconds,uint32_t vote_seconds,uint32_t backup_seconds){
+  const auto actor=module_actor(runtime,dao_id,member_id,get_self(),"offerprot"_n);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.status==0&&(app.contributor==member_id||actor.admin),"APPLICATION_OWNER");
+  grant_rounds rounds(get_self(),runtime.value);open_application(runtime,dao_id,rounds.get(app.round_id),app.contributor);protected_terms protections(get_self(),runtime.value);check(protections.find(application_id)==protections.end(),"ARBITRATION_EXISTS");
+  arbitration_terms term{};term.id=application_id;term.dao_id=dao_id;term.contributor=app.contributor;term.cutoff=app.term_end;term.base=application_protection_base(runtime,dao_id,get_self(),app);term.rules=protection_rules(runtime,dao_id,app.contributor,decide,backup,representative,review_seconds,challenge_seconds,vote_seconds,backup_seconds);require_arbitration_document_access(runtime,dao_id,term.rules,app.document_id,app.document_version);const auto& round=rounds.get(app.round_id);require_arbitration_document_access(runtime,dao_id,term.rules,round.document_id,round.document_version);term.commitment=arbitration_terms_hash(runtime,get_self(),term);protections.emplace(get_self(),[&](auto& r){r=term;});
+ }
+ ACTION submitprot(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,checksum256 expected){
+  module_actor(runtime,dao_id,member_id,get_self(),"submitprot"_n);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.contributor==member_id&&app.status==0,"APPLICATION_OWNER");grant_rounds rounds(get_self(),runtime.value);open_application(runtime,dao_id,rounds.get(app.round_id),member_id);
+  protected_terms protections(get_self(),runtime.value);const auto& term=protections.get(application_id,"ARBITRATION_REQUIRED");check(term.dao_id==dao_id&&term.contributor==member_id&&!term.accepted,"ARBITRATION_CONSENT");check(term.base==application_protection_base(runtime,dao_id,get_self(),app)&&term.commitment==expected&&expected==arbitration_terms_hash(runtime,get_self(),term),"ARBITRATION_CHANGED");validate_arbitration_rules(runtime,dao_id,member_id,term.rules);protections.modify(term,same_payer,[](auto& r){r.accepted=true;});apps.modify(app,same_payer,[](auto& r){r.status=1;r.consent_at=current_time_point().sec_since_epoch();});
+ }
+ ACTION clearprot(name runtime,uint64_t dao_id,uint64_t application_id){
+  grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.status!=4,"GRANT_DOMAIN");protected_terms protections(get_self(),runtime.value);auto term=protections.find(application_id);if(term==protections.end())return;check(term->dao_id==dao_id&&(app.status==5||current_time_point().sec_since_epoch()>=term->cutoff),"ARBITRATION_ACTIVE");protections.erase(term);
+ }
  ACTION submitapp(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id){
-  module_actor(runtime,dao_id,member_id,get_self(),"submitapp"_n);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.contributor==member_id,"APPLICATION_OWNER");check(app.status==0,"APPLICATION_STATE");grant_rounds rounds(get_self(),runtime.value);open_application(runtime,dao_id,rounds.get(app.round_id),member_id);apps.modify(app,same_payer,[](auto& r){r.status=1;r.consent_at=current_time_point().sec_since_epoch();});
+  module_actor(runtime,dao_id,member_id,get_self(),"submitapp"_n);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id&&app.contributor==member_id,"APPLICATION_OWNER");check(app.status==0,"APPLICATION_STATE");grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(app.round_id);open_application(runtime,dao_id,round,member_id);protected_terms protections(get_self(),runtime.value);check(protections.find(application_id)==protections.end(),"ARBITRATION_CONSENT");check(!protection_required(runtime,dao_id,round.works),"ARBITRATION_REQUIRED");apps.modify(app,same_payer,[](auto& r){r.status=1;r.consent_at=current_time_point().sec_since_epoch();});
  }
  ACTION reviewapp(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,bool eligible,uint64_t document_id,uint32_t document_version){
   module_actor(runtime,dao_id,member_id,get_self(),"reviewapp"_n,true);grant_applications apps(get_self(),runtime.value);const auto& app=apps.get(application_id,"APPLICATION_UNKNOWN");check(app.dao_id==dao_id,"GRANT_DOMAIN");check(app.status==1||app.status==2||app.status==3,"APPLICATION_STATE");grant_rounds rounds(get_self(),runtime.value);const auto& round=rounds.get(app.round_id);check(!round.closed&&current_time_point().sec_since_epoch()<round.review_close,"REVIEW_CLOSED");check_doc(runtime,dao_id,document_id,document_version);if(eligible)check(grant_participant(runtime,dao_id,app.contributor,round.allow_agents),"PARTICIPANT_INELIGIBLE");apps.modify(app,same_payer,[&](auto& r){r.status=eligible?2:3;r.decision_doc=document_id;r.decision_version=document_version;});sync_app(runtime,apps.get(application_id));
@@ -53,6 +67,7 @@ public:
  ACTION scanram(name runtime,name table,uint32_t limit){
   if(scan_ram_binding(runtime,get_self(),table,4,limit))return;
   if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="arbterms"_n){protected_terms(get_self(),runtime.value).backfill(limit);return;}
   if(table=="rounds"_n){grant_rounds(get_self(),runtime.value).backfill(limit);return;}
   if(table=="applications"_n){grant_applications(get_self(),runtime.value).backfill(limit);return;}
   check(false,"RAM_MIGRATION_TABLE");
@@ -68,4 +83,4 @@ private:
   check_doc(runtime,dao_id,doc,version);check(!payments.empty()&&payments.size()<=16&&payments.size()==dues.size(),"MILESTONE_LIMIT");check(end>start&&uint64_t(end)-start<=31536000&&end>current_time_point().sec_since_epoch(),"AGREEMENT_TERM");int64_t total=0;for(size_t i=0;i<payments.size();i++){const auto& payment=payments[i];check(payment.is_valid()&&payment.amount>0&&payment.symbol==round.maximum.symbol,"ASSET_QUANTITY");check(dues[i]>=start&&dues[i]<=end,"AGREEMENT_DUE");total=add_amount(total,payment.amount);}check(total<=round.maximum.amount,"ROUND_CAP");
  }
 };
-EOSIO_DISPATCH(grants,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(reviewapp)(closeapp)(closeround)(govaward))
+EOSIO_DISPATCH(grants,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(newround)(applygrant)(amend)(submitapp)(offerprot)(submitprot)(clearprot)(reviewapp)(closeapp)(closeround)(govaward))

@@ -1,5 +1,7 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
 export { encodeBallotMetadata, readBallotMetadata } from './ballots.js';
+export { ballotCommitment, type BallotCommitmentInput } from './ballot-commitment.js';
+export { prepareBallotVote } from './ballot-vote.js';
 import { activityAbi, type ActivityActions } from './generated/activity.js';
 import { ActivityActionSchemas } from './generated/activity-schemas.js';
 export { activityAbi, activityAbiHash } from './generated/activity.js';
@@ -104,3 +106,5 @@ export {
   ActivityIntentSchema,
   type ActivityIntent,
 } from './community-activity.js';
+
+export { makeBallotExport } from "./ballot-export.js";

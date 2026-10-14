@@ -2,12 +2,14 @@ import { z } from 'zod';
 import {
   BallotContentSchema,
   BallotMetadataSchema,
+  BallotMetadataV3Schema,
   type BallotContent,
   type BallotMetadata,
+  type BallotMetadataV3,
 } from '../protocol/ballots.js';
 
-export function encodeBallotMetadata(value: BallotMetadata): string {
-  const metadata = JSON.stringify(BallotMetadataSchema.parse(value));
+export function encodeBallotMetadata(value: BallotMetadata | BallotMetadataV3): string {
+  const metadata = JSON.stringify(value.schemaVersion === 3 ? BallotMetadataV3Schema.parse(value) : BallotMetadataSchema.parse(value));
   if (new TextEncoder().encode(metadata).length > 4096) throw new Error('BALLOT_METADATA_SIZE');
   return metadata;
 }
@@ -16,11 +18,13 @@ export function readBallotMetadata(metadata: string, choices: number): BallotCon
   if (choices < 2 || choices > 16 || new TextEncoder().encode(metadata).length > 4096) return;
   try {
     const value = z
-      .object({ schemaVersion: z.union([z.literal(1), z.literal(2)]).optional() })
+      .object({ schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() })
       .passthrough()
       .parse(JSON.parse(metadata));
     const content =
-      value.schemaVersion === 2
+      value.schemaVersion === 3
+        ? BallotMetadataV3Schema.parse(value)
+        : value.schemaVersion === 2
         ? BallotMetadataSchema.parse(value)
         : BallotContentSchema.parse({
             ...value,

@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const decideAbiHash = '84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acdcb60a1cafa';
+export const decideAbiHash = '5ce73db291c57e82891ddc78f68afa7fc6c169058135564ac60e07a45cab3b9b';
 export const decideAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -50,6 +50,200 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "agreement_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schema_version",
+          "type": "uint16"
+        },
+        {
+          "name": "term_start",
+          "type": "uint32"
+        },
+        {
+          "name": "term_end",
+          "type": "uint32"
+        },
+        {
+          "name": "terms",
+          "type": "checksum256"
+        },
+        {
+          "name": "accepted",
+          "type": "bool"
+        },
+        {
+          "name": "accepted_at",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_plan",
+      "base": "",
+      "fields": [
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "protection",
+          "type": "protected_obligation"
+        },
+        {
+          "name": "quantity",
+          "type": "asset"
+        },
+        {
+          "name": "due",
+          "type": "uint32"
+        },
+        {
+          "name": "voters",
+          "type": "arbitration_voter[]"
+        },
+        {
+          "name": "executed",
+          "type": "bool"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "cursor",
+          "type": "uint64"
+        },
+        {
+          "name": "scanned",
+          "type": "uint32"
+        },
+        {
+          "name": "ready",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_rules",
+      "base": "",
+      "fields": [
+        {
+          "name": "decide",
+          "type": "name"
+        },
+        {
+          "name": "decide_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "backup",
+          "type": "uint64"
+        },
+        {
+          "name": "representative",
+          "type": "uint64"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "quorum",
+          "type": "uint16"
+        },
+        {
+          "name": "approval",
+          "type": "uint16"
+        },
+        {
+          "name": "review_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "challenge_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "vote_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "backup_seconds",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_terms",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "contributor",
+          "type": "uint64"
+        },
+        {
+          "name": "cutoff",
+          "type": "uint32"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "rules",
+          "type": "arbitration_rules"
+        },
+        {
+          "name": "base",
+          "type": "checksum256"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "accepted",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_voter",
+      "base": "",
+      "fields": [
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "weight",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "archive_prune_proof",
       "base": "",
       "fields": [
@@ -82,6 +276,40 @@ export const decideAbi = {
         {
           "name": "limit",
           "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "ballot_definition_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "purpose",
+          "type": "uint8"
+        },
+        {
+          "name": "policy_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "policy_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
         }
       ]
     },
@@ -148,6 +376,36 @@ export const decideAbi = {
         {
           "name": "metadata",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "ballot_target",
+      "base": "",
+      "fields": [
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "work",
+          "type": "work_ballot_target?"
+        },
+        {
+          "name": "grant",
+          "type": "grant_ballot_target?"
+        },
+        {
+          "name": "released",
+          "type": "bool"
         }
       ]
     },
@@ -432,6 +690,24 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "execarb",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "execute",
       "base": "",
       "fields": [
@@ -528,6 +804,110 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "grant_application",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "round_id",
+          "type": "uint64"
+        },
+        {
+          "name": "contributor",
+          "type": "uint64"
+        },
+        {
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "payments",
+          "type": "asset[]"
+        },
+        {
+          "name": "dues",
+          "type": "uint32[]"
+        },
+        {
+          "name": "term_start",
+          "type": "uint32"
+        },
+        {
+          "name": "term_end",
+          "type": "uint32"
+        },
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "consent_at",
+          "type": "uint32"
+        },
+        {
+          "name": "decision_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "decision_version",
+          "type": "uint32"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "funding_ballot",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "grant_ballot_target",
+      "base": "",
+      "fields": [
+        {
+          "name": "round",
+          "type": "grant_round"
+        },
+        {
+          "name": "application",
+          "type": "grant_application"
+        },
+        {
+          "name": "protection",
+          "type": "arbitration_terms?"
+        },
+        {
+          "name": "rules_commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "application_commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "decision_commitment",
+          "type": "checksum256"
+        }
+      ]
+    },
+    {
       "name": "grant_execution",
       "base": "",
       "fields": [
@@ -590,6 +970,68 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "grant_round",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "creator",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "rules_revision",
+          "type": "uint64"
+        },
+        {
+          "name": "applications_close",
+          "type": "uint32"
+        },
+        {
+          "name": "review_close",
+          "type": "uint32"
+        },
+        {
+          "name": "awards_close",
+          "type": "uint32"
+        },
+        {
+          "name": "maximum",
+          "type": "asset"
+        },
+        {
+          "name": "awarded",
+          "type": "int64"
+        },
+        {
+          "name": "allow_agents",
+          "type": "bool"
+        },
+        {
+          "name": "works",
+          "type": "name"
+        },
+        {
+          "name": "closed",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "markpoll",
       "base": "",
       "fields": [
@@ -603,6 +1045,56 @@ export const decideAbi = {
         },
         {
           "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "milestone_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "asset"
+        },
+        {
+          "name": "due",
+          "type": "uint32"
+        },
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "submission_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "submission_version",
+          "type": "uint32"
+        },
+        {
+          "name": "review_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "review_version",
+          "type": "uint32"
+        },
+        {
+          "name": "reviewer",
           "type": "uint64"
         }
       ]
@@ -752,6 +1244,28 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "openarb",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "obligation_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "openaward",
       "base": "",
       "fields": [
@@ -786,6 +1300,52 @@ export const decideAbi = {
         {
           "name": "project_id",
           "type": "uint64"
+        },
+        {
+          "name": "duration",
+          "type": "uint32"
+        },
+        {
+          "name": "quorum",
+          "type": "uint16"
+        },
+        {
+          "name": "approval",
+          "type": "uint16"
+        },
+        {
+          "name": "metadata",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "openpoll",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "choices",
+          "type": "uint8"
         },
         {
           "name": "duration",
@@ -874,6 +1434,44 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "project_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "creator",
+          "type": "uint64"
+        },
+        {
+          "name": "contributor",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "milestones",
+          "type": "uint64[]"
+        },
+        {
+          "name": "status",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
       "name": "proposedoc",
       "base": "",
       "fields": [
@@ -904,6 +1502,120 @@ export const decideAbi = {
         {
           "name": "ballot_id",
           "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "protected_obligation",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "source",
+          "type": "name"
+        },
+        {
+          "name": "source_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "recipient",
+          "type": "uint64"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "source_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "terms",
+          "type": "checksum256"
+        },
+        {
+          "name": "rules",
+          "type": "arbitration_rules"
+        },
+        {
+          "name": "cutoff",
+          "type": "uint32"
+        },
+        {
+          "name": "reviewer",
+          "type": "uint64"
+        },
+        {
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "name": "deadline",
+          "type": "uint32"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "decision_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "consent_outcome",
+          "type": "uint8"
+        },
+        {
+          "name": "consent_mask",
+          "type": "uint8"
+        },
+        {
+          "name": "reviewers",
+          "type": "uint64[]"
+        },
+        {
+          "name": "submission_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "review_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "challenge_doc",
+          "type": "uint64"
+        },
+        {
+          "name": "submission_version",
+          "type": "uint32"
+        },
+        {
+          "name": "review_version",
+          "type": "uint32"
+        },
+        {
+          "name": "challenge_version",
+          "type": "uint32"
+        },
+        {
+          "name": "submission_commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "review_commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "challenge_commitment",
+          "type": "checksum256"
         }
       ]
     },
@@ -1048,6 +1760,24 @@ export const decideAbi = {
         {
           "name": "track_acceptance",
           "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "releasetgt",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_ids",
+          "type": "uint64[]"
         }
       ]
     },
@@ -1248,6 +1978,62 @@ export const decideAbi = {
       ]
     },
     {
+      "name": "votecommit",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "ballot_id",
+          "type": "uint64"
+        },
+        {
+          "name": "expected",
+          "type": "checksum256"
+        },
+        {
+          "name": "choice",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "work_ballot_target",
+      "base": "",
+      "fields": [
+        {
+          "name": "project",
+          "type": "project_record"
+        },
+        {
+          "name": "milestones",
+          "type": "milestone_record[]"
+        },
+        {
+          "name": "agreement",
+          "type": "agreement_record?"
+        },
+        {
+          "name": "protection",
+          "type": "arbitration_terms?"
+        },
+        {
+          "name": "document_commitment",
+          "type": "checksum256"
+        }
+      ]
+    },
+    {
       "name": "work_execution_record",
       "base": "",
       "fields": [
@@ -1337,6 +2123,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "execarb",
+      "type": "execarb",
+      "ricardian_contract": ""
+    },
+    {
       "name": "execute",
       "type": "execute",
       "ricardian_contract": ""
@@ -1372,8 +2163,18 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "openarb",
+      "type": "openarb",
+      "ricardian_contract": ""
+    },
+    {
       "name": "openaward",
       "type": "openaward",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "openpoll",
+      "type": "openpoll",
       "ricardian_contract": ""
     },
     {
@@ -1402,6 +2203,11 @@ export const decideAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "releasetgt",
+      "type": "releasetgt",
+      "ricardian_contract": ""
+    },
+    {
       "name": "scanclose",
       "type": "scanclose",
       "ricardian_contract": ""
@@ -1420,9 +2226,28 @@ export const decideAbi = {
       "name": "vote",
       "type": "vote",
       "ricardian_contract": ""
+    },
+    {
+      "name": "votecommit",
+      "type": "votecommit",
+      "ricardian_contract": ""
     }
   ],
   "tables": [
+    {
+      "name": "arbplans",
+      "type": "arbitration_plan",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "ballotdefs",
+      "type": "ballot_definition_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
     {
       "name": "ballots",
       "type": "ballot_record",
@@ -1541,6 +2366,13 @@ export const decideAbi = {
       "index_type": "i64",
       "key_names": [],
       "key_types": []
+    },
+    {
+      "name": "votetargets",
+      "type": "ballot_target",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
     }
   ],
   "variants": [],
@@ -1559,6 +2391,57 @@ export interface adoptdoc {
   member_id: string;
   proposal_id: string;
 }
+export interface agreement_record {
+  project_id: string;
+  dao_id: string;
+  schema_version: number;
+  term_start: number;
+  term_end: number;
+  terms: string;
+  accepted: boolean;
+  accepted_at: number;
+}
+export interface arbitration_plan {
+  ballot_id: string;
+  dao_id: string;
+  protection: protected_obligation;
+  quantity: string;
+  due: number;
+  voters: arbitration_voter[];
+  executed: boolean;
+  version: number;
+  cursor: string;
+  scanned: number;
+  ready: boolean;
+}
+export interface arbitration_rules {
+  decide: string;
+  decide_hash: string;
+  backup: string;
+  representative: string;
+  kind: number;
+  quorum: number;
+  approval: number;
+  review_seconds: number;
+  challenge_seconds: number;
+  vote_seconds: number;
+  backup_seconds: number;
+}
+export interface arbitration_terms {
+  id: string;
+  dao_id: string;
+  contributor: string;
+  cutoff: number;
+  version: number;
+  rules: arbitration_rules;
+  base: string;
+  commitment: string;
+  accepted: boolean;
+}
+export interface arbitration_voter {
+  member_id: string;
+  weight: string;
+}
 export interface archive_prune_proof {
   primary_key: string;
   siblings: string[];
@@ -1568,6 +2451,15 @@ export interface backfillrefs {
   dao_id: string;
   table: string;
   limit: number;
+}
+export interface ballot_definition_record {
+  ballot_id: string;
+  dao_id: string;
+  version: number;
+  purpose: number;
+  policy_revision: string;
+  policy_hash: string;
+  commitment: string;
 }
 export interface ballot_record {
   id: string;
@@ -1585,6 +2477,14 @@ export interface ballot_record {
   status: number;
   winner: number;
   metadata: string;
+}
+export interface ballot_target {
+  ballot_id: string;
+  dao_id: string;
+  version: number;
+  work: work_ballot_target | undefined;
+  grant: grant_ballot_target | undefined;
+  released: boolean;
 }
 export interface bindrampool {
   runtime: string;
@@ -1661,6 +2561,11 @@ export interface election_record {
   status: number;
   candidates: string[];
 }
+export interface execarb {
+  runtime: string;
+  dao_id: string;
+  ballot_id: string;
+}
 export interface execute {
   runtime: string;
   dao_id: string;
@@ -1687,6 +2592,33 @@ export interface governing_document {
   adopted_id: string;
   pending_id: string;
 }
+export interface grant_application {
+  id: string;
+  dao_id: string;
+  round_id: string;
+  contributor: string;
+  revision: string;
+  document_id: string;
+  document_version: number;
+  payments: string[];
+  dues: number[];
+  term_start: number;
+  term_end: number;
+  status: number;
+  consent_at: number;
+  decision_doc: string;
+  decision_version: number;
+  project_id: string;
+  funding_ballot: string;
+}
+export interface grant_ballot_target {
+  round: grant_round;
+  application: grant_application;
+  protection: arbitration_terms | undefined;
+  rules_commitment: string;
+  application_commitment: string;
+  decision_commitment: string;
+}
 export interface grant_execution {
   ballot_id: string;
   dao_id: string;
@@ -1703,10 +2635,39 @@ export interface grant_execution {
   deadline: number;
   executed: boolean;
 }
+export interface grant_round {
+  id: string;
+  dao_id: string;
+  creator: string;
+  document_id: string;
+  document_version: number;
+  rules_revision: string;
+  applications_close: number;
+  review_close: number;
+  awards_close: number;
+  maximum: string;
+  awarded: string;
+  allow_agents: boolean;
+  works: string;
+  closed: boolean;
+}
 export interface markpoll {
   runtime: string;
   dao_id: string;
   ballot_id: string;
+}
+export interface milestone_record {
+  id: string;
+  dao_id: string;
+  project_id: string;
+  quantity: string;
+  due: number;
+  status: number;
+  submission_doc: string;
+  submission_version: number;
+  review_doc: string;
+  review_version: number;
+  reviewer: string;
 }
 export interface newelect {
   runtime: string;
@@ -1746,6 +2707,12 @@ export interface open {
   approval: number;
   metadata: string;
 }
+export interface openarb {
+  runtime: string;
+  dao_id: string;
+  obligation_id: string;
+  ballot_id: string;
+}
 export interface openaward {
   runtime: string;
   dao_id: string;
@@ -1755,6 +2722,18 @@ export interface openaward {
   round_id: string;
   application_id: string;
   project_id: string;
+  duration: number;
+  quorum: number;
+  approval: number;
+  metadata: string;
+}
+export interface openpoll {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  ballot_id: string;
+  kind: number;
+  choices: number;
   duration: number;
   quorum: number;
   approval: number;
@@ -1778,6 +2757,16 @@ export interface poll_end {
   completed_at: number;
   legacy: boolean;
 }
+export interface project_record {
+  id: string;
+  dao_id: string;
+  creator: string;
+  contributor: string;
+  document_id: string;
+  document_version: number;
+  milestones: string[];
+  status: number;
+}
 export interface proposedoc {
   runtime: string;
   dao_id: string;
@@ -1786,6 +2775,35 @@ export interface proposedoc {
   document_version: number;
   expected_revision: string;
   ballot_id: string;
+}
+export interface protected_obligation {
+  id: string;
+  source: string;
+  source_id: string;
+  project_id: string;
+  recipient: string;
+  version: number;
+  source_hash: string;
+  terms: string;
+  rules: arbitration_rules;
+  cutoff: number;
+  reviewer: string;
+  state: number;
+  deadline: number;
+  ballot_id: string;
+  decision_hash: string;
+  consent_outcome: number;
+  consent_mask: number;
+  reviewers: string[];
+  submission_doc: string;
+  review_doc: string;
+  challenge_doc: string;
+  submission_version: number;
+  review_version: number;
+  challenge_version: number;
+  submission_commitment: string;
+  review_commitment: string;
+  challenge_commitment: string;
 }
 export interface prunevotes {
   runtime: string;
@@ -1825,6 +2843,11 @@ export interface regdoc {
   category: number;
   approval: number;
   track_acceptance: boolean;
+}
+export interface releasetgt {
+  runtime: string;
+  dao_id: string;
+  ballot_ids: string[];
 }
 export interface scanclose {
   runtime: string;
@@ -1879,6 +2902,21 @@ export interface vote_record {
   weight: string;
   choice: number;
 }
+export interface votecommit {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  ballot_id: string;
+  expected: string;
+  choice: number;
+}
+export interface work_ballot_target {
+  project: project_record;
+  milestones: milestone_record[];
+  agreement: agreement_record | undefined;
+  protection: arbitration_terms | undefined;
+  document_commitment: string;
+}
 export interface work_execution_record {
   ballot_id: string;
   dao_id: string;
@@ -1900,6 +2938,7 @@ export interface DecideActions {
   checkquota: checkquota;
   clearclose: clearclose;
   cleardocs: cleardocs;
+  execarb: execarb;
   execute: execute;
   executeaward: executeaward;
   finalize: finalize;
@@ -1907,14 +2946,18 @@ export interface DecideActions {
   newelect: newelect;
   nominate: nominate;
   open: open;
+  openarb: openarb;
   openaward: openaward;
+  openpoll: openpoll;
   openwork: openwork;
   proposedoc: proposedoc;
   prunevotes: prunevotes;
   recall: recall;
   regdoc: regdoc;
+  releasetgt: releasetgt;
   scanclose: scanclose;
   scanram: scanram;
   startelect: startelect;
   vote: vote;
+  votecommit: votecommit;
 }

@@ -3,7 +3,7 @@ import { TimePointSec } from '@greymass/eosio';
 import { Blockchain } from '@proton/vert';
 import { PrivateKey } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
+import { load, send, sendBoundVote, row, listFirstParty, replaceContract } from './helpers/vert.js';
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { wasmCodeHash } from './helpers/code-hash.js';
@@ -31,7 +31,7 @@ beforeEach(async () => {
     await send(
       core,
       'setmodule',
-      [dao, 'decide', 1, ['open', 'vote'], ['govlock'], decideHash],
+      [dao, 'decide', 1, ['open', 'vote', 'votecommit'], ['govlock'], decideHash],
       'alice@active',
     );
     await send(core, 'grantcredit', [dao, 1, 10], 'alice@active');
@@ -75,7 +75,7 @@ describe('Decide snapshots and finalization', () => {
     await send(
       core,
       'setmodule',
-      [1, 'decide', 1, ['open', 'vote'], ['govlock'], oldHash],
+      [1, 'decide', 1, ['open', 'vote', 'votecommit'], ['govlock'], oldHash],
       'alice@active',
     );
     await send(decide, 'open', open(), 'daclifycore@active');
@@ -88,7 +88,7 @@ describe('Decide snapshots and finalization', () => {
     await send(
       core,
       'setmodule',
-      [1, 'decide', 1, ['open', 'vote'], ['govlock'], decideHash],
+      [1, 'decide', 1, ['open', 'vote', 'votecommit'], ['govlock'], decideHash],
       'alice@active',
     );
     await send(decide, 'markpoll', ['daclifycore', 1, 1], 'decide@active');
@@ -130,15 +130,15 @@ describe('Decide snapshots and finalization', () => {
   it('does not approve a binary proposal when Reject has the qualifying majority', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     for (const member of [1, 2])
-      await send(decide, 'vote', ['daclifycore', 1, member, 1, 0], 'daclifycore@active');
+      await sendBoundVote(decide, ['daclifycore', 1, member, 1, 0], 'daclifycore@active');
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
     expect(ballot().status).toBe(2);
   });
   it('rejects a tied binary result even when quorum is met', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
-    await send(decide, 'vote', ['daclifycore', 1, 1, 1, 0], 'daclifycore@active');
-    await send(decide, 'vote', ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
+    await sendBoundVote(decide, ['daclifycore', 1, 1, 1, 0], 'daclifycore@active');
+    await sendBoundVote(decide, ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
     expect(ballot().status).toBe(2);
@@ -160,21 +160,21 @@ describe('Decide snapshots and finalization', () => {
   });
   it('counts one vote per member', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
-    await send(decide, 'vote', ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
+    await sendBoundVote(decide, ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
     await expect(
-      send(decide, 'vote', ['daclifycore', 1, 2, 1, 1], 'daclifycore@active'),
+      sendBoundVote(decide, ['daclifycore', 1, 2, 1, 1], 'daclifycore@active'),
     ).rejects.toThrow('ALREADY_VOTED');
     expect(ballot().cast).toBe(1);
   });
   it('weights credits in integer units', async () => {
     await send(decide, 'open', open(1, 1), 'daclifycore@active');
-    await send(decide, 'vote', ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
+    await sendBoundVote(decide, ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
     expect(ballot().tallies).toEqual([0, 20]);
   });
   it('rejects cross-DAO ballot substitution', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     await expect(
-      send(decide, 'vote', ['daclifycore', 2, 2, 1, 1], 'daclifycore@active'),
+      sendBoundVote(decide, ['daclifycore', 2, 2, 1, 1], 'daclifycore@active'),
     ).rejects.toThrow('BALLOT_DOMAIN');
   });
   it('rejects a member admitted after opening', async () => {
@@ -186,13 +186,13 @@ describe('Decide snapshots and finalization', () => {
       'alice@active',
     );
     await expect(
-      send(decide, 'vote', ['daclifycore', 1, 4, 1, 1], 'daclifycore@active'),
+      sendBoundVote(decide, ['daclifycore', 1, 4, 1, 1], 'daclifycore@active'),
     ).rejects.toThrow('SNAPSHOT_MEMBER');
   });
   it('rejects invalid choices', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     await expect(
-      send(decide, 'vote', ['daclifycore', 1, 2, 1, 2], 'daclifycore@active'),
+      sendBoundVote(decide, ['daclifycore', 1, 2, 1, 2], 'daclifycore@active'),
     ).rejects.toThrow('CHOICE');
   });
   it('cannot finalize before closing', async () => {
@@ -203,7 +203,7 @@ describe('Decide snapshots and finalization', () => {
   });
   it('fails quorum rather than assuming missing voters consent', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
-    await send(decide, 'vote', ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
+    await sendBoundVote(decide, ['daclifycore', 1, 2, 1, 1], 'daclifycore@active');
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
     expect(ballot().status).toBe(2);
@@ -211,7 +211,7 @@ describe('Decide snapshots and finalization', () => {
   it('passes a qualifying majority and unlocks the denominator', async () => {
     await send(decide, 'open', open(), 'daclifycore@active');
     for (const member of [1, 2])
-      await send(decide, 'vote', ['daclifycore', 1, member, 1, 1], 'daclifycore@active');
+      await sendBoundVote(decide, ['daclifycore', 1, member, 1, 1], 'daclifycore@active');
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'bob@active');
     expect(ballot().status).toBe(1);
@@ -251,7 +251,7 @@ describe('Decide snapshots and finalization', () => {
     );
     await send(decide, 'open', open(1, 1), 'daclifycore@active');
     await expect(
-      send(decide, 'vote', ['daclifycore', 1, 3, 1, 1], 'daclifycore@active'),
+      sendBoundVote(decide, ['daclifycore', 1, 3, 1, 1], 'daclifycore@active'),
     ).rejects.toThrow('NO_VOTING_WEIGHT');
   });
   it('finalizes once', async () => {

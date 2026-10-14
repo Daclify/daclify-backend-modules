@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
+import { load, send, row, ballotExpectation, listFirstParty, replaceContract } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain,
   core: ReturnType<typeof load>,
@@ -36,10 +36,11 @@ async function act(target: string, action: string, fields: object, member = 1) {
       'utf8',
     ),
   );
+  const boundFields = action === 'votecommit' ? { ...fields, expected: ballotExpectation(decide, 'daclifycore', z.object({ballot_id:z.union([z.number(),z.string()])}).parse(fields).ballot_id) } : fields;
   const data = Serializer.encode({
     abi,
     type: action,
-    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...fields },
+    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...boundFields },
   }).hexString;
   const request = {
     version: 1,
@@ -90,7 +91,7 @@ beforeEach(async () => {
       1,
       'decide',
       1,
-      ['open', 'vote', 'openwork', 'openaward'],
+      ['open', 'vote', 'votecommit', 'openwork', 'openaward'],
       ['govlock'],
       wasmCodeHash('.artifacts/contracts/decide.wasm'),
     ],
@@ -116,7 +117,7 @@ beforeEach(async () => {
       1,
       'grants',
       1,
-      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround'],
+      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround','offerprot','submitprot'],
       ['awardwork'],
       wasmCodeHash('.artifacts/contracts/grants.wasm'),
     ],
@@ -171,10 +172,10 @@ async function openAward(ballot = 1, applicationId = 1, project = 10, roundId = 
     metadata: '{}',
   });
 }
-async function award(ballot = 1, applicationId = 1, project = 10, roundId = 1) {
+async function award(ballot = 1, applicationId = 1, project = 10, roundId = 1, legacy = false) {
   await openAward(ballot, applicationId, project, roundId);
   for (const member of [1, 2])
-    await act('decide', 'vote', { ballot_id: ballot, choice: 1 }, member);
+    await act('decide', legacy ? 'vote' : 'votecommit', { ballot_id: ballot, choice: 1 }, member);
   chain.addTime(TimePointSec.from(301));
   await send(decide, 'finalize', ['daclifycore', 1, ballot], 'relay@active');
 }
@@ -247,7 +248,7 @@ it.each(['grants', 'works'] as const)(
       await send(
         core,
         'setmodule',
-        [1, 'decide', 1, ['open', 'vote', 'openwork', 'openaward'], ['govlock'], hash],
+        [1, 'decide', 1, ['open', 'vote', 'votecommit', 'openwork', 'openaward'], ['govlock'], hash],
         'alice@active',
       );
     }
@@ -285,7 +286,7 @@ it.each(['grants', 'works'] as const)(
     await pin('works', oldWorksHash);
     await newRound(2);
     await application(1, '3.0000 TLOS', 2);
-    await award(1, 1, 10, 2);
+    await award(1, 1, 10, 2, true);
     const approved = row(decide, 'grantplans', core.toBigInt(), 1n);
     const eligible = row(grants, 'applications', core.toBigInt(), 1n);
     const round = row(grants, 'rounds', core.toBigInt(), 2n);
@@ -352,7 +353,7 @@ it.each(['grants', 'works'] as const)(
     await expect(
       send(decide, 'checkmig', ['daclifycore', 1], 'daclifycore@active'),
     ).rejects.toThrow('RAM_MIGRATION_PENDING_WORK');
-    for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 0 }, member);
+    for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 0 }, member);
     chain.addTime(TimePointSec.from(301));
     await send(decide, 'finalize', ['daclifycore', 1, 1], 'relay@active');
     expect(
@@ -421,7 +422,7 @@ it('rolls back a voted award without its Grants-to-Works capability and succeeds
       1,
       'grants',
       1,
-      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround'],
+      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround','offerprot','submitprot'],
       [],
       wasmCodeHash('.artifacts/contracts/grants.wasm'),
     ],
@@ -448,7 +449,7 @@ it('rolls back a voted award without its Grants-to-Works capability and succeeds
       1,
       'grants',
       1,
-      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround'],
+      ['newround', 'applygrant', 'amend', 'submitapp', 'reviewapp', 'closeapp', 'closeround','offerprot','submitprot'],
       ['awardwork'],
       wasmCodeHash('.artifacts/contracts/grants.wasm'),
     ],
@@ -592,4 +593,32 @@ it('replaces application references and clears decision references after an amen
     expect.objectContaining({ table: 'rounds', version: 1 }),
     expect.objectContaining({ table: 'applications', slot: 0, version: 2 }),
   ]);
+});
+
+it('requires exact protected consent for Grants-funded work and transfers the agreed rules to Works',async()=>{
+ await act('daclifycore','protectdao',{works:'works'});
+ await act('grants','applygrant',{round_id:1,application_id:1,document_id:1,document_version:1,payments:['3.0000 TLOS'],dues:[2000],term_start:0,term_end:4000},3);
+ await expect(act('grants','submitapp',{application_id:1},3)).rejects.toThrow('ARBITRATION_REQUIRED');
+ await act('grants','offerprot',{application_id:1,decide:'decide',backup:2,representative:1,review_seconds:60,challenge_seconds:60,vote_seconds:60,backup_seconds:60},3);
+ const terms=z.object({commitment:z.string()}).parse(row(grants,'arbterms',core.toBigInt(),1n));
+ await expect(act('grants','submitprot',{application_id:1,expected:'ff'.repeat(32)},3)).rejects.toThrow('ARBITRATION_CHANGED');
+ await act('grants','submitprot',{application_id:1,expected:terms.commitment},3);await act('grants','reviewapp',{application_id:1,eligible:true,document_id:1,document_version:1});await award();await send(decide,'executeaward',['daclifycore',1,1],'relay@active');
+ expect(row(works,'arbterms',core.toBigInt(),10n)).toMatchObject({accepted:true,contributor:3,rules:{backup:2,representative:1}});expect(row(core,'protected',1n,1n)).toMatchObject({source:'works',recipient:3,project_id:10});
+ await expect(send(core,'cancelob',[1,'works',1],'alice@active')).rejects.toThrow('OBLIGATION_PROTECTED');
+ await act('works','submitwork',{milestone_id:1,document_id:1,document_version:1},3);await act('works','review',{milestone_id:1,approve:true,document_id:1,document_version:1});expect(row(core,'obligations',1n,1n)).toMatchObject({status:0});
+});
+it('requires new consent if protection is adopted after an unfunded application was reviewed',async()=>{
+ await application();await act('daclifycore','protectdao',{works:'works'});await expect(openAward()).rejects.toThrow('ARBITRATION_REQUIRED');expect(totals()).toMatchObject({available:200000,reserved:0});
+});
+it('retains the original funding target after an application is amended',async()=>{
+ await application();await openAward();const target=row(decide,'votetargets',core.toBigInt(),1n);expect(target).toMatchObject({ballot_id:1,dao_id:1,version:1,grant:{application:{id:1,revision:1,payments:['3.0000 TLOS'],document_id:1,document_version:1}}});
+ await act('grants','amend',{application_id:1,document_id:1,document_version:1,payments:['4.0000 TLOS'],dues:[2000],term_start:0,term_end:4000},3);
+ expect(row(decide,'votetargets',core.toBigInt(),1n)).toEqual(target);
+});
+it('releases failed funding-document references while retaining the frozen voting marker',async()=>{
+ await application();await openAward();await expect(send(decide,'releasetgt',['daclifycore',1,[1]],'relay@active')).rejects.toThrow('BALLOT_OPEN');
+ chain.addTime(TimePointSec.from(300));await send(decide,'finalize',['daclifycore',1,1],'relay@active');
+ const before=ballotExpectation(decide,'daclifycore',1);await send(decide,'releasetgt',['daclifycore',1,[1]],'relay@active');await send(decide,'releasetgt',['daclifycore',1,[1]],'relay@active');
+ expect(ballotExpectation(decide,'daclifycore',1)).toBe(before);expect(row(decide,'votetargets',core.toBigInt(),1n)).toMatchObject({released:true});
+ const refs=core.tables.docrefs;if(!refs)throw Error('Fixture document refs');expect(refs(1n).getTableRows().filter((value:unknown)=>z.object({source:z.string(),table:z.string()}).parse(value).table==='votetargets')).toEqual([]);
 });

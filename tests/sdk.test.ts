@@ -8,12 +8,12 @@ import {
   ModuleInstallationSchema,
 } from '../protocol/index.js';
 describe('public module codecs', () => {
-  it('supports the coordinated login API release without claiming unknown future minor compatibility', () => {
+  it('requires the coordinated contract release without claiming older or future compatibility', () => {
     for (const manifest of Catalog) {
-      expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(true);
-      expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(true);
+      expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(false);
+      expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(false);
       expect(compatible('0.11.0-alpha.1', manifest.coreRange)).toBe(false);
-      expect(manifest.version).toBe('0.10.0-alpha.3');
+      expect(manifest.version).toBe('0.10.0-alpha.4');
     }
   });
   it('installs the governing-document contract release with its complete action list', () => {
@@ -22,7 +22,7 @@ describe('public module codecs', () => {
       ModuleInstallationSchema.parse({
         id: 'decide',
         account: 'decide',
-        version: '0.10.0-alpha.3',
+        version: '0.10.0-alpha.4',
         config: DecideConfigSchema.parse({
           configVersion: 1,
           weight: 'member',
@@ -33,6 +33,9 @@ describe('public module codecs', () => {
         actions: [
           'open',
           'vote',
+          'votecommit',
+          'openpoll',
+          'openarb',
           'openwork',
           'openaward',
           'newelect',
@@ -47,54 +50,13 @@ describe('public module codecs', () => {
         ],
         grants: ['govlock', 'electexec'],
       }).version,
-    ).toBe('0.10.0-alpha.3');
+    ).toBe('0.10.0-alpha.4');
   });
-  it('accepts its pinned core release while refusing unqualified patch and minor releases', () => {
+  it('requires the core release with the new definition RAM migration coverage', () => {
     for (const manifest of Catalog) {
       expect(compatible(CoreVersion, manifest.coreRange)).toBe(true);
-      expect(compatible('0.12.0-alpha.1', manifest.coreRange)).toBe(true);
-      expect(compatible('0.12.0-alpha.3', manifest.coreRange)).toBe(false);
-      expect(compatible('0.13.0-alpha.1', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.2', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.3', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.4', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.5', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.6', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.7', manifest.coreRange)).toBe(true);
-      expect(compatible('0.13.0-alpha.8', manifest.coreRange)).toBe(false);
-      expect(compatible('0.14.0-alpha.1', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.2', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.3', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.4', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.5', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.6', manifest.coreRange)).toBe(false);
-      expect(compatible('0.14.0-alpha.7', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.8', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.9', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.10', manifest.coreRange)).toBe(true);
-      expect(compatible('0.14.0-alpha.11', manifest.coreRange)).toBe(false);
-      expect(compatible('0.15.0-alpha.1', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.2', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.3', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.4', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.5', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.6', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.7', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.8', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.9', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.10', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.11', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.12', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.13', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.15', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.16', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.17', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.18', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.19', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.20', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.21', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.22', manifest.coreRange)).toBe(true);
-      expect(compatible('0.15.0-alpha.23', manifest.coreRange)).toBe(false);
+      for (const unsupported of ['0.12.0-alpha.1', '0.14.0-alpha.10', '0.15.0-alpha.22', '0.15.0-alpha.24', '0.16.0'])
+        expect(compatible(unsupported, manifest.coreRange)).toBe(false);
     }
   });
   it('encodes exact binary member vote data', () => {

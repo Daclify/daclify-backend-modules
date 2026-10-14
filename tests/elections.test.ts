@@ -4,7 +4,7 @@ import { Blockchain } from '@proton/vert';
 import { TimePointSec } from '@greymass/eosio';
 import { ABI, Checksum256, PrivateKey, Serializer } from '@wharfkit/antelope';
 import { z } from 'zod';
-import { load, send, row, listFirstParty } from './helpers/vert.js';
+import { load, send, row, ballotExpectation, listFirstParty } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 let chain: Blockchain, core: ReturnType<typeof load>, decide: ReturnType<typeof load>;
 const keys = Array.from({ length: 17 }, () => PrivateKey.generate('K1'));
@@ -32,10 +32,11 @@ async function act(target: string, action: string, fields: object, member = 1) {
       'utf8',
     ),
   );
+  const boundFields = action === 'votecommit' ? { ...fields, expected: ballotExpectation(decide, 'daclifycore', z.object({ballot_id:z.union([z.number(),z.string()])}).parse(fields).ballot_id) } : fields;
   const data = Serializer.encode({
     abi,
     type: action,
-    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...fields },
+    object: { runtime: 'daclifycore', dao_id: 1, member_id: member, ...boundFields },
   }).hexString;
   const request = {
     version: 1,
@@ -90,7 +91,7 @@ beforeEach(async () => {
       1,
       'decide',
       1,
-      ['open', 'vote', 'openwork', 'openaward', 'newelect', 'nominate', 'startelect', 'recall'],
+      ['open', 'vote', 'votecommit', 'openwork', 'openaward', 'newelect', 'nominate', 'startelect', 'recall'],
       ['govlock'],
       wasmCodeHash('.artifacts/contracts/decide.wasm'),
     ],
@@ -168,11 +169,11 @@ it('requires self-nomination, freezes candidates and counts one vote per member'
   await nominate(2);
   await start();
   await expect(nominate(3)).rejects.toThrow('NOMINATIONS_CLOSED');
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 1);
-  await expect(act('decide', 'vote', { ballot_id: 1, choice: 2 }, 1)).rejects.toThrow(
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 1);
+  await expect(act('decide', 'votecommit', { ballot_id: 1, choice: 2 }, 1)).rejects.toThrow(
     'ALREADY_VOTED',
   );
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 2);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 2);
   await finish();
   expect(terms()).toHaveLength(1);
   expect(
@@ -190,8 +191,8 @@ it('leaves a boundary tie vacant but fills a tied group when every tied candidat
   await nominate(1);
   await nominate(2);
   await start();
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 1);
-  await act('decide', 'vote', { ballot_id: 1, choice: 2 }, 2);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 1);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 2 }, 2);
   await finish();
   expect(terms()).toHaveLength(0);
 });
@@ -200,8 +201,8 @@ it('fills two seats with a tied group without requiring a yes/no approval majori
   await nominate(1);
   await nominate(2);
   await start();
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 1);
-  await act('decide', 'vote', { ballot_id: 1, choice: 2 }, 2);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 1);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 2 }, 2);
   await finish();
   expect(terms()).toHaveLength(2);
 });
@@ -209,7 +210,7 @@ it('issues no terms on no quorum or abstention-only voting', async () => {
   await election();
   await nominate(1);
   await start();
-  await act('decide', 'vote', { ballot_id: 1, choice: 0 }, 1);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 0 }, 1);
   await finish();
   expect(terms()).toHaveLength(0);
 });
@@ -220,8 +221,8 @@ it('preserves withdrawn slots, excludes ineligible winners and records an admini
   await act('decide', 'nominate', { election_id: 1, active: false }, 2);
   await nominate(3);
   await start();
-  await act('decide', 'vote', { ballot_id: 1, choice: 2 }, 1);
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 2);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 2 }, 1);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 2);
   await finish();
   expect(terms()).toHaveLength(2);
   await expect(
@@ -246,8 +247,8 @@ it('rechecks winning candidate eligibility without granting a runner-up or chang
   await nominate(2);
   await nominate(3);
   await start();
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 1);
-  await act('decide', 'vote', { ballot_id: 1, choice: 1 }, 2);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 1);
+  await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 2);
   await act('daclifycore', 'setactive', { target: 2, active: false });
   await finish();
   expect(terms()).toHaveLength(0);
@@ -293,7 +294,7 @@ it('counts explicit abstention toward quorum without inventing a representative'
   await election();
   await nominate(1);
   await start();
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 0 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 0 }, member);
   await finish();
   expect(terms()).toHaveLength(0);
 });
@@ -304,7 +305,7 @@ it('physically allocates bounded term space when voting starts and consumes it d
   await start();
   expect(row(decide, 'termholds', core.toBigInt(), 1n)).toMatchObject({ dao_id: 1, id: 1 });
   expect(row(decide, 'terms', core.toBigInt(), 1n)).toBeUndefined();
-  for (const member of [1, 2, 3]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2, 3]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   await finish();
   expect(row(decide, 'termholds', core.toBigInt(), 1n)).toBeUndefined();
   expect(row(decide, 'terms', core.toBigInt(), 1n)).toMatchObject({ member_id: 2, election_id: 1 });
@@ -316,7 +317,7 @@ it('excludes non-voting members from the denominator and rejects their ballots',
   await nominate(1);
   await start();
   expect(row(decide, 'ballots', core.toBigInt(), 1n)).toMatchObject({ denominator: 2 });
-  await expect(act('decide', 'vote', { ballot_id: 1, choice: 1 }, 3)).rejects.toThrow(
+  await expect(act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, 3)).rejects.toThrow(
     'VOTER_INELIGIBLE',
   );
   await expect(act('daclifycore', 'setvoter', { target: 2, can_vote: false })).rejects.toThrow(
@@ -332,7 +333,7 @@ async function executiveElection() {
       1,
       'decide',
       1,
-      ['open', 'vote', 'openwork', 'openaward', 'newelect', 'nominate', 'startelect', 'recall'],
+      ['open', 'vote', 'votecommit', 'openwork', 'openaward', 'newelect', 'nominate', 'startelect', 'recall'],
       ['govlock', 'electexec'],
       wasmCodeHash('.artifacts/contracts/decide.wasm'),
     ],
@@ -353,7 +354,7 @@ it('schedules an explicit executive election and activates the elected roster at
   await executiveElection();
   await nominate(2);
   await start();
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   await finish();
   expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
   expect(row(core, 'execpending', core.toBigInt(), 1n)).toMatchObject({
@@ -405,7 +406,7 @@ it('representative elections leave executive authority unchanged', async () => {
   await election();
   await nominate(2);
   await start();
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   await finish();
   expect(row(core, 'execpending', core.toBigInt(), 1n)).toBeUndefined();
   expect(row(core, 'executives', 1n, 1n)).toMatchObject({ member_id: 1 });
@@ -416,7 +417,7 @@ it('keeps the incumbent when a pending elected term expires before activation', 
   await executiveElection();
   await nominate(2);
   await start();
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   await finish();
   chain.addTime(TimePointSec.from(1600));
   await send(core, 'syncexec', [1], 'relay@active');
@@ -428,7 +429,7 @@ it('cancels a recalled pending roster without stripping the incumbent office', a
   await executiveElection();
   await nominate(2);
   await start();
-  for (const member of [1, 2]) await act('decide', 'vote', { ballot_id: 1, choice: 1 }, member);
+  for (const member of [1, 2]) await act('decide', 'votecommit', { ballot_id: 1, choice: 1 }, member);
   await finish();
   await act('decide', 'recall', { term_id: 1, document_id: 1, document_version: 1 });
   chain.addTime(TimePointSec.from(599));

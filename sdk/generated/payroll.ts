@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = '6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e332e7a1fa44';
+export const payrollAbiHash = '833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916ff51c76ec9';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -144,6 +144,68 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "commitdoc",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schedule_id",
+          "type": "uint64"
+        },
+        {
+          "name": "recipient",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "asset"
+        },
+        {
+          "name": "periods",
+          "type": "uint8"
+        },
+        {
+          "name": "interval",
+          "type": "uint32"
+        },
+        {
+          "name": "starts",
+          "type": "uint32"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "expected",
+          "type": "checksum256"
+        },
+        {
+          "name": "successor_of",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "control_record",
       "base": "",
       "fields": [
@@ -218,6 +280,48 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "payroll_terms",
+      "base": "",
+      "fields": [
+        {
+          "name": "schedule_id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "successor_of",
+          "type": "uint64"
+        },
+        {
+          "name": "schema_version",
+          "type": "uint16"
+        },
+        {
+          "name": "references_released",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "ram_migration_cursor",
       "base": "",
       "fields": [
@@ -264,6 +368,24 @@ export const payrollAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "releaseterms",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schedule_id",
+          "type": "uint64"
         }
       ]
     },
@@ -396,8 +518,18 @@ export const payrollAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "commitdoc",
+      "type": "commitdoc",
+      "ricardian_contract": ""
+    },
+    {
       "name": "edit",
       "type": "edit",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "releaseterms",
+      "type": "releaseterms",
       "ricardian_contract": ""
     },
     {
@@ -434,6 +566,13 @@ export const payrollAbi = {
     {
       "name": "entries",
       "type": "entry_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "payterms",
+      "type": "payroll_terms",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -509,6 +648,22 @@ export interface commit {
   interval: number;
   starts: number;
 }
+export interface commitdoc {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  schedule_id: string;
+  recipient: string;
+  quantity: string;
+  periods: number;
+  interval: number;
+  starts: number;
+  label: string;
+  document_id: string;
+  document_version: number;
+  expected: string;
+  successor_of: string;
+}
 export interface control_record {
   schedule_id: string;
   paused: number;
@@ -529,6 +684,17 @@ export interface entry_record {
   schedule_id: string;
   due: number;
 }
+export interface payroll_terms {
+  schedule_id: string;
+  dao_id: string;
+  document_id: string;
+  document_version: number;
+  commitment: string;
+  label: string;
+  successor_of: string;
+  schema_version: number;
+  references_released: boolean;
+}
 export interface ram_migration_cursor {
   table: string;
   cursor: string;
@@ -542,6 +708,11 @@ export interface ram_migration_overlay {
 }
 export interface ram_payer_owner {
   runtime: string;
+}
+export interface releaseterms {
+  runtime: string;
+  dao_id: string;
+  schedule_id: string;
 }
 export interface scanclose {
   runtime: string;
@@ -576,7 +747,9 @@ export interface PayrollActions {
   checkquota: checkquota;
   clearclose: clearclose;
   commit: commit;
+  commitdoc: commitdoc;
   edit: edit;
+  releaseterms: releaseterms;
   scanclose: scanclose;
   scanram: scanram;
   settle: settle;

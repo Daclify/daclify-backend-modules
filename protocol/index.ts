@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.10.0-alpha.31';
+export const VERSION = '0.10.0-alpha.32';
 // SDK/help releases do not require redeploying unchanged contract binaries.
-export const CONTRACT_VERSION = '0.10.0-alpha.3';
-const CORE_RANGE =
-  '^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22';
+export const CONTRACT_VERSION = '0.10.0-alpha.4';
+const CORE_RANGE = '0.15.0-alpha.23';
 export const ModulePermissions = Object.freeze({
   activity: {
     actions: [
@@ -21,6 +20,9 @@ export const ModulePermissions = Object.freeze({
     actions: [
       'open',
       'vote',
+      'votecommit',
+      'openpoll',
+      'openarb',
       'openwork',
       'openaward',
       'newelect',
@@ -43,6 +45,8 @@ export const ModulePermissions = Object.freeze({
       'review',
       'cancel',
       'offeragr',
+      'offerprot',
+      'acceptprot',
       'acceptagr',
     ] as const,
     grants: ['reserve', 'approve', 'cancel'] as const,
@@ -57,13 +61,15 @@ export const ModulePermissions = Object.freeze({
       'applygrant',
       'amend',
       'submitapp',
+      'offerprot',
+      'submitprot',
       'reviewapp',
       'closeapp',
       'closeround',
     ] as const,
     grants: ['awardwork'] as const,
   },
-  payroll: { actions: ['commit', 'edit'] as const, grants: ['reserve', 'approve'] as const },
+  payroll: { actions: ['commit', 'edit', 'commitdoc'] as const, grants: ['reserve', 'approve'] as const },
 });
 export const DecideConfigSchema = z.strictObject({
   configVersion: z.literal(1),
@@ -186,6 +192,9 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal(ModulePermissions.decide.actions[10]),
       z.literal(ModulePermissions.decide.actions[11]),
       z.literal(ModulePermissions.decide.actions[12]),
+      z.literal(ModulePermissions.decide.actions[13]),
+      z.literal(ModulePermissions.decide.actions[14]),
+      z.literal(ModulePermissions.decide.actions[15]),
     ]),
     grants: z.tuple([z.literal('govlock'), z.literal('electexec')]),
   }),
@@ -201,6 +210,8 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal('review'),
       z.literal('cancel'),
       z.literal('offeragr'),
+      z.literal('offerprot'),
+      z.literal('acceptprot'),
       z.literal('acceptagr'),
     ]),
     grants: z.tuple([z.literal('reserve'), z.literal('approve'), z.literal('cancel')]),
@@ -213,6 +224,7 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
     actions: z.tuple([
       z.literal(ModulePermissions.payroll.actions[0]),
       z.literal(ModulePermissions.payroll.actions[1]),
+      z.literal(ModulePermissions.payroll.actions[2]),
     ]),
     grants: z.tuple([z.literal('reserve'), z.literal('approve')]),
   }),
@@ -226,6 +238,8 @@ export const ModuleInstallationSchema = z.discriminatedUnion('id', [
       z.literal('applygrant'),
       z.literal('amend'),
       z.literal('submitapp'),
+      z.literal('offerprot'),
+      z.literal('submitprot'),
       z.literal('reviewapp'),
       z.literal('closeapp'),
       z.literal('closeround'),

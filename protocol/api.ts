@@ -74,6 +74,12 @@ export const ModuleStateSchema = z.strictObject({
   appKeys: z.array(ActivityTableSchemas.appkeys).default([]),
   appKeyGrants: z.array(ActivityTableSchemas.appgrants).default([]),
   ballots: z.array(DecideTableSchemas.ballots),
+  ballotDefinitions: z.array(DecideTableSchemas.ballotdefs).default([]),
+  ballotTargets: z.array(DecideTableSchemas.votetargets).default([]),
+  documentChanges: z.array(DecideTableSchemas.docchanges).default([]),
+  arbitrationPlans:z.array(DecideTableSchemas.arbplans).default([]),
+  protectedWorksTerms:z.array(WorksTableSchemas.arbterms).default([]),
+  protectedGrantTerms:z.array(GrantsTableSchemas.arbterms).default([]),
   votes: z.array(DecideTableSchemas.votes),
   projects: z.array(WorksTableSchemas.projects),
   milestones: z.array(WorksTableSchemas.milestones),
@@ -81,6 +87,7 @@ export const ModuleStateSchema = z.strictObject({
   schedules: z.array(PayrollTableSchemas.schedules),
   entries: z.array(PayrollTableSchemas.entries),
   controls: z.array(PayrollTableSchemas.controls),
+  payrollTerms: z.array(PayrollTableSchemas.payterms).default([]),
   elections: z.array(DecideTableSchemas.elections).default([]),
   nominations: z.array(DecideTableSchemas.nominations).default([]),
   terms: z.array(DecideTableSchemas.terms).default([]),
@@ -92,6 +99,16 @@ export const ModuleStateSchema = z.strictObject({
 });
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;
+export const BallotExportSchema = z.strictObject({
+  schemaVersion:z.literal(1),dao:DaoRefSchema,decide:NativeAccountSchema,
+  ballot:DecideTableSchemas.ballots,definition:DecideTableSchemas.ballotdefs.nullable(),
+  election:DecideTableSchemas.elections.optional(),execution:DecideTableSchemas.executions.optional(),
+  grantPlan:DecideTableSchemas.grantplans.optional(),documentChange:DecideTableSchemas.docchanges.optional(),dispute:DecideTableSchemas.arbplans.optional(),target:DecideTableSchemas.votetargets.optional(),
+  votes:z.array(DecideTableSchemas.votes).max(5000),
+  verification:z.enum(['verified','legacy-unbound']),coverage:z.enum(['complete-live','partial-live']),
+  archiveNotice:z.literal('Archived vote rows are not included; partial-live is not a complete history.'),
+});
+export type BallotExport = z.infer<typeof BallotExportSchema>;
 export const GoverningDocumentCategories = Object.freeze([
   'Constitution',
   'Policy',
@@ -126,12 +143,15 @@ export const GoverningDocumentPageSchema = z.strictObject({
   acceptances: z.array(DecideTableSchemas.docaccepts).max(25),
   acceptedAdoptionIds: z.array(IdSchema).max(25),
   ballots: z.array(DecideTableSchemas.ballots).max(50),
+  ballotDefinitions: z.array(DecideTableSchemas.ballotdefs).max(50).default([]),
   votes: z.array(DecideTableSchemas.votes).max(50),
   next: Uint64Schema.nullable(),
 });
 export type GoverningDocumentQuery = z.infer<typeof GoverningDocumentQuerySchema>;
 export type GoverningDocumentPage = z.infer<typeof GoverningDocumentPageSchema>;
 export const ModuleApiRoutes = {
+  arbitration:{method:'POST',path:'/v1/works/arbitration',input:z.strictObject({dao:DaoRefSchema,obligationId:IdSchema,operation:z.enum(['advance','open-vote'])}),response:z.strictObject({transactionId:ChainIdSchema,ballotId:IdSchema.nullable(),state:z.int().min(0).max(8)}),helpTopic:'works'},
+  ballotExport:{method:'GET',path:'/v1/daos/:id/ballots/:ballotId/export',response:BallotExportSchema,helpTopic:'decide'},
   clearDocuments: {
     method: 'POST',
     path: '/v1/decide/clear-documents',

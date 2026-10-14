@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const worksAbiHash = 'f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2a220600427';
+export const worksAbiHash = 'e1171a3876b32914123c74cbba1a79b4d282d020ab22535c19dfb87eb1a26cf0';
 export const worksAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -50,6 +50,32 @@ export const worksAbi = {
       ]
     },
     {
+      "name": "acceptprot",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "expected",
+          "type": "checksum256"
+        }
+      ]
+    },
+    {
       "name": "agreement_record",
       "base": "",
       "fields": [
@@ -84,6 +110,98 @@ export const worksAbi = {
         {
           "name": "accepted_at",
           "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_rules",
+      "base": "",
+      "fields": [
+        {
+          "name": "decide",
+          "type": "name"
+        },
+        {
+          "name": "decide_hash",
+          "type": "checksum256"
+        },
+        {
+          "name": "backup",
+          "type": "uint64"
+        },
+        {
+          "name": "representative",
+          "type": "uint64"
+        },
+        {
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "name": "quorum",
+          "type": "uint16"
+        },
+        {
+          "name": "approval",
+          "type": "uint16"
+        },
+        {
+          "name": "review_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "challenge_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "vote_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "backup_seconds",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "arbitration_terms",
+      "base": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uint64"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "contributor",
+          "type": "uint64"
+        },
+        {
+          "name": "cutoff",
+          "type": "uint32"
+        },
+        {
+          "name": "version",
+          "type": "uint16"
+        },
+        {
+          "name": "rules",
+          "type": "arbitration_rules"
+        },
+        {
+          "name": "base",
+          "type": "checksum256"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "accepted",
+          "type": "bool"
         }
       ]
     },
@@ -179,6 +297,24 @@ export const worksAbi = {
         },
         {
           "name": "dao_id",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "clearprot",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
           "type": "uint64"
         }
       ]
@@ -341,6 +477,56 @@ export const worksAbi = {
         },
         {
           "name": "term_end",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "offerprot",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "project_id",
+          "type": "uint64"
+        },
+        {
+          "name": "decide",
+          "type": "name"
+        },
+        {
+          "name": "backup",
+          "type": "uint64"
+        },
+        {
+          "name": "representative",
+          "type": "uint64"
+        },
+        {
+          "name": "review_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "challenge_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "vote_seconds",
+          "type": "uint32"
+        },
+        {
+          "name": "backup_seconds",
           "type": "uint32"
         }
       ]
@@ -606,6 +792,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "acceptprot",
+      "type": "acceptprot",
+      "ricardian_contract": ""
+    },
+    {
       "name": "backfillrefs",
       "type": "backfillrefs",
       "ricardian_contract": ""
@@ -636,6 +827,11 @@ export const worksAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "clearprot",
+      "type": "clearprot",
+      "ricardian_contract": ""
+    },
+    {
       "name": "govaccept",
       "type": "govaccept",
       "ricardian_contract": ""
@@ -648,6 +844,11 @@ export const worksAbi = {
     {
       "name": "offeragr",
       "type": "offeragr",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "offerprot",
+      "type": "offerprot",
       "ricardian_contract": ""
     },
     {
@@ -685,6 +886,13 @@ export const worksAbi = {
     {
       "name": "agreements",
       "type": "agreement_record",
+      "index_type": "i64",
+      "key_names": [],
+      "key_types": []
+    },
+    {
+      "name": "arbterms",
+      "type": "arbitration_terms",
       "index_type": "i64",
       "key_names": [],
       "key_types": []
@@ -748,6 +956,13 @@ export interface acceptagr {
   member_id: string;
   project_id: string;
 }
+export interface acceptprot {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  project_id: string;
+  expected: string;
+}
 export interface agreement_record {
   project_id: string;
   dao_id: string;
@@ -757,6 +972,30 @@ export interface agreement_record {
   terms: string;
   accepted: boolean;
   accepted_at: number;
+}
+export interface arbitration_rules {
+  decide: string;
+  decide_hash: string;
+  backup: string;
+  representative: string;
+  kind: number;
+  quorum: number;
+  approval: number;
+  review_seconds: number;
+  challenge_seconds: number;
+  vote_seconds: number;
+  backup_seconds: number;
+}
+export interface arbitration_terms {
+  id: string;
+  dao_id: string;
+  contributor: string;
+  cutoff: number;
+  version: number;
+  rules: arbitration_rules;
+  base: string;
+  commitment: string;
+  accepted: boolean;
 }
 export interface backfillrefs {
   runtime: string;
@@ -784,6 +1023,11 @@ export interface checkquota {
 export interface clearclose {
   runtime: string;
   dao_id: string;
+}
+export interface clearprot {
+  runtime: string;
+  dao_id: string;
+  project_id: string;
 }
 export interface closure_check {
   dao_id: string;
@@ -827,6 +1071,19 @@ export interface offeragr {
   project_id: string;
   term_start: number;
   term_end: number;
+}
+export interface offerprot {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  project_id: string;
+  decide: string;
+  backup: string;
+  representative: string;
+  review_seconds: number;
+  challenge_seconds: number;
+  vote_seconds: number;
+  backup_seconds: number;
 }
 export interface project_record {
   id: string;
@@ -898,15 +1155,18 @@ export interface submitwork {
 export interface WorksActions {
   accept: accept;
   acceptagr: acceptagr;
+  acceptprot: acceptprot;
   backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   cancel: cancel;
   checkmig: checkmig;
   checkquota: checkquota;
   clearclose: clearclose;
+  clearprot: clearprot;
   govaccept: govaccept;
   grantwork: grantwork;
   offeragr: offeragr;
+  offerprot: offerprot;
   propose: propose;
   review: review;
   scanclose: scanclose;

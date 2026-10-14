@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.31 · interface 1.
+Package 0.10.0-alpha.32 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -20,15 +20,17 @@ Executive elections are opt-in: initialize a core executive policy and install t
 
 The ballot editor requires a public title and explanation, and offers an optional existing DAO document pinned to its exact version and content commitment. Inline text and choice labels are public even in a private DAO. Use an encrypted supporting document for confidential details. The metadata reference adds no storage-retention guarantee.
 
-Binary proposals use Reject and Approve. Custom single-choice advisory polls have three to sixteen distinct labels; a neutral two-option poll is not supported by this contract. Polls use the same quorum and approval threshold as the saved DAO policy: the unique leading option must reach that threshold; a simple plurality can therefore fail. Abstention, ranked choices and changing a cast vote are not available for ordinary ballots.
+Binary proposals use Reject and Approve. Explicit advisory polls have two to sixteen distinct labels; either option can win a neutral two-option poll. Polls use the saved DAO quorum and approval threshold: the unique leading option must reach that threshold, so a simple plurality can fail. Ordinary ballots remain single-choice and once-only; advanced election methods are a separate release.
 
-New editor metadata has schemaVersion 2, a title up to 160 characters, an explanation up to 2000 characters, options with labels up to 80 characters, and an optional documentId/version/commitment reference. The whole serialized JSON is limited to 4096 UTF-8 bytes. Legacy binary ballots retain Reject/Approve meaning. Unsupported or inconsistent choice metadata prevents voting in the current interface. Contract-enforced vote commitments to the displayed definition remain a separate pending upgrade.
+New editor metadata uses schemaVersion 3 with explicit proposal or poll semantics, a title up to 160 characters, an explanation up to 2000 characters, labels up to 80 characters and an optional documentId/version/commitment reference. Serialized JSON is limited to 4096 UTF-8 bytes. Schema-one/two ballots retain their original interpretation. Every newly opened ballot stores a versioned contract-checked definition commitment; votecommit binds exact metadata, domain, frozen rules and execution/election/document targets. Legacy vote is accepted only for genuinely pre-upgrade ballots.
+
+Funding ballots retain immutable opening snapshots of recipient, payments, due dates, contribution terms and exact supporting document commitments. Review those terms and verified supporting versions before voting. Export ballot and votes downloads the full domain, definition, target and every available live vote; partial-live explicitly excludes archived history.
 
 ## Fund work through milestones
 
 A proposal names a contributor, a deliverable reference, and bounded milestone payments. Funds must be reserved before commitment.
 
-Submission and review are separate permissions. A contributor cannot approve their own work. A reviewer can request changes and the contributor can submit a revision. A separate dispute or arbitration process is not implemented in this release.
+Submission and review are separate permissions. A contributor cannot approve their own work. Optional protected terms require fresh contributor acceptance before funding; an administrator can permanently require protection for all future Works reservations, including Grants awards using that Works source. Existing funded work keeps its original rights.
 
 Approval records a backed obligation. A job retry or duplicate submission cannot create a second payment for the same milestone.
 
@@ -37,6 +39,14 @@ Publish the proposal document, propose work, and have an administrator accept it
 When governed Works funding is enabled, direct administrator acceptance is rejected. An approved funding ballot reserves the pinned project; contributor submission and independent review are still required before payment.
 
 Observed acceptance preallocates fixed submission and review reference slots before committing funds. Revision reuses those slots; bounded legacy adoptwork scans add missing pending slots. This supports references to documents that already exist when ordinary RAM is exhausted. New document contents, uploads and new funding commitments still require ordinary capacity. Financial settlement uses its reserved core receipt hold; full-claim withdrawal is the emergency exit, while partial withdrawals need ordinary RAM.
+
+Before protected funding, choose a different active backup member, a DAO executive representative and review, challenge, vote and backup deadlines. Member voting follows the frozen DAO voting rules and excludes the contributor and every participating reviewer. Reviews stay provisional during the challenge period; disputed outcomes pay the fixed milestone amount or cancel only its unpaid reservation.
+
+No valid vote or no eligible electorate leaves funds reserved until the agreed backup deadline. After both decision stages expire, only matching contributor and fixed DAO representative consent resolves the reserve. An inactive contributor can still consent to this final settlement using their current signing proof. Already approved claims remain payable. Private evidence requires existing registered key grants for decision makers, and verified decryption remains a separate user requirement.
+
+The service catalogue publishes validated public or encrypted service offers using normal DAO documents. Private offers are read in explicit batches of 25 and clear from the screen when keys lock. Exact version links return to the originating DAO page.
+
+Large courts prepare eligible voters in bounded steps. The UI completes the preparation through one action and shows a resume option after interruption; voting remains locked until the entire frozen membership boundary is processed. Expired or empty preparation produces no approved payment. Preparation needs ordinary storage capacity; its failure leaves funded reserves under the agreed backup/mutual-settlement safeguards.
 
 ## Funded payroll with a clear end date
 
@@ -49,6 +59,8 @@ This initial contract uses fixed terms of at most twelve installments. Renewal i
 Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.
 
 One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. Pausing a schedule stops the payroll settlement helper until an administrator resumes it. It does not stop direct Treasury payment of an approved, due obligation. Only the separate DAO guardian pause blocks those obligation payments. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule.
+
+New commitments require an agreed name and exact terms document commitment before reserving funds. Renew with fresh funding creates one separately funded successor for the same recipient after the previous term, preserving all earlier installment claims. Retries cannot create a second successor. A later display-label edit does not change the immutable agreed name or document terms. All-paid reference cleanup retains the successor marker.
 
 ## Read the matching module reference
 
@@ -101,6 +113,8 @@ An administrator reviews eligibility using a decision document. Eligibility auth
 Execution atomically checks the round cap, creates a Works agreement accepted by the applicant submission and reserves every milestone from real Treasury funds. If any cap, backing, identity, policy or code check fails, nothing is awarded or reserved. Delivery, independent review, cancellation and once-only settlement then use Works and Treasury.
 
 Awarded is the cumulative committed award amount, not a current cash balance. Cancellation does not reopen the lifetime cap. Private narrative belongs in encrypted Documents; on-chain terms, membership, votes and asset amounts remain public. Changing the application or review invalidates its earlier vote.
+
+Protected applications require the contributor to approve the exact voting rules, backup and deadlines before submission. Amendment clears that consent and eligibility review. Award execution transfers the approved protected terms to Works; funding ballots preserve the original application revision and readable payment snapshot.
 
 ## Join with member endorsements
 
@@ -427,7 +441,7 @@ Source ABI JSON SHA-256: `f1a449c47cecebdd78c4df51df81b6b6d0aedf1ce2251289c33614
 
 ## decide contract
 
-Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acdcb60a1cafa`.
+Source ABI JSON SHA-256: `5ce73db291c57e82891ddc78f68afa7fc6c169058135564ac60e07a45cab3b9b`.
 
 ### Action: ackdoc
 
@@ -499,6 +513,14 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | runtime | name |
 | dao_id | uint64 |
 | proposal_ids | uint64[] |
+
+### Action: execarb
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| ballot_id | uint64 |
 
 ### Action: execute
 
@@ -573,6 +595,15 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | approval | uint16 |
 | metadata | string |
 
+### Action: openarb
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| obligation_id | uint64 |
+| ballot_id | uint64 |
+
 ### Action: openaward
 
 | Field | ABI type |
@@ -585,6 +616,21 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | round_id | uint64 |
 | application_id | uint64 |
 | project_id | uint64 |
+| duration | uint32 |
+| quorum | uint16 |
+| approval | uint16 |
+| metadata | string |
+
+### Action: openpoll
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| ballot_id | uint64 |
+| kind | uint8 |
+| choices | uint8 |
 | duration | uint32 |
 | quorum | uint16 |
 | approval | uint16 |
@@ -651,6 +697,14 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | approval | uint8 |
 | track_acceptance | bool |
 
+### Action: releasetgt
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| ballot_ids | uint64[] |
+
 ### Action: scanclose
 
 | Field | ABI type |
@@ -685,6 +739,45 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | member_id | uint64 |
 | ballot_id | uint64 |
 | choice | uint8 |
+
+### Action: votecommit
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| ballot_id | uint64 |
+| expected | checksum256 |
+| choice | uint8 |
+
+### Table: arbplans
+
+| Field | ABI type |
+| --- | --- |
+| ballot_id | uint64 |
+| dao_id | uint64 |
+| protection | protected_obligation |
+| quantity | asset |
+| due | uint32 |
+| voters | arbitration_voter[] |
+| executed | bool |
+| version | uint16 |
+| cursor | uint64 |
+| scanned | uint32 |
+| ready | bool |
+
+### Table: ballotdefs
+
+| Field | ABI type |
+| --- | --- |
+| ballot_id | uint64 |
+| dao_id | uint64 |
+| version | uint16 |
+| purpose | uint8 |
+| policy_revision | uint64 |
+| policy_hash | checksum256 |
+| commitment | checksum256 |
 
 ### Table: ballots
 
@@ -897,9 +990,20 @@ Source ABI JSON SHA-256: `84426dcd2d7419d88470720a9365921d922e6f05877a5d91de3acd
 | weight | uint64 |
 | choice | uint8 |
 
+### Table: votetargets
+
+| Field | ABI type |
+| --- | --- |
+| ballot_id | uint64 |
+| dao_id | uint64 |
+| version | uint16 |
+| work | work_ballot_target? |
+| grant | grant_ballot_target? |
+| released | bool |
+
 ## works contract
 
-Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2a220600427`.
+Source ABI JSON SHA-256: `e1171a3876b32914123c74cbba1a79b4d282d020ab22535c19dfb87eb1a26cf0`.
 
 ### Action: accept
 
@@ -918,6 +1022,16 @@ Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2
 | dao_id | uint64 |
 | member_id | uint64 |
 | project_id | uint64 |
+
+### Action: acceptprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| project_id | uint64 |
+| expected | checksum256 |
 
 ### Action: backfillrefs
 
@@ -964,6 +1078,14 @@ Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2
 | runtime | name |
 | dao_id | uint64 |
 
+### Action: clearprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| project_id | uint64 |
+
 ### Action: govaccept
 
 | Field | ABI type |
@@ -994,6 +1116,22 @@ Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2
 | project_id | uint64 |
 | term_start | uint32 |
 | term_end | uint32 |
+
+### Action: offerprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| project_id | uint64 |
+| decide | name |
+| backup | uint64 |
+| representative | uint64 |
+| review_seconds | uint32 |
+| challenge_seconds | uint32 |
+| vote_seconds | uint32 |
+| backup_seconds | uint32 |
 
 ### Action: propose
 
@@ -1069,6 +1207,20 @@ Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2
 | accepted | bool |
 | accepted_at | uint32 |
 
+### Table: arbterms
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| contributor | uint64 |
+| cutoff | uint32 |
+| version | uint16 |
+| rules | arbitration_rules |
+| base | checksum256 |
+| commitment | checksum256 |
+| accepted | bool |
+
 ### Table: closechecks
 
 | Field | ABI type |
@@ -1134,7 +1286,7 @@ Source ABI JSON SHA-256: `f30061c972d33083bbab3c847b03a024682db6e86b0c5c8bc04bc2
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e332e7a1fa44`.
+Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916ff51c76ec9`.
 
 ### Action: backfillrefs
 
@@ -1184,6 +1336,25 @@ Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e3
 | interval | uint32 |
 | starts | uint32 |
 
+### Action: commitdoc
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| schedule_id | uint64 |
+| recipient | uint64 |
+| quantity | asset |
+| periods | uint8 |
+| interval | uint32 |
+| starts | uint32 |
+| label | string |
+| document_id | uint64 |
+| document_version | uint32 |
+| expected | checksum256 |
+| successor_of | uint64 |
+
 ### Action: edit
 
 | Field | ABI type |
@@ -1194,6 +1365,14 @@ Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e3
 | schedule_id | uint64 |
 | paused | uint8 |
 | label | string |
+
+### Action: releaseterms
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| schedule_id | uint64 |
 
 ### Action: scanclose
 
@@ -1248,6 +1427,20 @@ Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e3
 | schedule_id | uint64 |
 | due | uint32 |
 
+### Table: payterms
+
+| Field | ABI type |
+| --- | --- |
+| schedule_id | uint64 |
+| dao_id | uint64 |
+| document_id | uint64 |
+| document_version | uint32 |
+| commitment | checksum256 |
+| label | string |
+| successor_of | uint64 |
+| schema_version | uint16 |
+| references_released | bool |
+
 ### Table: ramcursors
 
 | Field | ABI type |
@@ -1287,7 +1480,7 @@ Source ABI JSON SHA-256: `6a325ea097ae2491a7205b6e16fe6f02f5a3fa32e87d6fae6307e3
 
 ## grants contract
 
-Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd33157eccc2a94`.
+Source ABI JSON SHA-256: `692414352d30640d57e0fcf3bbaf7b6f7117c3d8f25e7a433155f7bbcee309a2`.
 
 ### Action: amend
 
@@ -1356,6 +1549,14 @@ Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd331
 | runtime | name |
 | dao_id | uint64 |
 
+### Action: clearprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| application_id | uint64 |
+
 ### Action: closeapp
 
 | Field | ABI type |
@@ -1401,6 +1602,22 @@ Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd331
 | allow_agents | bool |
 | works | name |
 
+### Action: offerprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| application_id | uint64 |
+| decide | name |
+| backup | uint64 |
+| representative | uint64 |
+| review_seconds | uint32 |
+| challenge_seconds | uint32 |
+| vote_seconds | uint32 |
+| backup_seconds | uint32 |
+
 ### Action: reviewapp
 
 | Field | ABI type |
@@ -1438,6 +1655,16 @@ Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd331
 | member_id | uint64 |
 | application_id | uint64 |
 
+### Action: submitprot
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| application_id | uint64 |
+| expected | checksum256 |
+
 ### Table: applications
 
 | Field | ABI type |
@@ -1459,6 +1686,20 @@ Source ABI JSON SHA-256: `242d90d61f9df1eedbe9010b358515561bf9b7c3d81c1d1fefd331
 | decision_version | uint32 |
 | project_id | uint64 |
 | funding_ballot | uint64 |
+
+### Table: arbterms
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| contributor | uint64 |
+| cutoff | uint32 |
+| version | uint16 |
+| rules | arbitration_rules |
+| base | checksum256 |
+| commitment | checksum256 |
+| accepted | bool |
 
 ### Table: closechecks
 
@@ -1671,6 +1912,1658 @@ Source ABI JSON SHA-256: `3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+## POST /v1/works/arbitration
+
+Guide: works.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "obligationId": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "advance",
+        "open-vote"
+      ]
+    }
+  },
+  "required": [
+    "dao",
+    "obligationId",
+    "operation"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "transactionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "ballotId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8
+    }
+  },
+  "required": [
+    "transactionId",
+    "ballotId",
+    "state"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/daos/:id/ballots/:ballotId/export
+
+Guide: decide.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "decide": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "ballot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "creator": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "kind": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "choices": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "closes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "quorum": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "approval": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "denominator": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "max_member": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "cast": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "tallies": {
+          "maxItems": 5000,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "winner": {
+          "type": "integer",
+          "minimum": -32768,
+          "maximum": 32767
+        },
+        "metadata": {
+          "type": "string",
+          "maxLength": 16384
+        }
+      },
+      "required": [
+        "id",
+        "dao_id",
+        "creator",
+        "kind",
+        "choices",
+        "closes",
+        "quorum",
+        "approval",
+        "denominator",
+        "max_member",
+        "cast",
+        "tallies",
+        "status",
+        "winner",
+        "metadata"
+      ],
+      "additionalProperties": false
+    },
+    "definition": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "ballot_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "dao_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535
+            },
+            "purpose": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "policy_revision": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "policy_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "ballot_id",
+            "dao_id",
+            "version",
+            "purpose",
+            "policy_revision",
+            "policy_hash",
+            "commitment"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "election": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "creator": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 16384
+        },
+        "document_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "document_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "document_commitment": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "policy_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "nomination_close": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "term_start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "term_end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "seats": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "candidates": {
+          "maxItems": 5000,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 20
+          }
+        }
+      },
+      "required": [
+        "id",
+        "dao_id",
+        "creator",
+        "title",
+        "document_id",
+        "document_version",
+        "document_commitment",
+        "policy_revision",
+        "nomination_close",
+        "term_start",
+        "term_end",
+        "seats",
+        "status",
+        "candidates"
+      ],
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "ballot_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "works": {
+          "type": "string",
+          "maxLength": 13
+        },
+        "project_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "commitment": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "works_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "policy_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "deadline": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "executed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ballot_id",
+        "dao_id",
+        "works",
+        "project_id",
+        "commitment",
+        "works_hash",
+        "policy_revision",
+        "deadline",
+        "executed"
+      ],
+      "additionalProperties": false
+    },
+    "grantPlan": {
+      "type": "object",
+      "properties": {
+        "ballot_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "grants": {
+          "type": "string",
+          "maxLength": 13
+        },
+        "works": {
+          "type": "string",
+          "maxLength": 13
+        },
+        "round_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "application_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "application_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "project_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "commitment": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "grants_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "works_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "policy_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "deadline": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "executed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ballot_id",
+        "dao_id",
+        "grants",
+        "works",
+        "round_id",
+        "application_id",
+        "application_revision",
+        "project_id",
+        "commitment",
+        "grants_hash",
+        "works_hash",
+        "policy_revision",
+        "deadline",
+        "executed"
+      ],
+      "additionalProperties": false
+    },
+    "documentChange": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "register_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "document_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "document_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "commitment": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "expected_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "policy_revision": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "ballot_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "proposer": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "proposed_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "deadline": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "adopted_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "adopted_by": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        }
+      },
+      "required": [
+        "id",
+        "dao_id",
+        "register_id",
+        "document_id",
+        "document_version",
+        "commitment",
+        "source_hash",
+        "expected_revision",
+        "policy_revision",
+        "ballot_id",
+        "proposer",
+        "proposed_at",
+        "deadline",
+        "adopted_at",
+        "adopted_by",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "dispute": {
+      "type": "object",
+      "properties": {
+        "ballot_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "protection": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "source": {
+              "type": "string",
+              "maxLength": 13
+            },
+            "source_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "project_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "recipient": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535
+            },
+            "source_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "terms": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "decide": {
+                  "type": "string",
+                  "maxLength": 13
+                },
+                "decide_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "backup": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "representative": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "kind": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "quorum": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "approval": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "review_seconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "challenge_seconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "vote_seconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "backup_seconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "decide",
+                "decide_hash",
+                "backup",
+                "representative",
+                "kind",
+                "quorum",
+                "approval",
+                "review_seconds",
+                "challenge_seconds",
+                "vote_seconds",
+                "backup_seconds"
+              ],
+              "additionalProperties": false
+            },
+            "cutoff": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "reviewer": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "state": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "deadline": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "ballot_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "decision_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "consent_outcome": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "consent_mask": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "reviewers": {
+              "maxItems": 5000,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 20
+              }
+            },
+            "submission_doc": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "review_doc": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "challenge_doc": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "submission_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "review_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "challenge_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "submission_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "review_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "challenge_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "source",
+            "source_id",
+            "project_id",
+            "recipient",
+            "version",
+            "source_hash",
+            "terms",
+            "rules",
+            "cutoff",
+            "reviewer",
+            "state",
+            "deadline",
+            "ballot_id",
+            "decision_hash",
+            "consent_outcome",
+            "consent_mask",
+            "reviewers",
+            "submission_doc",
+            "review_doc",
+            "challenge_doc",
+            "submission_version",
+            "review_version",
+            "challenge_version",
+            "submission_commitment",
+            "review_commitment",
+            "challenge_commitment"
+          ],
+          "additionalProperties": false
+        },
+        "quantity": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+        },
+        "due": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "voters": {
+          "maxItems": 5000,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "member_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "weight": {
+                "type": "string",
+                "maxLength": 20
+              }
+            },
+            "required": [
+              "member_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "executed": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "cursor": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "scanned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "ready": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ballot_id",
+        "dao_id",
+        "protection",
+        "quantity",
+        "due",
+        "voters",
+        "executed",
+        "version",
+        "cursor",
+        "scanned",
+        "ready"
+      ],
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "ballot_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "work": {
+          "type": "object",
+          "properties": {
+            "project": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "contributor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "milestones": {
+                  "maxItems": 5000,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator",
+                "contributor",
+                "document_id",
+                "document_version",
+                "milestones",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            "milestones": {
+              "maxItems": 5000,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                  },
+                  "due": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "status": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "submission_doc": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "submission_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "review_doc": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "review_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "reviewer": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "project_id",
+                  "quantity",
+                  "due",
+                  "status",
+                  "submission_doc",
+                  "submission_version",
+                  "review_doc",
+                  "review_version",
+                  "reviewer"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "agreement": {
+              "type": "object",
+              "properties": {
+                "project_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "schema_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "term_start": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "term_end": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "terms": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "accepted": {
+                  "type": "boolean"
+                },
+                "accepted_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "project_id",
+                "dao_id",
+                "schema_version",
+                "term_start",
+                "term_end",
+                "terms",
+                "accepted",
+                "accepted_at"
+              ],
+              "additionalProperties": false
+            },
+            "protection": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "contributor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "cutoff": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "rules": {
+                  "type": "object",
+                  "properties": {
+                    "decide": {
+                      "type": "string",
+                      "maxLength": 13
+                    },
+                    "decide_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "backup": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "representative": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "kind": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "quorum": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "approval": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "review_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "challenge_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "vote_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "backup_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    }
+                  },
+                  "required": [
+                    "decide",
+                    "decide_hash",
+                    "backup",
+                    "representative",
+                    "kind",
+                    "quorum",
+                    "approval",
+                    "review_seconds",
+                    "challenge_seconds",
+                    "vote_seconds",
+                    "backup_seconds"
+                  ],
+                  "additionalProperties": false
+                },
+                "base": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "commitment": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "accepted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "contributor",
+                "cutoff",
+                "version",
+                "rules",
+                "base",
+                "commitment",
+                "accepted"
+              ],
+              "additionalProperties": false
+            },
+            "document_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "project",
+            "milestones",
+            "document_commitment"
+          ],
+          "additionalProperties": false
+        },
+        "grant": {
+          "type": "object",
+          "properties": {
+            "round": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "rules_revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "applications_close": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "review_close": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "awards_close": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "maximum": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                },
+                "awarded": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "allow_agents": {
+                  "type": "boolean"
+                },
+                "works": {
+                  "type": "string",
+                  "maxLength": 13
+                },
+                "closed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator",
+                "document_id",
+                "document_version",
+                "rules_revision",
+                "applications_close",
+                "review_close",
+                "awards_close",
+                "maximum",
+                "awarded",
+                "allow_agents",
+                "works",
+                "closed"
+              ],
+              "additionalProperties": false
+            },
+            "application": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "round_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "contributor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "document_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "payments": {
+                  "maxItems": 5000,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                  }
+                },
+                "dues": {
+                  "maxItems": 5000,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  }
+                },
+                "term_start": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "term_end": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "consent_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "decision_doc": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "decision_version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "project_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "funding_ballot": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "round_id",
+                "contributor",
+                "revision",
+                "document_id",
+                "document_version",
+                "payments",
+                "dues",
+                "term_start",
+                "term_end",
+                "status",
+                "consent_at",
+                "decision_doc",
+                "decision_version",
+                "project_id",
+                "funding_ballot"
+              ],
+              "additionalProperties": false
+            },
+            "protection": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "contributor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "cutoff": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "rules": {
+                  "type": "object",
+                  "properties": {
+                    "decide": {
+                      "type": "string",
+                      "maxLength": 13
+                    },
+                    "decide_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "backup": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "representative": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "kind": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "quorum": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "approval": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "review_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "challenge_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "vote_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "backup_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    }
+                  },
+                  "required": [
+                    "decide",
+                    "decide_hash",
+                    "backup",
+                    "representative",
+                    "kind",
+                    "quorum",
+                    "approval",
+                    "review_seconds",
+                    "challenge_seconds",
+                    "vote_seconds",
+                    "backup_seconds"
+                  ],
+                  "additionalProperties": false
+                },
+                "base": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "commitment": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "accepted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "contributor",
+                "cutoff",
+                "version",
+                "rules",
+                "base",
+                "commitment",
+                "accepted"
+              ],
+              "additionalProperties": false
+            },
+            "rules_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "application_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "decision_commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "round",
+            "application",
+            "rules_commitment",
+            "application_commitment",
+            "decision_commitment"
+          ],
+          "additionalProperties": false
+        },
+        "released": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ballot_id",
+        "dao_id",
+        "version",
+        "released"
+      ],
+      "additionalProperties": false
+    },
+    "votes": {
+      "maxItems": 5000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "ballot": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "member": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "weight": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "choice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "id",
+          "ballot",
+          "member",
+          "weight",
+          "choice"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "verification": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "legacy-unbound"
+      ]
+    },
+    "coverage": {
+      "type": "string",
+      "enum": [
+        "complete-live",
+        "partial-live"
+      ]
+    },
+    "archiveNotice": {
+      "type": "string",
+      "const": "Archived vote rows are not included; partial-live is not a complete history."
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "dao",
+    "decide",
+    "ballot",
+    "definition",
+    "votes",
+    "verification",
+    "coverage",
+    "archiveNotice"
+  ],
+  "additionalProperties": false
+}
+```
 
 ## POST /v1/decide/clear-documents
 
@@ -2229,7 +4122,7 @@ Response:
             "maxLength": 20
           },
           "tallies": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -2267,6 +4160,56 @@ Response:
           "status",
           "winner",
           "metadata"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ballotDefinitions": {
+      "default": [],
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "purpose": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "policy_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "policy_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "ballot_id",
+          "dao_id",
+          "version",
+          "purpose",
+          "policy_revision",
+          "policy_hash",
+          "commitment"
         ],
         "additionalProperties": false
       }
@@ -2331,6 +4274,7 @@ Response:
     "acceptances",
     "acceptedAdoptionIds",
     "ballots",
+    "ballotDefinitions",
     "votes",
     "next"
   ],
@@ -3248,7 +5192,7 @@ Response:
             "maxLength": 20
           },
           "tallies": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -3286,6 +5230,1384 @@ Response:
           "status",
           "winner",
           "metadata"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ballotDefinitions": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "purpose": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "policy_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "policy_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "ballot_id",
+          "dao_id",
+          "version",
+          "purpose",
+          "policy_revision",
+          "policy_hash",
+          "commitment"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ballotTargets": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "work": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "creator": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "contributor": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "milestones": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
+                  },
+                  "status": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "creator",
+                  "contributor",
+                  "document_id",
+                  "document_version",
+                  "milestones",
+                  "status"
+                ],
+                "additionalProperties": false
+              },
+              "milestones": {
+                "maxItems": 5000,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "dao_id": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "project_id": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                    },
+                    "due": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "submission_doc": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "submission_version": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "review_doc": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "review_version": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "reviewer": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "dao_id",
+                    "project_id",
+                    "quantity",
+                    "due",
+                    "status",
+                    "submission_doc",
+                    "submission_version",
+                    "review_doc",
+                    "review_version",
+                    "reviewer"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "agreement": {
+                "type": "object",
+                "properties": {
+                  "project_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "schema_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "term_start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "term_end": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "terms": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "accepted_at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "dao_id",
+                  "schema_version",
+                  "term_start",
+                  "term_end",
+                  "terms",
+                  "accepted",
+                  "accepted_at"
+                ],
+                "additionalProperties": false
+              },
+              "protection": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "contributor": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "cutoff": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "rules": {
+                    "type": "object",
+                    "properties": {
+                      "decide": {
+                        "type": "string",
+                        "maxLength": 13
+                      },
+                      "decide_hash": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "backup": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "representative": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "kind": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 255
+                      },
+                      "quorum": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                      },
+                      "approval": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                      },
+                      "review_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "challenge_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "vote_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "backup_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      }
+                    },
+                    "required": [
+                      "decide",
+                      "decide_hash",
+                      "backup",
+                      "representative",
+                      "kind",
+                      "quorum",
+                      "approval",
+                      "review_seconds",
+                      "challenge_seconds",
+                      "vote_seconds",
+                      "backup_seconds"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "base": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "contributor",
+                  "cutoff",
+                  "version",
+                  "rules",
+                  "base",
+                  "commitment",
+                  "accepted"
+                ],
+                "additionalProperties": false
+              },
+              "document_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "project",
+              "milestones",
+              "document_commitment"
+            ],
+            "additionalProperties": false
+          },
+          "grant": {
+            "type": "object",
+            "properties": {
+              "round": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "creator": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "rules_revision": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "applications_close": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "review_close": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "awards_close": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "maximum": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                  },
+                  "awarded": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "allow_agents": {
+                    "type": "boolean"
+                  },
+                  "works": {
+                    "type": "string",
+                    "maxLength": 13
+                  },
+                  "closed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "creator",
+                  "document_id",
+                  "document_version",
+                  "rules_revision",
+                  "applications_close",
+                  "review_close",
+                  "awards_close",
+                  "maximum",
+                  "awarded",
+                  "allow_agents",
+                  "works",
+                  "closed"
+                ],
+                "additionalProperties": false
+              },
+              "application": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "round_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "contributor": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "revision": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "document_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "payments": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+                    }
+                  },
+                  "dues": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    }
+                  },
+                  "term_start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "term_end": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "status": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "consent_at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "decision_doc": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "decision_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "funding_ballot": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "round_id",
+                  "contributor",
+                  "revision",
+                  "document_id",
+                  "document_version",
+                  "payments",
+                  "dues",
+                  "term_start",
+                  "term_end",
+                  "status",
+                  "consent_at",
+                  "decision_doc",
+                  "decision_version",
+                  "project_id",
+                  "funding_ballot"
+                ],
+                "additionalProperties": false
+              },
+              "protection": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "contributor": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "cutoff": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "rules": {
+                    "type": "object",
+                    "properties": {
+                      "decide": {
+                        "type": "string",
+                        "maxLength": 13
+                      },
+                      "decide_hash": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "backup": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "representative": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "kind": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 255
+                      },
+                      "quorum": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                      },
+                      "approval": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                      },
+                      "review_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "challenge_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "vote_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      },
+                      "backup_seconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      }
+                    },
+                    "required": [
+                      "decide",
+                      "decide_hash",
+                      "backup",
+                      "representative",
+                      "kind",
+                      "quorum",
+                      "approval",
+                      "review_seconds",
+                      "challenge_seconds",
+                      "vote_seconds",
+                      "backup_seconds"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "base": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "contributor",
+                  "cutoff",
+                  "version",
+                  "rules",
+                  "base",
+                  "commitment",
+                  "accepted"
+                ],
+                "additionalProperties": false
+              },
+              "rules_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "application_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "decision_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "round",
+              "application",
+              "rules_commitment",
+              "application_commitment",
+              "decision_commitment"
+            ],
+            "additionalProperties": false
+          },
+          "released": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ballot_id",
+          "dao_id",
+          "version",
+          "released"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "documentChanges": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "register_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "expected_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "policy_revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "proposer": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "proposed_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "deadline": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "adopted_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "adopted_by": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "register_id",
+          "document_id",
+          "document_version",
+          "commitment",
+          "source_hash",
+          "expected_revision",
+          "policy_revision",
+          "ballot_id",
+          "proposer",
+          "proposed_at",
+          "deadline",
+          "adopted_at",
+          "adopted_by",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "arbitrationPlans": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "protection": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "source": {
+                "type": "string",
+                "maxLength": 13
+              },
+              "source_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "project_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "recipient": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "source_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "terms": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "rules": {
+                "type": "object",
+                "properties": {
+                  "decide": {
+                    "type": "string",
+                    "maxLength": 13
+                  },
+                  "decide_hash": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "backup": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "representative": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "kind": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "quorum": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "approval": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "review_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "challenge_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "vote_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "backup_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  }
+                },
+                "required": [
+                  "decide",
+                  "decide_hash",
+                  "backup",
+                  "representative",
+                  "kind",
+                  "quorum",
+                  "approval",
+                  "review_seconds",
+                  "challenge_seconds",
+                  "vote_seconds",
+                  "backup_seconds"
+                ],
+                "additionalProperties": false
+              },
+              "cutoff": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "reviewer": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "state": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "ballot_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "decision_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "consent_outcome": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "consent_mask": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "reviewers": {
+                "maxItems": 5000,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "submission_doc": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "review_doc": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "challenge_doc": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "submission_version": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "review_version": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "challenge_version": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "submission_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "review_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "challenge_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "source_id",
+              "project_id",
+              "recipient",
+              "version",
+              "source_hash",
+              "terms",
+              "rules",
+              "cutoff",
+              "reviewer",
+              "state",
+              "deadline",
+              "ballot_id",
+              "decision_hash",
+              "consent_outcome",
+              "consent_mask",
+              "reviewers",
+              "submission_doc",
+              "review_doc",
+              "challenge_doc",
+              "submission_version",
+              "review_version",
+              "challenge_version",
+              "submission_commitment",
+              "review_commitment",
+              "challenge_commitment"
+            ],
+            "additionalProperties": false
+          },
+          "quantity": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)? [A-Z]{1,7}$"
+          },
+          "due": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "voters": {
+            "maxItems": 5000,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "member_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "weight": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "required": [
+                "member_id",
+                "weight"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "executed": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "scanned": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ballot_id",
+          "dao_id",
+          "protection",
+          "quantity",
+          "due",
+          "voters",
+          "executed",
+          "version",
+          "cursor",
+          "scanned",
+          "ready"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "protectedWorksTerms": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "contributor": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "cutoff": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "decide": {
+                "type": "string",
+                "maxLength": 13
+              },
+              "decide_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "backup": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "representative": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "kind": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "quorum": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "approval": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "review_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "challenge_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "vote_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "backup_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "required": [
+              "decide",
+              "decide_hash",
+              "backup",
+              "representative",
+              "kind",
+              "quorum",
+              "approval",
+              "review_seconds",
+              "challenge_seconds",
+              "vote_seconds",
+              "backup_seconds"
+            ],
+            "additionalProperties": false
+          },
+          "base": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "contributor",
+          "cutoff",
+          "version",
+          "rules",
+          "base",
+          "commitment",
+          "accepted"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "protectedGrantTerms": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "contributor": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "cutoff": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "decide": {
+                "type": "string",
+                "maxLength": 13
+              },
+              "decide_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "backup": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "representative": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "kind": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "quorum": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "approval": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "review_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "challenge_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "vote_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "backup_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "required": [
+              "decide",
+              "decide_hash",
+              "backup",
+              "representative",
+              "kind",
+              "quorum",
+              "approval",
+              "review_seconds",
+              "challenge_seconds",
+              "vote_seconds",
+              "backup_seconds"
+            ],
+            "additionalProperties": false
+          },
+          "base": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "contributor",
+          "cutoff",
+          "version",
+          "rules",
+          "base",
+          "commitment",
+          "accepted"
         ],
         "additionalProperties": false
       }
@@ -3358,7 +6680,7 @@ Response:
             "maximum": 4294967295
           },
           "milestones": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -3552,7 +6874,7 @@ Response:
             "maximum": 4294967295
           },
           "entries": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -3639,6 +6961,64 @@ Response:
         "additionalProperties": false
       }
     },
+    "payrollTerms": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "document_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "commitment": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "successor_of": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "schema_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "references_released": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "schedule_id",
+          "dao_id",
+          "document_id",
+          "document_version",
+          "commitment",
+          "label",
+          "successor_of",
+          "schema_version",
+          "references_released"
+        ],
+        "additionalProperties": false
+      }
+    },
     "elections": {
       "default": [],
       "type": "array",
@@ -3704,7 +7084,7 @@ Response:
             "maximum": 255
           },
           "candidates": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -3900,7 +7280,7 @@ Response:
             "maximum": 4294967295
           },
           "witnesses": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -4058,7 +7438,7 @@ Response:
             "maximum": 4294967295
           },
           "payments": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "string",
@@ -4067,7 +7447,7 @@ Response:
             }
           },
           "dues": {
-            "maxItems": 64,
+            "maxItems": 5000,
             "type": "array",
             "items": {
               "type": "integer",
@@ -4285,6 +7665,12 @@ Response:
     "appKeys",
     "appKeyGrants",
     "ballots",
+    "ballotDefinitions",
+    "ballotTargets",
+    "documentChanges",
+    "arbitrationPlans",
+    "protectedWorksTerms",
+    "protectedGrantTerms",
     "votes",
     "projects",
     "milestones",
@@ -4292,6 +7678,7 @@ Response:
     "schedules",
     "entries",
     "controls",
+    "payrollTerms",
     "elections",
     "nominations",
     "terms",
@@ -4637,7 +8024,7 @@ Response:
                 "maxLength": 16384
               },
               "families": {
-                "maxItems": 64,
+                "maxItems": 5000,
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -4667,7 +8054,7 @@ Response:
                       "maxLength": 20
                     },
                     "chunks": {
-                      "maxItems": 64,
+                      "maxItems": 5000,
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -4795,7 +8182,7 @@ Response:
                 }
               },
               "files": {
-                "maxItems": 64,
+                "maxItems": 5000,
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -6311,7 +9698,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -6341,7 +9728,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -6469,7 +9856,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -6879,7 +10266,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -6909,7 +10296,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -7037,7 +10424,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -7456,7 +10843,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -7486,7 +10873,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -7614,7 +11001,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -8057,7 +11444,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -8087,7 +11474,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -8215,7 +11602,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -8642,7 +12029,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -8672,7 +12059,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -8800,7 +12187,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -9635,7 +13022,7 @@ Response:
                   "maxLength": 16384
                 },
                 "families": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -9665,7 +13052,7 @@ Response:
                         "maxLength": 20
                       },
                       "chunks": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -9793,7 +13180,7 @@ Response:
                   }
                 },
                 "files": {
-                  "maxItems": 64,
+                  "maxItems": 5000,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -10283,7 +13670,7 @@ Response:
                         "maxLength": 16384
                       },
                       "families": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -10313,7 +13700,7 @@ Response:
                               "maxLength": 20
                             },
                             "chunks": {
-                              "maxItems": 64,
+                              "maxItems": 5000,
                               "type": "array",
                               "items": {
                                 "type": "object",
@@ -10441,7 +13828,7 @@ Response:
                         }
                       },
                       "files": {
-                        "maxItems": 64,
+                        "maxItems": 5000,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -11794,7 +15181,7 @@ Response:
 
 ## activity configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: content.publish.
 
@@ -11824,7 +15211,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -11876,7 +15263,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11912,7 +15299,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -11949,7 +15336,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: obligation.create.
 
@@ -11989,7 +15376,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.3 · config 1 · core ^0.9.0-alpha.5 || 0.10.0-alpha.1 || 0.12.0-alpha.1 || 0.12.0-alpha.2 || 0.13.0-alpha.1 || 0.13.0-alpha.2 || 0.13.0-alpha.3 || 0.13.0-alpha.4 || 0.13.0-alpha.5 || 0.13.0-alpha.6 || 0.13.0-alpha.7 || 0.14.0-alpha.1 || 0.14.0-alpha.2 || 0.14.0-alpha.3 || 0.14.0-alpha.4 || 0.14.0-alpha.5 || 0.14.0-alpha.7 || 0.14.0-alpha.8 || 0.14.0-alpha.9 || 0.14.0-alpha.10 || 0.15.0-alpha.1 || 0.15.0-alpha.2 || 0.15.0-alpha.3 || 0.15.0-alpha.4 || 0.15.0-alpha.5 || 0.15.0-alpha.6 || 0.15.0-alpha.7 || 0.15.0-alpha.8 || 0.15.0-alpha.9 || 0.15.0-alpha.10 || 0.15.0-alpha.11 || 0.15.0-alpha.12 || 0.15.0-alpha.13 || 0.15.0-alpha.14 || 0.15.0-alpha.15 || 0.15.0-alpha.16 || 0.15.0-alpha.17 || 0.15.0-alpha.18 || 0.15.0-alpha.19 || 0.15.0-alpha.20 || 0.15.0-alpha.21 || 0.15.0-alpha.22.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.23.
 
 Capabilities: member.manage.
 

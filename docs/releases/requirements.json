@@ -1,36 +1,63 @@
 {
   "requirements": [
     {
+      "id": "DOMAIN-BOUND-BALLOT-DEFINITIONS",
+      "tests": [
+        "tests/ballot-commitment.test.ts",
+        "tests/ballot-definition-encoding.test.ts",
+        "tests/elections.test.ts",
+        "tests/governed-works.test.ts",
+        "tests/grants.test.ts",
+        "tests/governing-documents.test.ts"
+      ]
+    },
+    {
       "id": "BOUNDED-VERSIONED-BALLOT-METADATA",
-      "tests": ["tests/ballot-metadata.test.ts"]
+      "tests": [
+        "tests/ballot-metadata.test.ts"
+      ]
     },
     {
       "id": "DECIDE-TALLY",
-      "tests": ["tests/decide.test.ts"]
+      "tests": [
+        "tests/decide.test.ts"
+      ]
     },
     {
       "id": "WORKS-OBLIGATIONS",
-      "tests": ["tests/works.test.ts"]
+      "tests": [
+        "tests/works.test.ts"
+      ]
     },
     {
       "id": "PAYROLL-SETTLEMENT",
-      "tests": ["tests/payroll.test.ts"]
+      "tests": [
+        "tests/payroll.test.ts"
+      ]
     },
     {
       "id": "LINT-POLICY",
-      "tests": ["tests/lint-policy.test.ts"]
+      "tests": [
+        "tests/lint-policy.test.ts"
+      ]
     },
     {
       "id": "CONNECT-SERVER-CLIENT",
-      "tests": ["tests/connected-payments.test.ts"]
+      "tests": [
+        "tests/connected-payments.test.ts"
+      ]
     },
     {
       "id": "GRANTS-INTERCONTRACT-CAPABILITIES",
-      "tests": ["tests/grants.test.ts"]
+      "tests": [
+        "tests/grants.test.ts"
+      ]
     },
     {
       "id": "CORE-FIXTURE-PROVENANCE",
-      "tests": ["tests/core-fixture-provenance.test.ts"]
+      "tests": [
+        "tests/core-fixture-provenance.test.ts"
+      ]
     }
   ]
 }

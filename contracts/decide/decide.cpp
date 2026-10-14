@@ -1,4 +1,4 @@
-#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n,"docchanges"_n}
+#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n,"docchanges"_n,"votetargets"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "decide"
 #include "grants_records.hpp"
 #include "admission.hpp"
@@ -6,6 +6,9 @@
 #include "archive_state.hpp"
 #include "decide_ballots.hpp"
 #include "governing_documents.hpp"
+#include "ballot_commitments.hpp"
+#include "arbitration_plans.hpp"
+#include "ballot_targets.hpp"
 using namespace daclify;
 CONTRACT decide:public contract {
 public:
@@ -38,6 +41,7 @@ public:
   check(deadline<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");auto id=changes.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"DOCUMENT_CHANGE_LIMIT");
   changes.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.register_id=register_id;r.document_id=doc.document_id;r.document_version=document_version;r.commitment=doc.commitment;r.source_hash=get_code_hash(get_self());r.expected_revision=expected_revision;r.policy_revision=policy_revision;r.ballot_id=ballot_id;r.proposer=member_id;r.proposed_at=now;r.deadline=deadline;});
   rows.modify(registered,same_payer,[&](auto& r){r.pending_id=id;});sync_docchange(runtime,changes.get(id));
+  if(ballot_id)freeze_definition(runtime,ballot_id,5);
  }
  ACTION adoptdoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t proposal_id){
   document_changes changes(get_self(),runtime.value);const auto& proposal=changes.get(proposal_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(proposal.dao_id==dao_id,"DOCUMENT_DOMAIN");check(!proposal.status,"DOCUMENT_PROPOSAL_CLOSED");
@@ -111,6 +115,7 @@ public:
  ACTION backfillrefs(name runtime,uint64_t dao_id,name table,uint32_t limit){
   if(table=="elections"_n)backfill_document_refs<elections>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_election(runtime,r);});
   else if(table=="terms"_n)backfill_document_refs<terms>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_term(runtime,r);});
+  else if(table=="votetargets"_n)backfill_document_refs<ballot_targets>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_target(runtime,r);});
   else if(table=="docchanges"_n)backfill_document_refs<document_changes>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_docchange(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
  }
  ACTION newelect(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t election_id,std::string title,uint64_t document_id,uint32_t document_version,uint32_t nomination_close,uint32_t term_start,uint32_t term_end,uint8_t seats){
@@ -127,12 +132,19 @@ public:
  ACTION startelect(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t election_id){
   module_actor(runtime,dao_id,member_id,get_self(),"startelect"_n);elections rows(get_self(),runtime.value);const auto& election=rows.get(election_id,"ELECTION_UNKNOWN");check(election.dao_id==dao_id,"ELECTION_DOMAIN");check(election.status==0&&current_time_point().sec_since_epoch()>=election.nomination_close,"NOMINATIONS_OPEN");gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.revision==election.policy_revision&&policy.config.decide==get_self(),"POLICY_CHANGED");check(uint64_t(current_time_point().sec_since_epoch())+policy.config.duration<=election.term_start,"ELECTION_TERM");nominations nominees(get_self(),runtime.value);auto group=nominees.get_index<"byelection"_n>();std::vector<uint64_t> candidates;for(auto it=group.lower_bound(election_id);it!=group.end()&&it->election_id==election_id;++it)if(eligible_witness(runtime,dao_id,it->member_id,true))candidates.push_back(it->member_id);check(!candidates.empty()&&candidates.size()<=15,"CANDIDATE_LIMIT");std::sort(candidates.begin(),candidates.end());
   start(runtime,dao_id,member_id,election_id,policy.config.kind,candidates.size()+1,policy.config.duration,policy.config.quorum,policy.config.approval,"{}","startelect"_n);rows.modify(election,same_payer,[&](auto& r){r.status=1;r.candidates=candidates;});
+  freeze_definition(runtime,election_id,2);
  }
  ACTION recall(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t term_id,uint64_t document_id,uint32_t document_version){
   module_actor(runtime,dao_id,member_id,get_self(),"recall"_n,true);terms rows(get_self(),runtime.value);const auto& term=rows.get(term_id,"TERM_UNKNOWN");check(term.dao_id==dao_id,"ELECTION_DOMAIN");check(!term.recalled,"ALREADY_IN_STATE");documents docs(runtime,dao_id);auto versions=docs.get_index<"byversion"_n>();versions.get((uint128_t(document_id)<<32)|document_version,"DOCUMENT_UNKNOWN");rows.modify(term,same_payer,[&](auto& r){r.recalled=true;r.recalled_at=current_time_point().sec_since_epoch();r.recall_doc=document_id;r.recall_version=document_version;});sync_term(runtime,rows.get(term_id));if(term.title=="Executives"){executive_policies policies(runtime,runtime.value);if(policies.find(dao_id)!=policies.end())core_action(runtime,get_self(),"recallexec"_n,pack(std::make_tuple(get_self(),dao_id,term.election_id,term.member_id)));}
  }
  ACTION open(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t kind,uint8_t choices,uint32_t duration,uint16_t quorum,uint16_t approval,std::string metadata){
   start(runtime,dao_id,member_id,ballot_id,kind,choices,duration,quorum,approval,metadata,"open"_n);
+  freeze_definition(runtime,ballot_id,choices==2?0:1);
+ }
+ ACTION openpoll(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t kind,uint8_t choices,uint32_t duration,uint16_t quorum,uint16_t approval,std::string metadata){
+  validate_poll(metadata,choices);
+  start(runtime,dao_id,member_id,ballot_id,kind,choices,duration,quorum,approval,metadata,"openpoll"_n);
+  freeze_definition(runtime,ballot_id,1);
  }
  ACTION openwork(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,name works,uint64_t project_id,uint32_t duration,uint16_t quorum,uint16_t approval,std::string metadata){
   gov_policies policies(runtime,runtime.value);const auto& policy=policies.get(dao_id,"POLICY_UNKNOWN");check(policy.config.governed_works,"GOVERNANCE_REQUIRED");
@@ -142,6 +154,7 @@ public:
   auto deadline=uint64_t(current_time_point().sec_since_epoch())+duration+604800;check(deadline<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");
   work_executions plans(get_self(),runtime.value);check(plans.find(ballot_id)==plans.end(),"EXECUTION_EXISTS");
   plans.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.works=works;r.project_id=project_id;r.commitment=commitment;r.works_hash=grant.code_hash;r.policy_revision=policy.revision;r.deadline=deadline;});
+  snapshot_work(runtime,dao_id,ballot_id,works,project_id);freeze_definition(runtime,ballot_id,3);
  }
  ACTION execute(name runtime,uint64_t dao_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   ballots rows(get_self(),runtime.value);const auto& ballot=rows.get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id,"BALLOT_DOMAIN");check(ballot.status==1,"BALLOT_NOT_PASSED");
@@ -158,6 +171,7 @@ public:
   pinned_module(runtime,dao_id,round.works);const auto commitment=grant_commitment(runtime,dao_id,grants,round_id,application_id);check(uint64_t(current_time_point().sec_since_epoch())+duration<round.awards_close,"AWARDS_CLOSED");
   start(runtime,dao_id,member_id,ballot_id,policy.config.kind,2,duration,quorum,approval,metadata,"openaward"_n);
   grant_executions plans(get_self(),runtime.value);check(plans.find(ballot_id)==plans.end(),"EXECUTION_EXISTS");plans.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.grants=grants;r.works=round.works;r.round_id=round_id;r.application_id=application_id;r.application_revision=app.revision;r.project_id=project_id;r.commitment=commitment;r.grants_hash=get_code_hash(grants);r.works_hash=get_code_hash(round.works);r.policy_revision=policy.revision;r.deadline=round.awards_close;});
+  snapshot_grant(runtime,dao_id,ballot_id,grants,round,app);freeze_definition(runtime,ballot_id,4);
  }
  ACTION executeaward(name runtime,uint64_t dao_id,uint64_t ballot_id){require_active_dao(runtime,dao_id);
   ballots rows(get_self(),runtime.value);const auto& ballot=rows.get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id,"BALLOT_DOMAIN");check(ballot.status==1,"BALLOT_NOT_PASSED");grant_executions plans(get_self(),runtime.value);const auto& plan=plans.get(ballot_id,"EXECUTION_UNKNOWN");check(plan.dao_id==dao_id,"EXECUTION_DOMAIN");check(!plan.executed,"ALREADY_EXECUTED");check(current_time_point().sec_since_epoch()<plan.deadline,"AWARDS_CLOSED");
@@ -199,6 +213,9 @@ public:
     progress.complete=complete;ram_migration_cursors cursors(get_self(),runtime.value);cursors.modify(cursors.get(table.value),same_payer,[&](auto& r){r=progress;});return;
   }
   if(table=="ballots"_n){ballots(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="votetargets"_n){ballot_targets(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="arbplans"_n){arbitration_plans(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="ballotdefs"_n){ballot_definitions(get_self(),runtime.value).backfill(limit);return;}
   if(table=="votes"_n){votes(get_self(),runtime.value).backfill(limit);return;}
   if(table=="pollends"_n){poll_ends(get_self(),runtime.value).backfill(limit);return;}
   if(table=="voteids"_n){vote_identities(get_self(),runtime.value).backfill(limit);return;}
@@ -215,6 +232,52 @@ public:
  }
 
 private:
+ void snapshot_work(name runtime,uint64_t dao_id,uint64_t ballot_id,name works,uint64_t project_id){
+  work_ballot_target snapshot{};snapshot.project=works_projects(works,runtime.value).get(project_id,"PROJECT_UNKNOWN");check(snapshot.project.dao_id==dao_id&&snapshot.project.milestones.size()<=16,"PROJECT_DOMAIN");works_milestones milestones(works,runtime.value);for(auto id:snapshot.project.milestones)snapshot.milestones.push_back(milestones.get(id,"MILESTONE_UNKNOWN"));
+  works_agreements agreements(works,runtime.value);auto agreement=agreements.find(project_id);if(agreement!=agreements.end())snapshot.agreement=*agreement;protected_terms protections(works,runtime.value);auto protection=protections.find(project_id);if(protection!=protections.end())snapshot.protection=*protection;snapshot.document_commitment=target_document_hash(runtime,dao_id,snapshot.project.document_id,snapshot.project.document_version);
+  ballot_targets targets(get_self(),runtime.value);targets.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.work=snapshot;});sync_target(runtime,targets.get(ballot_id));
+ }
+ void snapshot_grant(name runtime,uint64_t dao_id,uint64_t ballot_id,name grants,const grant_round& round,const grant_application& application){
+  grant_ballot_target snapshot{};snapshot.round=round;snapshot.application=application;protected_terms protections(grants,runtime.value);auto protection=protections.find(application.id);if(protection!=protections.end())snapshot.protection=*protection;
+  snapshot.rules_commitment=target_document_hash(runtime,dao_id,round.document_id,round.document_version);snapshot.application_commitment=target_document_hash(runtime,dao_id,application.document_id,application.document_version);snapshot.decision_commitment=target_document_hash(runtime,dao_id,application.decision_doc,application.decision_version);
+  ballot_targets targets(get_self(),runtime.value);targets.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.grant=snapshot;});sync_target(runtime,targets.get(ballot_id));
+ }
+ void sync_target(name runtime,const ballot_target& target){
+  uint64_t body=0,rules=0,decision=0;uint32_t body_version=0,rules_version=0,decision_version=0;
+  if(!target.released){if(target.work){body=target.work->project.document_id;body_version=target.work->project.document_version;}if(target.grant){body=target.grant->application.document_id;body_version=target.grant->application.document_version;rules=target.grant->round.document_id;rules_version=target.grant->round.document_version;decision=target.grant->application.decision_doc;decision_version=target.grant->application.decision_version;}}
+  document_ref(runtime,target.dao_id,get_self(),"votetargets"_n,target.ballot_id,0,body,body_version);document_ref(runtime,target.dao_id,get_self(),"votetargets"_n,target.ballot_id,1,rules,rules_version);document_ref(runtime,target.dao_id,get_self(),"votetargets"_n,target.ballot_id,2,decision,decision_version);
+ }
+ void validate_poll(const std::string& metadata,uint8_t choices){
+  json_metadata(metadata);const auto value=nlohmann::json::parse(metadata,nullptr,false);
+  check(value.contains("options")&&value["options"].is_array()&&value["options"].size()==choices,"BALLOT_OPTIONS");
+  std::vector<std::string> labels;
+  for(const auto& option:value["options"]){check(option.is_string(),"BALLOT_OPTIONS");const auto label=option.get<std::string>();check(!label.empty()&&label.size()<=320&&std::any_of(label.begin(),label.end(),[](unsigned char c){return c>0x20;}),"BALLOT_OPTIONS");check(std::find(labels.begin(),labels.end(),label)==labels.end(),"BALLOT_OPTIONS");labels.push_back(label);}
+ }
+ checksum256 subtype_commitment(name runtime,uint64_t dao_id,uint64_t ballot_id,uint8_t purpose,uint16_t version){
+  if(purpose<=1)return checksum256{};
+  std::vector<char> bytes;
+  if(purpose==2){auto r=elections(get_self(),runtime.value).get(ballot_id,"ELECTION_UNKNOWN");check(r.dao_id==dao_id,"ELECTION_DOMAIN");r.status=0;bytes=pack(r);}
+  else if(purpose==3){auto r=work_executions(get_self(),runtime.value).get(ballot_id,"EXECUTION_UNKNOWN");check(r.dao_id==dao_id,"EXECUTION_DOMAIN");r.executed=false;bytes=pack(r);}
+  else if(purpose==4){auto r=grant_executions(get_self(),runtime.value).get(ballot_id,"EXECUTION_UNKNOWN");check(r.dao_id==dao_id,"EXECUTION_DOMAIN");r.executed=false;bytes=pack(r);}
+  else if(purpose==5){document_changes rows(get_self(),runtime.value);auto index=rows.get_index<"byballot"_n>();auto r=index.get(ballot_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(r.dao_id==dao_id,"DOCUMENT_DOMAIN");r.adopted_at=0;r.adopted_by=0;r.status=0;bytes=pack(r);}
+  else if(purpose==6){auto r=arbitration_plans(get_self(),runtime.value).get(ballot_id,"ARBITRATION_PLAN_UNKNOWN");check(r.dao_id==dao_id,"ARBITRATION_DOMAIN");r.executed=false;bytes=pack(r);}
+  else check(false,"BALLOT_SEMANTICS");
+  const auto base=sha256(bytes.data(),bytes.size());if(version==2){check(purpose==3||purpose==4,"BALLOT_SEMANTICS");auto target=ballot_targets(get_self(),runtime.value).get(ballot_id,"BALLOT_TARGET_REQUIRED");check(target.version==1&&target.dao_id==dao_id&&target.ballot_id==ballot_id&&bool(target.work)==(purpose==3)&&bool(target.grant)==(purpose==4),"BALLOT_DEFINITION_DOMAIN");target.released=false;const auto snapshot=pack(target);const auto target_hash=sha256(snapshot.data(),snapshot.size());auto bound=pack(std::make_tuple(base,target_hash));return sha256(bound.data(),bound.size());}return base;
+ }
+ checksum256 current_definition(name runtime,const ballot_record& b,const ballot_definition_record& d){
+  check((d.version==1||d.version==2)&&d.dao_id==b.dao_id&&d.ballot_id==b.id,"BALLOT_DEFINITION_DOMAIN");
+  return definition_commitment(runtime_chain_id(runtime),runtime,get_self(),b,d,subtype_commitment(runtime,b.dao_id,b.id,d.purpose,d.version));
+ }
+ void freeze_definition(name runtime,uint64_t ballot_id,uint8_t purpose){
+  const auto b=ballots(get_self(),runtime.value).get(ballot_id,"BALLOT_UNKNOWN");ballot_definitions rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_DEFINITION_EXISTS");
+  if(purpose<=1){const auto value=nlohmann::json::parse(b.metadata,nullptr,false);
+   if(value.contains("schemaVersion")&&value["schemaVersion"]==3){check(value.contains("semantics")&&value["semantics"].is_string()&&value["semantics"]==(purpose==1?"poll":"proposal"),"BALLOT_SEMANTICS");validate_poll(b.metadata,b.choices);
+    if(!purpose)check(b.choices==2&&value["options"][0]=="Reject"&&value["options"][1]=="Approve","BALLOT_SEMANTICS");}
+  }
+  ballot_definition_record d{};d.ballot_id=b.id;d.dao_id=b.dao_id;d.purpose=purpose;if(purpose==3||purpose==4)d.version=2;
+  gov_policies policies(runtime,runtime.value);auto policy=policies.find(b.dao_id);if(policy!=policies.end()){d.policy_revision=policy->revision;const auto bytes=pack(*policy);d.policy_hash=sha256(bytes.data(),bytes.size());}
+  d.commitment=current_definition(runtime,b,d);rows.emplace(get_self(),[&](auto& r){r=d;});
+ }
  void sync_docchange(name runtime,const document_change& r){const bool protect=r.status<=1;document_ref(runtime,r.dao_id,get_self(),"docchanges"_n,r.id,0,protect?r.document_id:0,protect?r.document_version:0);}
  void close_docchange(name runtime,const document_change& r,uint8_t status){governing_documents rows(get_self(),runtime.value);const auto& registered=rows.get(r.register_id);check(registered.pending_id==r.id,"DOCUMENT_REVISION_CHANGED");document_changes changes(get_self(),runtime.value);changes.modify(changes.get(r.id),same_payer,[&](auto& value){value.status=status;});rows.modify(registered,same_payer,[](auto& value){value.pending_id=0;});sync_docchange(runtime,changes.get(r.id));}
  void reserve_term_hold(name runtime,const election_record& election){
@@ -233,7 +296,7 @@ private:
   daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);uint64_t denominator=voting_denominator(runtime,dao_id,kind);check(denominator>0,"NO_ELIGIBLE_WEIGHT");ballots rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_EXISTS");
   auto now=current_time_point().sec_since_epoch();check(uint64_t(now)+duration<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");uint32_t closes=now+duration;
   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=member_id;r.kind=kind;r.choices=choices;r.closes=closes;r.quorum=quorum;r.approval=approval;r.denominator=denominator;r.max_member=d.max_member;r.tallies=std::vector<uint64_t>(choices,0);r.metadata=metadata;});
-  if(action_name=="open"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}
+  if(action_name=="open"_n||action_name=="openpoll"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}
   if(action_name=="startelect"_n&&ram_observer_settings(runtime,runtime.value).exists())reserve_term_hold(runtime,elections_table.get(ballot_id));
   core_action(runtime,get_self(),"govlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id,closes)));
  }
@@ -261,20 +324,62 @@ public:
   }
   core_action(runtime,get_self(),"archstep"_n,pack(std::make_tuple(dao_id,get_self(),archive_id,chunk_ordinal,start,uint32_t(proofs.size()))));
  }
+ ACTION releasetgt(name runtime,uint64_t dao_id,std::vector<uint64_t> ballot_ids){
+  check(!ballot_ids.empty()&&ballot_ids.size()<=25,"BALLOT_TARGET_BOUNDS");ballot_targets targets(get_self(),runtime.value);for(auto id:ballot_ids){const auto target=targets.get(id,"BALLOT_TARGET_REQUIRED");check(target.dao_id==dao_id,"BALLOT_DOMAIN");if(target.released)continue;const auto ballot=ballots(get_self(),runtime.value).get(id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id&&ballot.status!=0,"BALLOT_OPEN");bool finished=ballot.status==2;
+   if(target.work){const auto plan=work_executions(get_self(),runtime.value).get(id,"EXECUTION_UNKNOWN");finished=finished||plan.executed||current_time_point().sec_since_epoch()>plan.deadline;}
+   if(target.grant){const auto plan=grant_executions(get_self(),runtime.value).get(id,"EXECUTION_UNKNOWN");finished=finished||plan.executed||current_time_point().sec_since_epoch()>plan.deadline;}check(finished,"BALLOT_TARGET_ACTIVE");targets.modify(targets.get(id),same_payer,[](auto& r){r.released=true;});sync_target(runtime,targets.get(id));}
+ }
  ACTION markpoll(name runtime,uint64_t dao_id,uint64_t ballot_id){
   require_auth(get_self());pinned_module(runtime,dao_id,get_self());ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status!=0,"BALLOT_OPEN");check(ordinary(runtime,ballot_id),"ARCHIVE_FAMILY_PROTECTED");record_end(runtime,dao_id,ballot_id,true);
  }
+ ACTION openarb(name runtime,uint64_t dao_id,uint64_t obligation_id,uint64_t ballot_id){
+  check(ballot_id>0,"BALLOT_ID");protected_obligations protections(runtime,dao_id);auto protection=protections.get(obligation_id,"ARBITRATION_UNKNOWN");check(protection.rules.decide==get_self()&&protection.rules.decide_hash==get_code_hash(get_self()),"ARBITRATION_DECIDE");
+  ballots rows(get_self(),runtime.value);arbitration_plans plans(get_self(),runtime.value);auto saved=plans.find(ballot_id);const auto now=current_time_point().sec_since_epoch();
+  if(saved==plans.end()){
+   if(protection.state<=3){check(protection.state!=2,"ARBITRATION_CHALLENGE");check(now>=protection.deadline,"ARBITRATION_DEADLINE");check(uint64_t(now)+protection.rules.vote_seconds+60<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");protection.state=4;protection.deadline=now+protection.rules.vote_seconds+60;}
+   check(protection.state==4&&uint64_t(now)+60<protection.deadline&&!protection.ballot_id,"ARBITRATION_STATE");elections pending(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end()&&pending.find(ballot_id)==pending.end(),"BALLOT_EXISTS");
+   protection.ballot_id=ballot_id;protection.decision_hash=protection_decision_hash(runtime,dao_id,protection);
+   // Inline callbacks run after this action; core independently binds the expected snapshot.
+   core_action(runtime,get_self(),"arbstart"_n,pack(std::make_tuple(dao_id,obligation_id,ballot_id,protection.decision_hash)));
+   nlohmann::json metadata={{"schemaVersion",3},{"semantics","poll"},{"title","Resolve disputed milestone"},{"description","Cancel the unpaid milestone or approve its fixed payment. An invalid result keeps the funds reserved."},{"options",nlohmann::json::array({"Cancel unpaid milestone","Pay contributor"})}};
+   const auto raw=protection.challenge_commitment.extract_as_byte_array();const char* digits="0123456789abcdef";std::string hash;hash.reserve(64);for(auto byte:raw){hash+=digits[byte>>4];hash+=digits[byte&15];}
+   if(protection.challenge_doc)metadata["document"]={{"documentId",std::to_string(protection.challenge_doc)},{"version",protection.challenge_version},{"commitment",hash}};
+   const auto community=daos(runtime,runtime.value).get(dao_id,"DAO_UNKNOWN");const uint32_t closes=protection.deadline-60;
+   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=protection.rules.representative;r.kind=protection.rules.kind;r.choices=2;r.closes=closes;r.quorum=protection.rules.quorum;r.approval=protection.rules.approval;r.denominator=0;r.max_member=community.max_member;r.tallies={0,0};r.metadata=metadata.dump();r.status=3;});
+   const auto debt=obligations(runtime,dao_id).get(obligation_id,"OBLIGATION_UNKNOWN");check(debt.status==0&&debt.recipient==protection.recipient&&debt.source==protection.source&&debt.source_id==protection.source_id,"ARBITRATION_DOMAIN");
+   plans.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;r.protection=protection;r.quantity=debt.quantity;r.due=debt.due;});saved=plans.find(ballot_id);core_action(runtime,get_self(),"govlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id,closes)));
+  }
+  check(saved->version==1&&saved->dao_id==dao_id&&saved->protection.id==obligation_id,"ARBITRATION_DOMAIN");const auto ballot=rows.get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id,"BALLOT_DOMAIN");if(saved->ready||ballot.status!=3)return;
+  if(now>=ballot.closes){rows.modify(rows.get(ballot_id),same_payer,[](auto& r){r.status=2;});freeze_definition(runtime,ballot_id,6);core_action(runtime,get_self(),"govunlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id)));return;}
+  check(protection.state==4&&protection.ballot_id==ballot_id,"ARBITRATION_STATE");
+  auto next=*saved;uint64_t denominator=ballot.denominator;members people(runtime,dao_id);nonvoters excluded(runtime,dao_id);participants actors(runtime,dao_id);auto person=people.upper_bound(next.cursor);uint32_t count=0;
+  for(;person!=people.end()&&person->id<=ballot.max_member&&count<256;++person,++count){check(++next.scanned<=5000,"ARBITRATION_ELECTORATE_LIMIT");next.cursor=person->id;if(!person->active||person->id==next.protection.recipient||person->id==next.protection.reviewer||std::find(next.protection.reviewers.begin(),next.protection.reviewers.end(),person->id)!=next.protection.reviewers.end()||excluded.find(person->id)!=excluded.end())continue;auto actor=actors.find(person->id);if(actor!=actors.end()&&actor->revoked)continue;const uint64_t weight=ballot.kind==0?1:ballot.kind==1?person->credits:uint64_t(person->stake);if(!weight)continue;denominator=add64(denominator,weight);next.voters.push_back({person->id,weight});}
+  next.ready=person==people.end()||person->id>ballot.max_member;plans.modify(saved,same_payer,[&](auto& r){r=next;});rows.modify(rows.get(ballot_id),same_payer,[&](auto& r){r.denominator=denominator;if(next.ready)r.status=denominator?0:2;});
+  if(next.ready){freeze_definition(runtime,ballot_id,6);if(!denominator)core_action(runtime,get_self(),"govunlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id)));}
+ }
+ ACTION execarb(name runtime,uint64_t dao_id,uint64_t ballot_id){
+  arbitration_plans plans(get_self(),runtime.value);const auto plan=plans.get(ballot_id,"ARBITRATION_PLAN_UNKNOWN");check(plan.dao_id==dao_id&&plan.version==1,"ARBITRATION_DOMAIN");if(plan.executed)return;
+  const auto ballot=ballots(get_self(),runtime.value).get(ballot_id,"BALLOT_UNKNOWN");check(ballot.dao_id==dao_id&&ballot.status==1&&ballot.winner>=0&&ballot.winner<=1,"BALLOT_NOT_PASSED");
+  const auto definition=ballot_definitions(get_self(),runtime.value).get(ballot_id,"BALLOT_DEFINITION_REQUIRED");check(definition.purpose==6&&definition.commitment==current_definition(runtime,ballot,definition),"BALLOT_DEFINITION_CHANGED");
+  plans.modify(plans.get(ballot_id),same_payer,[](auto& r){r.executed=true;});core_action(runtime,get_self(),"arbitrate"_n,pack(std::make_tuple(dao_id,plan.protection.id,ballot_id,plan.protection.decision_hash,ballot.winner==1)));
+ }
  ACTION vote(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t choice){
-  const auto person=module_actor(runtime,dao_id,member_id,get_self(),"vote"_n);check(can_vote(runtime,dao_id,member_id),"VOTER_INELIGIBLE");ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status==0&&current_time_point().sec_since_epoch()<b.closes,"BALLOT_CLOSED");check(member_id<=b.max_member,"SNAPSHOT_MEMBER");check(choice<b.choices,"CHOICE");
-  votes cast(get_self(),runtime.value);auto index=cast.get_index<"bymember"_n>();check(index.find((uint128_t(ballot_id)<<64)|member_id)==index.end(),"ALREADY_VOTED");uint64_t weight=b.kind==0?1:b.kind==1?person.credits:uint64_t(person.stake);check(weight>0,"NO_VOTING_WEIGHT");check(weight<=b.denominator-b.cast,"VOTE_WEIGHT_RANGE");auto id=next_vote_id(runtime);
-  cast.emplace(get_self(),[&](auto& r){r.id=id;r.ballot=ballot_id;r.member=member_id;r.weight=weight;r.choice=choice;});rows.modify(b,same_payer,[&](auto& r){r.cast=add64(r.cast,weight);r.tallies[choice]=add64(r.tallies[choice],weight);});
+  ballot_definitions definitions(get_self(),runtime.value);check(definitions.find(ballot_id)==definitions.end(),"BALLOT_COMMITMENT_REQUIRED");
+  cast_vote(runtime,dao_id,member_id,ballot_id,choice,"vote"_n);
+ }
+ ACTION votecommit(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,checksum256 expected,uint8_t choice){
+  const auto b=ballots(get_self(),runtime.value).get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");
+  const auto d=ballot_definitions(get_self(),runtime.value).get(ballot_id,"BALLOT_DEFINITION_REQUIRED");
+  check(expected==d.commitment&&expected==current_definition(runtime,b,d),"BALLOT_DEFINITION_CHANGED");
+  cast_vote(runtime,dao_id,member_id,ballot_id,choice,"votecommit"_n);
  }
  ACTION finalize(name runtime,uint64_t dao_id,uint64_t ballot_id){
   ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status==0,"BALLOT_FINALIZED");check(current_time_point().sec_since_epoch()>=b.closes,"BALLOT_OPEN");
   elections election_rows(get_self(),runtime.value);auto election=election_rows.find(ballot_id);if(election!=election_rows.end())finish_election(runtime,dao_id,*election,b);else{
   bool quorum=(__uint128_t(b.cast)*10000)>=__uint128_t(b.denominator)*b.quorum;uint64_t maximum=0;int16_t winner=-1;bool tie=false;
   for(size_t i=0;i<b.tallies.size();i++){if(b.tallies[i]>maximum){maximum=b.tallies[i];winner=i;tie=false;}else if(b.tallies[i]==maximum)tie=true;}
-  bool passed=quorum&&b.cast>0&&!tie&&winner>=0&&(b.choices!=2||winner==1)&&(__uint128_t(maximum)*10000)>=__uint128_t(b.cast)*b.approval;
+  ballot_definitions definitions(get_self(),runtime.value);auto definition=definitions.find(ballot_id);const bool binary=definition==definitions.end()?b.choices==2:definition->purpose!=1&&definition->purpose!=6;
+  bool passed=quorum&&b.cast>0&&!tie&&winner>=0&&(!binary||winner==1)&&(__uint128_t(maximum)*10000)>=__uint128_t(b.cast)*b.approval;
   rows.modify(b,same_payer,[&](auto& r){r.status=passed?1:2;r.winner=passed?winner:-1;});
   }
   if(ordinary(runtime,ballot_id))record_end(runtime,dao_id,ballot_id,false);
@@ -282,6 +387,11 @@ public:
   governance_locks locks(runtime,dao_id);auto index=locks.get_index<"bysource"_n>();auto packed=pack(std::make_tuple(get_self(),ballot_id));const auto& lock=index.get(sha256(packed.data(),packed.size()),"LOCK_UNKNOWN");if(lock.active)core_action(runtime,get_self(),"govunlock"_n,pack(std::make_tuple(dao_id,get_self(),ballot_id)));
  }
 private:
+ void cast_vote(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,uint8_t choice,name action_name){
+  const auto person=module_actor(runtime,dao_id,member_id,get_self(),action_name);check(can_vote(runtime,dao_id,member_id),"VOTER_INELIGIBLE");ballots rows(get_self(),runtime.value);const auto& b=rows.get(ballot_id,"BALLOT_UNKNOWN");check(b.dao_id==dao_id,"BALLOT_DOMAIN");check(b.status==0&&current_time_point().sec_since_epoch()<b.closes,"BALLOT_CLOSED");check(member_id<=b.max_member,"SNAPSHOT_MEMBER");check(choice<b.choices,"CHOICE");
+  votes cast(get_self(),runtime.value);auto index=cast.get_index<"bymember"_n>();check(index.find((uint128_t(ballot_id)<<64)|member_id)==index.end(),"ALREADY_VOTED");uint64_t weight=b.kind==0?1:b.kind==1?person.credits:uint64_t(person.stake);arbitration_plans plans(get_self(),runtime.value);auto plan=plans.find(ballot_id);if(plan!=plans.end()){check(plan->version==1&&plan->ready&&plan->dao_id==dao_id&&plan->voters.size()<=5000,"ARBITRATION_DOMAIN");auto voter=std::find_if(plan->voters.begin(),plan->voters.end(),[&](const auto& v){return v.member_id==member_id;});check(voter!=plan->voters.end(),"ARBITRATION_VOTER");check(arbitration_document_access(runtime,dao_id,member_id,plan->protection.submission_doc,plan->protection.submission_version)&&arbitration_document_access(runtime,dao_id,member_id,plan->protection.review_doc,plan->protection.review_version)&&arbitration_document_access(runtime,dao_id,member_id,plan->protection.challenge_doc,plan->protection.challenge_version),"ARBITRATION_EVIDENCE_ACCESS");weight=voter->weight;}check(weight>0,"NO_VOTING_WEIGHT");check(weight<=b.denominator-b.cast,"VOTE_WEIGHT_RANGE");auto id=next_vote_id(runtime);
+  cast.emplace(get_self(),[&](auto& r){r.id=id;r.ballot=ballot_id;r.member=member_id;r.weight=weight;r.choice=choice;});rows.modify(b,same_payer,[&](auto& r){r.cast=add64(r.cast,weight);r.tallies[choice]=add64(r.tallies[choice],weight);});
+ }
  void preserve_vote_ids(name runtime){
   vote_identities ids(get_self(),runtime.value);if(ids.find(0)!=ids.end())return;votes cast(get_self(),runtime.value);uint64_t maximum=0;if(cast.begin()!=cast.end()){auto last=cast.end();--last;maximum=last->id;}
   ids.emplace(get_self(),[&](auto& r){r.high_water=maximum;});
@@ -291,6 +401,7 @@ private:
  }
  bool ordinary(name runtime,uint64_t ballot_id){
   document_changes changes(get_self(),runtime.value);auto bound=changes.get_index<"byballot"_n>();if(bound.find(ballot_id)!=bound.end())return false;
+  arbitration_plans plans(get_self(),runtime.value);if(plans.find(ballot_id)!=plans.end())return false;
   elections election_rows(get_self(),runtime.value);work_executions works(get_self(),runtime.value);grant_executions grants(get_self(),runtime.value);return election_rows.find(ballot_id)==election_rows.end()&&works.find(ballot_id)==works.end()&&grants.find(ballot_id)==grants.end();
  }
  void record_end(name runtime,uint64_t dao_id,uint64_t ballot_id,bool legacy){
@@ -299,4 +410,4 @@ private:
   else ends.emplace(get_self(),[&](auto& r){r.dao_id=dao_id;r.ballot_id=ballot_id;r.completed_at=current_time_point().sec_since_epoch();r.legacy=legacy;});
  }
 };
-EOSIO_DISPATCH(decide,(scanclose)(clearclose)(regdoc)(proposedoc)(adoptdoc)(canceldoc)(ackdoc)(cleardocs)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openwork)(vote)(finalize)(markpoll)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))
+EOSIO_DISPATCH(decide,(scanclose)(clearclose)(regdoc)(proposedoc)(adoptdoc)(canceldoc)(ackdoc)(cleardocs)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(open)(openpoll)(openarb)(execarb)(openwork)(vote)(votecommit)(finalize)(markpoll)(releasetgt)(prunevotes)(execute)(openaward)(executeaward)(newelect)(nominate)(startelect)(recall))

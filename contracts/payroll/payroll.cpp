@@ -1,11 +1,11 @@
-#define DACLIFY_DOCUMENT_TABLES {}
+#define DACLIFY_DOCUMENT_TABLES {"payterms"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "payroll"
 #include "module.hpp"
 using namespace daclify;
 CONTRACT payroll:public contract {
 public:
  using contract::contract;
- ACTION backfillrefs(name runtime,uint64_t dao_id){require_auth(runtime);pinned_module(runtime,dao_id,get_self());register_document_source(runtime,dao_id,get_self());}
+ ACTION backfillrefs(name runtime,uint64_t dao_id){backfill_document_refs<terms>(runtime,dao_id,get_self(),"payterms"_n,25,[&](const auto& r){if(!r.references_released)document_ref(runtime,dao_id,get_self(),"payterms"_n,r.schedule_id,0,r.document_id,r.document_version);});}
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  TABLE schedule_record {uint64_t id;uint64_t dao_id;uint64_t creator;uint64_t recipient;asset quantity;uint8_t periods;uint32_t interval;uint32_t starts;std::vector<uint64_t> entries;uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}EOSLIB_SERIALIZE(schedule_record,(id)(dao_id)(creator)(recipient)(quantity)(periods)(interval)(starts)(entries))};
  using schedules=ram_table<"schedules"_n,schedule_record,indexed_by<"bydao"_n,const_mem_fun<schedule_record,uint64_t,&schedule_record::by_dao>>>;
@@ -13,12 +13,22 @@ public:
  using entries=ram_table<"entries"_n,entry_record,indexed_by<"byschedule"_n,const_mem_fun<entry_record,uint64_t,&entry_record::by_schedule>>>;
  TABLE control_record {uint64_t schedule_id;uint8_t paused;uint32_t last_payout;std::string label;uint64_t ram_owner(name code,uint64_t scope)const{return schedules(code,scope).get(schedule_id,"SCHEDULE_UNKNOWN").dao_id;}uint64_t primary_key()const{return schedule_id;}EOSLIB_SERIALIZE(control_record,(schedule_id)(paused)(last_payout)(label))};
  using controls=ram_table<"controls"_n,control_record>;
- ACTION commit(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint64_t recipient,asset quantity,uint8_t periods,uint32_t interval,uint32_t starts){
-  module_actor(runtime,dao_id,member_id,get_self(),"commit"_n,true);check(schedule_id>0,"SCHEDULE_ID");check(periods>=1&&periods<=12&&interval>=86400&&interval<=2678400,"PAYROLL_LIMIT");auto now=current_time_point().sec_since_epoch();check(starts>=now&&uint64_t(starts)<=uint64_t(now)+2678400,"PAYROLL_START");check(uint64_t(starts)+uint64_t(interval)*(periods-1)<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");
-  daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);check(quantity.is_valid()&&quantity.amount>0&&quantity.symbol==d.token_symbol,"ASSET_QUANTITY");check(__int128(quantity.amount)*periods<=asset::max_amount,"AMOUNT_RANGE");members people(runtime,dao_id);check(people.get(recipient,"MEMBER_UNKNOWN").active,"MEMBER_INACTIVE");schedules rows(get_self(),runtime.value);check(rows.find(schedule_id)==rows.end(),"SCHEDULE_EXISTS");entries items(get_self(),runtime.value);std::vector<uint64_t> ids;
-  for(uint32_t i=0;i<periods;i++){auto id=items.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"PAYROLL_LIMIT");uint32_t due=starts+interval*i;ids.push_back(id);items.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.schedule_id=schedule_id;r.due=due;});core_action(runtime,get_self(),"reserve"_n,pack(std::make_tuple(dao_id,get_self(),id,recipient,quantity,due)));core_action(runtime,get_self(),"approveob"_n,pack(std::make_tuple(dao_id,get_self(),id)));}
-  rows.emplace(get_self(),[&](auto& r){r.id=schedule_id;r.dao_id=dao_id;r.creator=member_id;r.recipient=recipient;r.quantity=quantity;r.periods=periods;r.interval=interval;r.starts=starts;r.entries=ids;});
-  controls flags(get_self(),runtime.value);flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule_id;r.paused=0;r.last_payout=0;r.label="";});
+ TABLE payroll_terms {uint64_t schedule_id,dao_id,document_id;uint32_t document_version;checksum256 commitment;std::string label;uint64_t successor_of=0;uint16_t schema_version=1;bool references_released=false;uint64_t primary_key()const{return schedule_id;}uint64_t by_previous()const{return successor_of;}EOSLIB_SERIALIZE(payroll_terms,(schedule_id)(dao_id)(document_id)(document_version)(commitment)(label)(successor_of)(schema_version)(references_released))};
+ using terms=ram_table<"payterms"_n,payroll_terms,indexed_by<"byprevious"_n,const_mem_fun<payroll_terms,uint64_t,&payroll_terms::by_previous>>>;
+ ACTION commit(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint64_t recipient,asset quantity,uint8_t periods,uint32_t interval,uint32_t starts){create_schedule(runtime,dao_id,member_id,schedule_id,recipient,quantity,periods,interval,starts,"commit"_n,"");}
+ ACTION commitdoc(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint64_t recipient,asset quantity,uint8_t periods,uint32_t interval,uint32_t starts,std::string label,uint64_t document_id,uint32_t document_version,checksum256 expected,uint64_t successor_of){
+  check(!label.empty()&&label.size()<=80,"PAYROLL_LABEL");for(unsigned char c:label)check(c>=0x20,"PAYROLL_LABEL");
+  documents docs(runtime,dao_id);auto versions=docs.get_index<"byversion"_n>();const auto& document=versions.get((uint128_t(document_id)<<32)|document_version,"DOCUMENT_UNKNOWN");check(document.commitment==expected,"PAYROLL_TERMS_CHANGED");
+  terms details(get_self(),runtime.value);if(successor_of){schedules rows(get_self(),runtime.value);const auto& previous=rows.get(successor_of,"SCHEDULE_UNKNOWN");check(previous.dao_id==dao_id&&previous.recipient==recipient,"PAYROLL_DOMAIN");check(uint64_t(starts)>=uint64_t(previous.starts)+uint64_t(previous.interval)*previous.periods,"PAYROLL_TERM_OVERLAP");auto successors=details.get_index<"byprevious"_n>();check(successors.find(successor_of)==successors.end(),"PAYROLL_ALREADY_RENEWED");}
+  create_schedule(runtime,dao_id,member_id,schedule_id,recipient,quantity,periods,interval,starts,"commitdoc"_n,label);
+  details.emplace(get_self(),[&](auto& r){r.schedule_id=schedule_id;r.dao_id=dao_id;r.document_id=document_id;r.document_version=document_version;r.commitment=expected;r.label=label;r.successor_of=successor_of;});
+  document_ref(runtime,dao_id,get_self(),"payterms"_n,schedule_id,0,document_id,document_version);
+ }
+ ACTION releaseterms(name runtime,uint64_t dao_id,uint64_t schedule_id){
+  terms details(get_self(),runtime.value);const auto& term=details.get(schedule_id,"PAYROLL_TERMS_UNKNOWN");check(term.dao_id==dao_id,"PAYROLL_DOMAIN");if(term.references_released)return;
+  schedules rows(get_self(),runtime.value);const auto& schedule=rows.get(schedule_id,"SCHEDULE_UNKNOWN");check(schedule.dao_id==dao_id&&!schedule.entries.empty()&&schedule.entries.size()<=12,"PAYROLL_DOMAIN");
+  obligations debts(runtime,dao_id);auto index=debts.get_index<"bysource"_n>();for(auto id:schedule.entries){auto bytes=pack(std::make_tuple(get_self(),id));const auto& debt=index.get(sha256(bytes.data(),bytes.size()),"OBLIGATION_UNKNOWN");check(debt.source==get_self()&&debt.source_id==id&&debt.status==2,"PAYROLL_UNSETTLED");}
+  document_ref(runtime,dao_id,get_self(),"payterms"_n,schedule_id,0,0,0);details.modify(term,same_payer,[](auto& r){r.references_released=true;});
  }
  ACTION edit(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint8_t paused,std::string label){
   module_actor(runtime,dao_id,member_id,get_self(),"edit"_n,true);schedules rows(get_self(),runtime.value);const auto& schedule=rows.get(schedule_id,"SCHEDULE_UNKNOWN");check(schedule.dao_id==dao_id,"PAYROLL_DOMAIN");
@@ -60,8 +70,18 @@ public:
   if(table=="schedules"_n){schedules(get_self(),runtime.value).backfill(limit);return;}
   if(table=="entries"_n){entries(get_self(),runtime.value).backfill(limit);return;}
   if(table=="controls"_n){controls(get_self(),runtime.value).backfill(limit);return;}
+  if(table=="payterms"_n){terms(get_self(),runtime.value).backfill(limit);return;}
   check(false,"RAM_MIGRATION_TABLE");
  }
 
+private:
+ void create_schedule(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t schedule_id,uint64_t recipient,asset quantity,uint8_t periods,uint32_t interval,uint32_t starts,name action_name,const std::string& label){
+  module_actor(runtime,dao_id,member_id,get_self(),action_name,true);check(schedule_id>0,"SCHEDULE_ID");check(periods>=1&&periods<=12&&interval>=86400&&interval<=2678400,"PAYROLL_LIMIT");auto now=current_time_point().sec_since_epoch();check(starts>=now&&uint64_t(starts)<=uint64_t(now)+2678400,"PAYROLL_START");check(uint64_t(starts)+uint64_t(interval)*(periods-1)<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");
+  daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);check(quantity.is_valid()&&quantity.amount>0&&quantity.symbol==d.token_symbol,"ASSET_QUANTITY");check(__int128(quantity.amount)*periods<=asset::max_amount,"AMOUNT_RANGE");members people(runtime,dao_id);check(people.get(recipient,"MEMBER_UNKNOWN").active,"MEMBER_INACTIVE");schedules rows(get_self(),runtime.value);check(rows.find(schedule_id)==rows.end(),"SCHEDULE_EXISTS");entries items(get_self(),runtime.value);std::vector<uint64_t> ids;
+  for(uint32_t i=0;i<periods;i++){auto id=items.available_primary_key();if(!id)id=1;check(id<std::numeric_limits<uint64_t>::max(),"PAYROLL_LIMIT");uint32_t due=starts+interval*i;ids.push_back(id);items.emplace(get_self(),[&](auto& r){r.id=id;r.dao_id=dao_id;r.schedule_id=schedule_id;r.due=due;});core_action(runtime,get_self(),"reserve"_n,pack(std::make_tuple(dao_id,get_self(),id,recipient,quantity,due)));core_action(runtime,get_self(),"approveob"_n,pack(std::make_tuple(dao_id,get_self(),id)));}
+  rows.emplace(get_self(),[&](auto& r){r.id=schedule_id;r.dao_id=dao_id;r.creator=member_id;r.recipient=recipient;r.quantity=quantity;r.periods=periods;r.interval=interval;r.starts=starts;r.entries=ids;});
+  controls flags(get_self(),runtime.value);flags.emplace(get_self(),[&](auto& r){r.schedule_id=schedule_id;r.paused=0;r.last_payout=0;r.label=label;});
+ }
+
 };
-EOSIO_DISPATCH(payroll,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(edit)(settle))
+EOSIO_DISPATCH(payroll,(scanclose)(clearclose)(checkquota)(checkmig)(scanram)(backfillrefs)(bindrampool)(commit)(commitdoc)(releaseterms)(edit)(settle))

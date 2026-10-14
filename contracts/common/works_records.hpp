@@ -1,6 +1,12 @@
 #pragma once
 #include "module.hpp"
+#include "arbitration.hpp"
 namespace daclify {
+inline arbitration_rules protection_rules(name runtime,uint64_t dao_id,uint64_t contributor,name decide,uint64_t backup,uint64_t representative,uint32_t review_seconds,uint32_t challenge_seconds,uint32_t vote_seconds,uint32_t backup_seconds){
+ pinned_module(runtime,dao_id,decide);uint8_t kind=0;uint16_t quorum=5000,approval=5001;gov_policies policies(runtime,runtime.value);auto policy=policies.find(dao_id);if(policy!=policies.end()){check(policy->config.decide==decide,"POLICY_DECIDE");kind=policy->config.kind;quorum=policy->config.quorum;approval=policy->config.approval;}
+ arbitration_rules rules{decide,get_code_hash(decide),backup,representative,kind,quorum,approval,review_seconds,challenge_seconds,vote_seconds,backup_seconds};validate_arbitration_rules(runtime,dao_id,contributor,rules);return rules;
+}
+
 struct [[eosio::table("projects"), eosio::contract("works")]] project_record {
  uint64_t id;uint64_t dao_id;uint64_t creator;uint64_t contributor;uint64_t document_id;uint32_t document_version;std::vector<uint64_t> milestones;uint8_t status=0;
  uint64_t primary_key()const{return id;}uint64_t by_dao()const{return dao_id;}
@@ -42,7 +48,9 @@ inline checksum256 work_commitment(name runtime,uint64_t dao_id,name works,uint6
  // Ordinary pre-extension projects keep their exact pending-ballot commitment bytes.
  if(found==agreements.end())return base;
  check(found->dao_id==dao_id&&found->accepted,"AGREEMENT_CONSENT");check(found->terms==agreement_commitment(runtime,dao_id,works,project_id,found->term_start,found->term_end),"AGREEMENT_CHANGED");
- auto bytes=pack(std::make_tuple(base,*found));return sha256(bytes.data(),bytes.size());
+ protected_terms protections(works,runtime.value);auto protection=protections.find(project_id);
+ if(protection!=protections.end()){check(protection->dao_id==dao_id&&protection->accepted,"ARBITRATION_CONSENT");check(protection->base==found->terms&&protection->commitment==arbitration_terms_hash(runtime,works,*protection),"ARBITRATION_CHANGED");auto bytes=pack(std::make_tuple(base,*found,*protection));return sha256(bytes.data(),bytes.size());}
+ check(!protection_required(runtime,dao_id,works),"ARBITRATION_REQUIRED");auto bytes=pack(std::make_tuple(base,*found));return sha256(bytes.data(),bytes.size());
 }
 
 }

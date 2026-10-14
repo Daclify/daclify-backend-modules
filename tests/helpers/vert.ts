@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { ABI, Serializer } from '@wharfkit/antelope';
+import { ABI, Name, Serializer } from '@wharfkit/antelope';
 import { RuntimeCodeHash, RuntimeRawAbiHash } from '@daclify/core-protocol/sdk';
+import { DecideTableSchemas } from '../../sdk/generated/decide-schemas.js';
+import { ballotCommitment } from '../../sdk/ballot-commitment.js';
 import { Blockchain, type Account } from '@proton/vert';
 import { API, PermissionLevel } from '@greymass/eosio';
 import { z } from 'zod';
@@ -93,6 +95,30 @@ export function row(account: Account, table: string, scope: bigint, id: bigint):
   const accessor = account.tables[table];
   if (!accessor) throw new Error(`Missing ABI table ${table}`);
   return accessor(scope).getTableRow(id);
+}
+export function ballotExpectation(account: Account, runtime: string, ballotId: string | number): string {
+  const scope = BigInt(Name.from(runtime).value.toString());
+  const definition = row(account, 'ballotdefs', scope, BigInt(ballotId));
+  if (definition === undefined) return '00'.repeat(32);
+  const d = DecideTableSchemas.ballotdefs.parse(definition), b = DecideTableSchemas.ballots.parse(row(account, 'ballots', scope, BigInt(ballotId)));
+  const input = { chainId:'ab'.repeat(32), runtime, decide:account.name.toString(), ballot:b, definition:d, target:d.version===2?DecideTableSchemas.votetargets.parse(row(account,'votetargets',scope,BigInt(ballotId))):undefined };
+  if (d.purpose === 2) return ballotCommitment({...input,election:DecideTableSchemas.elections.parse(row(account,'elections',scope,BigInt(ballotId)))});
+  if (d.purpose === 3) return ballotCommitment({...input,execution:DecideTableSchemas.executions.parse(row(account,'executions',scope,BigInt(ballotId)))});
+  if (d.purpose === 4) return ballotCommitment({...input,grantPlan:DecideTableSchemas.grantplans.parse(row(account,'grantplans',scope,BigInt(ballotId)))});
+  if(d.purpose===6)return ballotCommitment({...input,dispute:DecideTableSchemas.arbplans.parse(row(account,'arbplans',scope,BigInt(ballotId)))});
+  if (d.purpose === 5) {
+    const table = account.tables.docchanges;
+    if (!table) throw new Error('Fixture document changes');
+    const changes = z.array(DecideTableSchemas.docchanges).parse(table(scope).getTableRows());
+    const change = changes.find(value => value.ballot_id === b.id && value.dao_id === b.dao_id);
+    if (!change) throw new Error('Fixture ballot document change');
+    return ballotCommitment({...input,documentChange:change});
+  }
+  return ballotCommitment(input);
+}
+export async function sendBoundVote(account: Account, data: unknown[], auth?: string | string[]) {
+  const [runtime, dao, member, ballotId, choice] = z.tuple([z.string(), z.union([z.number(),z.string()]), z.union([z.number(),z.string()]), z.union([z.number(),z.string()]), z.number()]).parse(data);
+  await send(account, 'votecommit', [runtime, dao, member, ballotId, ballotExpectation(account,runtime,ballotId), choice], auth);
 }
 export function replaceContract(account: Account, path: string): void {
   account.setContract(
