@@ -1,6 +1,10 @@
 {
   "requirements": [
     {
+      "id": "BOUNDED-VERSIONED-BALLOT-METADATA",
+      "tests": ["tests/ballot-metadata.test.ts"]
+    },
+    {
       "id": "DECIDE-TALLY",
       "tests": ["tests/decide.test.ts"]
     },

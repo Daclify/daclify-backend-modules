@@ -1,4 +1,5 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
+export { encodeBallotMetadata, readBallotMetadata } from './ballots.js';
 import { activityAbi, type ActivityActions } from './generated/activity.js';
 import { ActivityActionSchemas } from './generated/activity-schemas.js';
 export { activityAbi, activityAbiHash } from './generated/activity.js';

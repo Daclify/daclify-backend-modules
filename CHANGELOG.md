@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.31
+
+- Publish bounded ballot content schema version 2 and compatible metadata reading/encoding for existing Decide contracts. Binary semantics and deployed binaries are unchanged.
+
 ## 0.10.0-alpha.30 development
 
 Refresh the documentation/SDK cohort for core22 with unchanged module contracts. Link to authoritative current status and retain exact reviewed core compatibility; later unqualified versions remain rejected.

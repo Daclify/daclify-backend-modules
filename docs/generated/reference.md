@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.30 · interface 1.
+Package 0.10.0-alpha.31 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -17,6 +17,12 @@ After the closing time, select Finalize ballot to calculate its result and relea
 DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory.
 
 Executive elections are opt-in: initialize a core executive policy and install the electexec grant. The reserved title Executives schedules a core roster handover at term start; the pending roster activates after eligible successor pairing and synchronization within its term. Other titles remain representative terms. The old roster retains control until a valid successor activates, and recall cannot remove the final paired native controller. Non-voting members are excluded from new ballot denominators and cannot cast votes.
+
+The ballot editor requires a public title and explanation, and offers an optional existing DAO document pinned to its exact version and content commitment. Inline text and choice labels are public even in a private DAO. Use an encrypted supporting document for confidential details. The metadata reference adds no storage-retention guarantee.
+
+Binary proposals use Reject and Approve. Custom single-choice advisory polls have three to sixteen distinct labels; a neutral two-option poll is not supported by this contract. Polls use the same quorum and approval threshold as the saved DAO policy: the unique leading option must reach that threshold; a simple plurality can therefore fail. Abstention, ranked choices and changing a cast vote are not available for ordinary ballots.
+
+New editor metadata has schemaVersion 2, a title up to 160 characters, an explanation up to 2000 characters, options with labels up to 80 characters, and an optional documentId/version/commitment reference. The whole serialized JSON is limited to 4096 UTF-8 bytes. Legacy binary ballots retain Reject/Approve meaning. Unsupported or inconsistent choice metadata prevents voting in the current interface. Contract-enforced vote commitments to the displayed definition remain a separate pending upgrade.
 
 ## Fund work through milestones
 

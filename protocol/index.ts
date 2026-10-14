@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.10.0-alpha.30';
+export const VERSION = '0.10.0-alpha.31';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.10.0-alpha.3';
 const CORE_RANGE =
@@ -250,4 +250,5 @@ export type ModuleInstallation = z.infer<typeof ModuleInstallationSchema>;
 
 export * from './api.js';
 export * from './agreements.js';
+export * from './ballots.js';
 export * from './telos-governance.js';
