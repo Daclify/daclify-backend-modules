@@ -1,3 +1,5 @@
+import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
+import { ArchiveBundleSchema } from './archive.js';
 import { z } from 'zod';
 import {
   ChainIdSchema,
@@ -85,6 +87,11 @@ export type QuickBallot = z.infer<typeof QuickBallotRowSchema>;
 export type QuickBallotResponse = z.infer<typeof QuickBallotResponseSchema>;
 export type QuickBallotSnapshot = z.infer<typeof QuickBallotSnapshotSchema>;
 
+export const QuickBallotArchiveSchema = z.strictObject({
+  anchor: RuntimeTableSchemas.archives,
+  bundle: ArchiveBundleSchema,
+});
+
 const maintenance = z.strictObject({
   transactionId: ChainIdSchema.nullable(),
   prepared: z.boolean(),
@@ -120,6 +127,15 @@ export const QuickBallotRoutes = {
       next: Uint64Schema.nullable(),
       pruned: z.boolean(),
       root: ChainIdSchema,
+    }),
+    helpTopic: 'quick-ballots',
+  },
+  quickArchive: {
+    method: 'GET',
+    path: '/v1/quick-ballots/:ballotId/archive',
+    response: z.strictObject({
+      archives: z.array(QuickBallotArchiveSchema).max(2),
+      complete: z.boolean(),
     }),
     helpTopic: 'quick-ballots',
   },

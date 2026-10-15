@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.38 · interface 1.
+Package 0.10.0-alpha.39 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -2819,6 +2819,799 @@ Response:
     "next",
     "pruned",
     "root"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/quick-ballots/:ballotId/archive
+
+Guide: quick-ballots.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "archives": {
+      "maxItems": 2,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "anchor": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "dao_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "manifest": {
+                "type": "object",
+                "properties": {
+                  "format_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "chain_id": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "runtime": {
+                    "type": "string",
+                    "maxLength": 13
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "source": {
+                    "type": "string",
+                    "maxLength": 13
+                  },
+                  "code_hash": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "abi_hash": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "block_number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "block_id": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "maxLength": 16384
+                  },
+                  "families": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "maxLength": 16384
+                        },
+                        "parent_id": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "table": {
+                          "type": "string",
+                          "maxLength": 13
+                        },
+                        "scope": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "schema_hash": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "records": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "chunks": {
+                          "maxItems": 5000,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "domain": {
+                                "type": "object",
+                                "properties": {
+                                  "format_version": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 65535
+                                  },
+                                  "chain_id": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "runtime": {
+                                    "type": "string",
+                                    "maxLength": 13
+                                  },
+                                  "dao_id": {
+                                    "type": "string",
+                                    "maxLength": 20
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "maxLength": 13
+                                  },
+                                  "code_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "abi_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "schema_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "table": {
+                                    "type": "string",
+                                    "maxLength": 13
+                                  },
+                                  "scope": {
+                                    "type": "string",
+                                    "maxLength": 20
+                                  },
+                                  "chunk_ordinal": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967295
+                                  },
+                                  "leaf_count": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967295
+                                  }
+                                },
+                                "required": [
+                                  "format_version",
+                                  "chain_id",
+                                  "runtime",
+                                  "dao_id",
+                                  "source",
+                                  "code_hash",
+                                  "abi_hash",
+                                  "schema_hash",
+                                  "table",
+                                  "scope",
+                                  "chunk_ordinal",
+                                  "leaf_count"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "root": {
+                                "type": "string",
+                                "pattern": "^[0-9a-f]{64}$"
+                              },
+                              "cid": {
+                                "type": "string",
+                                "maxLength": 16384
+                              },
+                              "bytes": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 4294967295
+                              },
+                              "commitment": {
+                                "type": "string",
+                                "pattern": "^[0-9a-f]{64}$"
+                              },
+                              "first_key": {
+                                "type": "string",
+                                "maxLength": 20
+                              },
+                              "last_key": {
+                                "type": "string",
+                                "maxLength": 20
+                              }
+                            },
+                            "required": [
+                              "domain",
+                              "root",
+                              "cid",
+                              "bytes",
+                              "commitment",
+                              "first_key",
+                              "last_key"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "parent_id",
+                        "table",
+                        "scope",
+                        "schema_hash",
+                        "records",
+                        "chunks"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "files": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "document_id": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 4294967295
+                        },
+                        "cid": {
+                          "type": "string",
+                          "maxLength": 16384
+                        },
+                        "bytes": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "commitment": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "envelope_version": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 255
+                        },
+                        "key_epoch": {
+                          "type": "string",
+                          "maxLength": 20
+                        }
+                      },
+                      "required": [
+                        "document_id",
+                        "version",
+                        "cid",
+                        "bytes",
+                        "commitment",
+                        "envelope_version",
+                        "key_epoch"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "format_version",
+                  "chain_id",
+                  "runtime",
+                  "dao_id",
+                  "source",
+                  "code_hash",
+                  "abi_hash",
+                  "block_number",
+                  "block_id",
+                  "timestamp",
+                  "families",
+                  "files"
+                ],
+                "additionalProperties": false
+              },
+              "manifest_cid": {
+                "type": "string",
+                "maxLength": 16384
+              },
+              "manifest_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "manifest_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "descriptor_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "backup_commitment": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "verifier": {
+                "type": "string",
+                "maxLength": 13
+              },
+              "attestation_transaction": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "approval_transaction": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "retention_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "attested_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "approved_by": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "approved_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "revoked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "dao_id",
+              "manifest",
+              "manifest_cid",
+              "manifest_bytes",
+              "manifest_commitment",
+              "descriptor_commitment",
+              "backup_commitment",
+              "verifier",
+              "attestation_transaction",
+              "approval_transaction",
+              "retention_seconds",
+              "attested_at",
+              "approved_by",
+              "approved_at",
+              "revoked"
+            ],
+            "additionalProperties": false
+          },
+          "bundle": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "manifest": {
+                "type": "object",
+                "properties": {
+                  "schemaVersion": {
+                    "type": "number",
+                    "const": 1
+                  },
+                  "dao": {
+                    "type": "object",
+                    "properties": {
+                      "chainId": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "contract": {
+                        "type": "string",
+                        "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                      },
+                      "daoId": {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      "interfaceVersion": {
+                        "type": "number",
+                        "const": 1
+                      }
+                    },
+                    "required": [
+                      "chainId",
+                      "contract",
+                      "daoId",
+                      "interfaceVersion"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "properties": {
+                      "blockNumber": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 4294967295
+                      },
+                      "blockId": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "timestamp": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z))$"
+                          },
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "blockNumber",
+                      "blockId",
+                      "timestamp"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "account": {
+                        "type": "string",
+                        "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                      },
+                      "codeHash": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "abiHash": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "account",
+                      "codeHash",
+                      "abiHash"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "families": {
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "ordinary-poll-votes",
+                            "document-versions",
+                            "quick-ballot-responses",
+                            "quick-ballot-grants",
+                            "protected-export"
+                          ]
+                        },
+                        "parentId": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "table": {
+                          "type": "string",
+                          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "schemaHash": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "records": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "chunks": {
+                          "maxItems": 1024,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "domain": {
+                                "type": "object",
+                                "properties": {
+                                  "format_version": {
+                                    "type": "number",
+                                    "const": 1
+                                  },
+                                  "chain_id": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "runtime": {
+                                    "type": "string",
+                                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                                  },
+                                  "dao_id": {
+                                    "type": "string",
+                                    "maxLength": 20
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                                  },
+                                  "code_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "abi_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "schema_hash": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "table": {
+                                    "type": "string",
+                                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                                  },
+                                  "scope": {
+                                    "type": "string",
+                                    "maxLength": 20
+                                  },
+                                  "chunk_ordinal": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967295
+                                  },
+                                  "leaf_count": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 65536
+                                  }
+                                },
+                                "required": [
+                                  "format_version",
+                                  "chain_id",
+                                  "runtime",
+                                  "dao_id",
+                                  "source",
+                                  "code_hash",
+                                  "abi_hash",
+                                  "schema_hash",
+                                  "table",
+                                  "scope",
+                                  "chunk_ordinal",
+                                  "leaf_count"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "root": {
+                                "type": "string",
+                                "pattern": "^[0-9a-f]{64}$"
+                              },
+                              "cid": {
+                                "type": "string",
+                                "maxLength": 128
+                              },
+                              "bytes": {
+                                "type": "integer",
+                                "minimum": 188,
+                                "maximum": 5242880
+                              },
+                              "commitment": {
+                                "type": "string",
+                                "pattern": "^[0-9a-f]{64}$"
+                              },
+                              "firstKey": {
+                                "type": "string",
+                                "maxLength": 20
+                              },
+                              "lastKey": {
+                                "type": "string",
+                                "maxLength": 20
+                              }
+                            },
+                            "required": [
+                              "domain",
+                              "root",
+                              "cid",
+                              "bytes",
+                              "commitment",
+                              "firstKey",
+                              "lastKey"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "parentId",
+                        "table",
+                        "scope",
+                        "schemaHash",
+                        "records",
+                        "chunks"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "files": {
+                    "maxItems": 65536,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "document_id": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 4294967295
+                        },
+                        "cid": {
+                          "type": "string",
+                          "maxLength": 128
+                        },
+                        "bytes": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "commitment": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "envelope_version": {
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "const": 0
+                            },
+                            {
+                              "type": "number",
+                              "const": 1
+                            }
+                          ]
+                        },
+                        "key_epoch": {
+                          "type": "string",
+                          "maxLength": 20
+                        }
+                      },
+                      "required": [
+                        "document_id",
+                        "version",
+                        "cid",
+                        "bytes",
+                        "commitment",
+                        "envelope_version",
+                        "key_epoch"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "descriptorCommitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "schemaVersion",
+                  "dao",
+                  "snapshot",
+                  "source",
+                  "families",
+                  "files",
+                  "descriptorCommitment"
+                ],
+                "additionalProperties": false
+              },
+              "manifestFile": {
+                "type": "object",
+                "properties": {
+                  "cid": {
+                    "type": "string",
+                    "maxLength": 128
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5242880
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "content": {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 6990508
+                  }
+                },
+                "required": [
+                  "cid",
+                  "bytes",
+                  "commitment",
+                  "content"
+                ],
+                "additionalProperties": false
+              },
+              "chunks": {
+                "maxItems": 1024,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cid": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "content": {
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 6990508
+                    }
+                  },
+                  "required": [
+                    "cid",
+                    "content"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "manifest",
+              "manifestFile",
+              "chunks"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "anchor",
+          "bundle"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "complete": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "archives",
+    "complete"
   ],
   "additionalProperties": false
 }

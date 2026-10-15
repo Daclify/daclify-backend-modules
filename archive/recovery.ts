@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { IdSchema } from '@daclify/core-protocol';
+import { IdSchema, ChainIdSchema } from '@daclify/core-protocol';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
 import {
@@ -9,6 +9,11 @@ import {
 } from '../protocol/archive.js';
 import { verifyArchiveBundle, decodeReleasedArchiveRow } from './restore.js';
 import { verifyArchiveChunks } from './manifest.js';
+export function archiveRecoveryId(value: string) {
+  const h = ChainIdSchema.parse(value);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+
 export function verifyAnchoredArchive(value: unknown, anchorValue: unknown) {
   const anchor = RuntimeTableSchemas.archives.parse(anchorValue),
     bundle = verifyArchiveBundle(value, anchor.manifest_commitment),

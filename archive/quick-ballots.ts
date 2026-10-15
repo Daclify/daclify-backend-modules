@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { Name } from '@wharfkit/antelope';
 import { ramRowBytes } from '@daclify/core-protocol';
 import { RuntimeTableSchemas } from '@daclify/core-protocol/sdk';
-import { QuickBallotRowSchema } from '../protocol/quick-ballots.js';
+import {
+  QuickBallotRowSchema,
+  QuickBallotResultInputSchema,
+  QuickBallotResponseSchema,
+  QuickBallotArchiveSchema,
+} from '../protocol/quick-ballots.js';
 import {
   ArchiveRowSchema,
   OrdinaryPollArchivePlanSchema,
@@ -14,9 +19,9 @@ import { buildArchiveTree } from './format.js';
 import { verifyAnchoredArchive } from './recovery.js';
 import { verifyArchiveChunkDescriptor } from './manifest.js';
 import { QuickvoteActionSchemas } from '../sdk/generated/quickvote-schemas.js';
-import { encodeQuickBallot } from '../sdk/quick-ballots.js';
+import { encodeQuickBallot, QuickBallotTableSchemas } from '../sdk/quick-ballots.js';
 
-const InputSchema = OrdinaryPollArchivePlanSchema.pick({
+export const QuickBallotArchiveInputSchema = OrdinaryPollArchivePlanSchema.pick({
   dao: true,
   source: true,
   snapshot: true,
@@ -27,7 +32,7 @@ const InputSchema = OrdinaryPollArchivePlanSchema.pick({
   rows: z.array(ArchiveRowSchema).min(1).max(5000),
 });
 export function planQuickBallotArchive(value: unknown): OrdinaryPollArchivePlan {
-  const input = InputSchema.parse(value),
+  const input = QuickBallotArchiveInputSchema.parse(value),
     schema = archiveSourceSchema(input.kind),
     { ballot } = input;
   if (
@@ -178,13 +183,79 @@ export function quickArchivePruneBatch(value: unknown, anchorValue: unknown, pos
     archive_id: anchor.id,
     chunk_ordinal: chunkOrdinal,
     start,
-    proofs: rows
-      .slice(start, start + 25)
-      .map((row, offset) => ({
-        primary_key: row.primaryKey,
-        siblings: tree.proof(start + offset),
-      })),
+    proofs: rows.slice(start, start + 25).map((row, offset) => ({
+      primary_key: row.primaryKey,
+      siblings: tree.proof(start + offset),
+    })),
   });
   if (encodeQuickBallot('prune', data).length > 16384) throw new RangeError('ARCHIVE_ACTION_SIZE');
   return { action: 'prune', data } as const;
+}
+
+export function recoverQuickBallotHistory(value: unknown) {
+  const input = QuickBallotResultInputSchema.extend({
+    responses: z.array(QuickBallotResponseSchema).max(5000),
+    grants: QuickBallotTableSchemas.qgrants.nullable(),
+    archives: z.array(QuickBallotArchiveSchema).max(2),
+  }).parse(value);
+  const responses = new Map<string, z.infer<typeof QuickBallotResponseSchema>>();
+  let grants = input.grants;
+  function response(row: z.infer<typeof QuickBallotResponseSchema>) {
+    const previous = responses.get(row.id);
+    if (previous && JSON.stringify(previous) !== JSON.stringify(row))
+      throw new RangeError('ARCHIVE_HISTORY_CONFLICT');
+    responses.set(row.id, row);
+  }
+  for (const row of input.responses) response(row);
+  for (const exported of input.archives) {
+    const bundle = verifyAnchoredArchive(exported.bundle, exported.anchor),
+      manifest = bundle.manifest,
+      family = manifest.families[0];
+    if (
+      exported.anchor.revoked ||
+      manifest.families.length !== 1 ||
+      manifest.files.length ||
+      !family ||
+      manifest.dao.chainId !== input.chainId ||
+      manifest.dao.contract !== input.runtime ||
+      manifest.dao.daoId !== input.ballot.dao_id ||
+      manifest.source.account !== input.source ||
+      family.parentId !== input.ballot.id ||
+      !['quick-ballot-responses', 'quick-ballot-grants'].includes(family.kind)
+    )
+      throw new RangeError('ARCHIVE_DOMAIN');
+    for (const chunk of family.chunks) {
+      const asset = bundle.chunks.find((row) => row.cid === chunk.cid);
+      if (!asset) throw new RangeError('ARCHIVE_CONTENTS_INCOMPLETE');
+      const rows = verifyArchiveChunkDescriptor(
+        chunk,
+        Uint8Array.from(atob(asset.content), (char) => char.charCodeAt(0)),
+      );
+      for (const row of rows) {
+        const decoded = decodeReleasedArchiveRow(chunk.domain, row, input.ballot.id);
+        if ('ballot_id' in decoded.value) response(QuickBallotResponseSchema.parse(decoded.value));
+        else if ('grants' in decoded.value) {
+          const next = QuickBallotTableSchemas.qgrants.parse(decoded.value);
+          if (grants && JSON.stringify(grants) !== JSON.stringify(next))
+            throw new RangeError('ARCHIVE_HISTORY_CONFLICT');
+          grants = next;
+        } else throw new RangeError('ARCHIVE_DOMAIN');
+      }
+    }
+  }
+  if (
+    grants &&
+    (grants.id !== input.ballot.id ||
+      grants.dao_id !== input.ballot.dao_id ||
+      grants.grants.length !== input.ballot.definition.readers.length)
+  )
+    throw new RangeError('ARCHIVE_DOMAIN');
+  const snapshot = verifyQuickBallotSnapshot({
+    chainId: input.chainId,
+    runtime: input.runtime,
+    source: input.source,
+    ballot: input.ballot,
+    responses: [...responses.values()].sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1)),
+  });
+  return { snapshot, grants };
 }
