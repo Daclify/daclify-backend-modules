@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.40",
+  "packageVersion": "0.10.0-alpha.41",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -47,7 +47,9 @@ export const ModulesHelpBundle={
         "Before protected funding, choose a different active backup member, a DAO executive representative and review, challenge, vote and backup deadlines. Member voting follows the frozen DAO voting rules and excludes the contributor and every participating reviewer. Reviews stay provisional during the challenge period; disputed outcomes pay the fixed milestone amount or cancel only its unpaid reservation.",
         "No valid vote or no eligible electorate leaves funds reserved until the agreed backup deadline. After both decision stages expire, only matching contributor and fixed DAO representative consent resolves the reserve. An inactive contributor can still consent to this final settlement using their current signing proof. Already approved claims remain payable. Private evidence requires existing registered key grants for decision makers, and verified decryption remains a separate user requirement.",
         "The service catalogue publishes validated public or encrypted service offers using normal DAO documents. Private offers are read in explicit batches of 25 and clear from the screen when keys lock. Exact version links return to the originating DAO page.",
-        "Large courts prepare eligible voters in bounded steps. The UI completes the preparation through one action and shows a resume option after interruption; voting remains locked until the entire frozen membership boundary is processed. Expired or empty preparation produces no approved payment. Preparation needs ordinary storage capacity; its failure leaves funded reserves under the agreed backup/mutual-settlement safeguards."
+        "Large courts prepare eligible voters in bounded steps. The UI completes the preparation through one action and shows a resume option after interruption; voting remains locked until the entire frozen membership boundary is processed. Expired or empty preparation produces no approved payment. Preparation needs ordinary storage capacity; its failure leaves funded reserves under the agreed backup/mutual-settlement safeguards.",
+        "After publishing a contributor-project template, Use in a new Works proposal selects only its exact document/version/commitment. The link contains no agreement text or party details and signs nothing. Verify the contributor, integer payments, dates and agreement wording in the existing form; normal contributor consent, protected terms and funding approvals still apply.",
+        "Generated prose does not compile into native obligations. Existing projects retain their immutable document terms: a revised agreement needs an explicitly reviewed successor proposal unless the existing reference already matches. No template handoff changes earlier claims, milestone decisions or funding."
       ]
     },
     {
@@ -177,7 +179,11 @@ export const ModulesHelpBundle={
         "Each proposal pins its version, content commitment, adoption revision and contract code hash. A voting proposal also pins the governance policy revision. Adoption is once-only; changed policy or code requires a new proposal. Proposals expire seven days after the vote closes, or seven days after administrator submission. Cancel an open proposal or clear a rejected/expired proposal; finalizing its ballot remains necessary to release its governance lock.",
         "Open the adopted content before confirming that you have reviewed and accept that version. Signing creates one acceptance record for your existing DAO member ID. Later amendments need a new acknowledgement; old records remain. Tracking acceptance does not change membership or voting rights and does not certify legal enforceability or external signatures.",
         "Existing encryption and historic-access rules apply. Private bodies and filenames stay encrypted; document IDs, categories, proposal/vote outcomes and acceptance records are public chain metadata. If an old epoch is unavailable, ask an authorized key holder for permitted access or restore the protected version; do not acknowledge unread content.",
-        "Formal management requires the matching upgraded core and Decide binaries, installed action permissions, document-reference coverage and RAM migration. Unsupported deployments keep ordinary Documents available. Proposed/adopted versions and their bound ballots remain protected from ordinary archive pruning; rejected or expired proposal references can be released in batches of at most 25."
+        "Formal management requires the matching upgraded core and Decide binaries, installed action permissions, document-reference coverage and RAM migration. Unsupported deployments keep ordinary Documents available. Proposed/adopted versions and their bound ballots remain protected from ordinary archive pruning; rejected or expired proposal references can be released in batches of at most 25.",
+        "Documents → Create from template prepares twelve editable legal drafts. Publish first, then use Continue document setup to select fixed approval and acceptance settings. Only an active administrator with compatible enabled Decide actions can register or propose; being an executive alone does not bypass the native role requirements. Publishing is available independently of registration.",
+        "The chooser reads the complete bounded register before assigning a constitution identity. An existing constitution is amended under its original document ID and immutable registration settings; review its exact adopted text first. Other amendments require an explicit document choice. A registration supports at most 64 managed identities. Partial discovery, a changed policy or unavailable exact bytes blocks duplicate-sensitive continuation.",
+        "Registration, proposing a version, administrator approval or member voting/finalization/adoption, and each member acceptance remain separate actions. New uploads never replace the adopted version or old acceptance history. Accepting records one member acknowledgement of the exact adopted version; it does not collect outside signatures or establish universal legal validity. Known wording differences from current DAO rules need explicit acknowledgement and separate governance changes.",
+        "If publication completed but a later stage failed, keep the published document identity and use Continue document setup or the register to resume. Read current native state before resending an uncertain registration or proposal. Key recovery does not duplicate an acceptance for the same stable native member. Reading a private agreement still requires permitted historical epoch coverage; see Contact recovery."
       ]
     }
   ],
@@ -19883,7 +19889,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "quick-ballots",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19911,7 +19917,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "activity",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19943,7 +19949,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "decide",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19999,7 +20005,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "works",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20038,7 +20044,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "payroll",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20078,7 +20084,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "grants-rounds",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20120,7 +20126,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.30",
+        "coreRange": "0.15.0-alpha.31",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

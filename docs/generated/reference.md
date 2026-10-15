@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.40 · interface 1.
+Package 0.10.0-alpha.41 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -63,6 +63,10 @@ No valid vote or no eligible electorate leaves funds reserved until the agreed b
 The service catalogue publishes validated public or encrypted service offers using normal DAO documents. Private offers are read in explicit batches of 25 and clear from the screen when keys lock. Exact version links return to the originating DAO page.
 
 Large courts prepare eligible voters in bounded steps. The UI completes the preparation through one action and shows a resume option after interruption; voting remains locked until the entire frozen membership boundary is processed. Expired or empty preparation produces no approved payment. Preparation needs ordinary storage capacity; its failure leaves funded reserves under the agreed backup/mutual-settlement safeguards.
+
+After publishing a contributor-project template, Use in a new Works proposal selects only its exact document/version/commitment. The link contains no agreement text or party details and signs nothing. Verify the contributor, integer payments, dates and agreement wording in the existing form; normal contributor consent, protected terms and funding approvals still apply.
+
+Generated prose does not compile into native obligations. Existing projects retain their immutable document terms: a revised agreement needs an explicitly reviewed successor proposal unless the existing reference already matches. No template handoff changes earlier claims, milestone decisions or funding.
 
 ## Funded payroll with a clear end date
 
@@ -213,6 +217,14 @@ Open the adopted content before confirming that you have reviewed and accept tha
 Existing encryption and historic-access rules apply. Private bodies and filenames stay encrypted; document IDs, categories, proposal/vote outcomes and acceptance records are public chain metadata. If an old epoch is unavailable, ask an authorized key holder for permitted access or restore the protected version; do not acknowledge unread content.
 
 Formal management requires the matching upgraded core and Decide binaries, installed action permissions, document-reference coverage and RAM migration. Unsupported deployments keep ordinary Documents available. Proposed/adopted versions and their bound ballots remain protected from ordinary archive pruning; rejected or expired proposal references can be released in batches of at most 25.
+
+Documents → Create from template prepares twelve editable legal drafts. Publish first, then use Continue document setup to select fixed approval and acceptance settings. Only an active administrator with compatible enabled Decide actions can register or propose; being an executive alone does not bypass the native role requirements. Publishing is available independently of registration.
+
+The chooser reads the complete bounded register before assigning a constitution identity. An existing constitution is amended under its original document ID and immutable registration settings; review its exact adopted text first. Other amendments require an explicit document choice. A registration supports at most 64 managed identities. Partial discovery, a changed policy or unavailable exact bytes blocks duplicate-sensitive continuation.
+
+Registration, proposing a version, administrator approval or member voting/finalization/adoption, and each member acceptance remain separate actions. New uploads never replace the adopted version or old acceptance history. Accepting records one member acknowledgement of the exact adopted version; it does not collect outside signatures or establish universal legal validity. Known wording differences from current DAO rules need explicit acknowledgement and separate governance changes.
+
+If publication completed but a later stage failed, keep the published document identity and use Continue document setup or the register to resume. Read current native state before resending an uncertain registration or proposal. Key recovery does not duplicate an acceptance for the same stable native member. Reading a private agreement still requires permitted historical epoch coverage; see Contact recovery.
 
 ## activity contract
 
@@ -17187,7 +17199,7 @@ Response:
 
 ## quick-ballots configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: ballot.create, ballot.finalize.
 
@@ -17212,7 +17224,7 @@ Guide: quick-ballots.
 
 ## activity configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: content.publish.
 
@@ -17242,7 +17254,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -17294,7 +17306,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17330,7 +17342,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17367,7 +17379,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: obligation.create.
 
@@ -17407,7 +17419,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.30.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.31.
 
 Capabilities: member.manage.
 
