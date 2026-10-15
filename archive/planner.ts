@@ -10,7 +10,7 @@ import { archiveSourceSchema } from './restore.js';
 import { buildArchiveTree } from './format.js';
 export function planOrdinaryPollArchive(value: unknown): OrdinaryPollArchivePlan {
   const input = OrdinaryPollArchiveInputSchema.parse(value),
-    schema = archiveSourceSchema('ordinary-poll-votes');
+    schema = archiveSourceSchema('ordinary-poll-votes', input.source);
   const snapshotTime = Date.parse(input.snapshot.timestamp) / 1000;
   if (
     input.source.account === input.dao.contract ||

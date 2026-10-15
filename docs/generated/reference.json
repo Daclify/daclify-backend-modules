@@ -1,6 +1,6 @@
 {
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.39",
+  "packageVersion": "0.10.0-alpha.40",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -19881,7 +19881,7 @@
       "manifest": {
         "id": "quick-ballots",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19909,7 +19909,7 @@
       "manifest": {
         "id": "activity",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19941,7 +19941,7 @@
       "manifest": {
         "id": "decide",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19997,7 +19997,7 @@
       "manifest": {
         "id": "works",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20036,7 +20036,7 @@
       "manifest": {
         "id": "payroll",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20076,7 +20076,7 @@
       "manifest": {
         "id": "grants-rounds",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20118,7 +20118,7 @@
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

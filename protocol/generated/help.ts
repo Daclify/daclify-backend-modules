@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.39",
+  "packageVersion": "0.10.0-alpha.40",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -19883,7 +19883,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "quick-ballots",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19911,7 +19911,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "activity",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19943,7 +19943,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "decide",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19999,7 +19999,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "works",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20038,7 +20038,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "payroll",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20078,7 +20078,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "grants-rounds",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20120,7 +20120,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.29",
+        "coreRange": "0.15.0-alpha.30",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

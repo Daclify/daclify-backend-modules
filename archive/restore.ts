@@ -1,3 +1,4 @@
+import { previousContactArchiveReleases } from './releases/trusted-contact-previous.js';
 import type { z } from 'zod';
 import { ABI, ABIDecoder, Bytes, Checksum256, Name, Serializer } from '@wharfkit/antelope';
 import { IdSchema, ChainIdSchema } from '@daclify/core-protocol';
@@ -78,11 +79,14 @@ const sources = {
     table: 'documents',
   },
 };
-export function archiveSourceSchema(kind: keyof typeof sources) {
+export function archiveSourceSchema(
+  kind: keyof typeof sources,
+  identity?: { codeHash: string; abiHash: string },
+) {
   const source = sources[kind],
     rowType = source.abi.tables.find((table) => table.name.toString() === source.table)?.type;
   if (!rowType) throw new Error('ARCHIVE_RELEASE_SCHEMA_MISSING');
-  return {
+  const current = {
     table: source.table,
     codeHash: source.codeHash,
     rawAbiHash: Checksum256.hash(Serializer.encode({ object: source.abi }).array).toString(),
@@ -102,6 +106,15 @@ export function archiveSourceSchema(kind: keyof typeof sources) {
     ).toString(),
     rowType,
   };
+  if (
+    !identity ||
+    (identity.codeHash === current.codeHash && identity.abiHash === current.rawAbiHash)
+  )
+    return current;
+  const previous = previousContactArchiveReleases[kind].identity;
+  if (identity.codeHash === previous.codeHash && identity.abiHash === previous.rawAbiHash)
+    return { table: source.table, ...previous };
+  throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
 }
 function releasedSource(
   kind: keyof typeof sources,
@@ -116,6 +129,13 @@ function releasedSource(
     schemaHash === current.schemaHash
   )
     return { abi: sources[kind].abi, rowType: current.rowType };
+  const previous = previousContactArchiveReleases[kind];
+  if (
+    codeHash === previous.identity.codeHash &&
+    rawAbiHash === previous.identity.rawAbiHash &&
+    schemaHash === previous.identity.schemaHash
+  )
+    return { abi: ABI.from(previous.abi), rowType: previous.identity.rowType };
   if (kind === 'ordinary-poll-votes')
     for (const release of [
       previousPollRelease,

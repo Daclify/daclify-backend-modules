@@ -331,3 +331,19 @@ it('derives the backup bundle ID from its on-chain manifest commitment after SQL
   expect(archiveRecoveryId(commitment)).toBe('abababab-abab-4bab-8bab-abababababab');
   expect(() => archiveRecoveryId('not-a-commitment')).toThrow();
 });
+
+it('keeps the previous pinned native archive readable after the recovery release', async () => {
+  const { previousContactArchiveReleases } =
+    await import('../archive/releases/trusted-contact-previous.js');
+  const release = previousContactArchiveReleases['quick-ballot-responses'];
+  const snapshot = input();
+  snapshot.source.codeHash = release.identity.codeHash;
+  snapshot.source.abiHash = release.identity.rawAbiHash;
+  expect(planQuickBallotArchive(snapshot).blocked).toEqual([]);
+  const archived = archiveFixture(snapshot);
+  expect(
+    verifyArchiveBundle(archived.bundle, archived.bundle.manifestFile.commitment).manifest.source,
+  ).toEqual(snapshot.source);
+  snapshot.source.codeHash = 'ff'.repeat(32);
+  expect(() => planQuickBallotArchive(snapshot)).toThrow('ARCHIVE_SCHEMA_UNSUPPORTED');
+});

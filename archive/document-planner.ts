@@ -10,7 +10,7 @@ import { archiveSourceSchema } from './restore.js';
 import { buildArchiveTree } from './format.js';
 export function planDocumentArchive(value: unknown): OrdinaryPollArchivePlan {
   const input = DocumentArchiveInputSchema.parse(value),
-    schema = archiveSourceSchema('document-versions'),
+    schema = archiveSourceSchema('document-versions', input.source),
     abi = ABI.from(runtimeAbi),
     time = Date.parse(input.snapshot.timestamp) / 1000;
   if (

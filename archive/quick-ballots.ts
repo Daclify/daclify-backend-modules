@@ -33,7 +33,7 @@ export const QuickBallotArchiveInputSchema = OrdinaryPollArchivePlanSchema.pick(
 });
 export function planQuickBallotArchive(value: unknown): OrdinaryPollArchivePlan {
   const input = QuickBallotArchiveInputSchema.parse(value),
-    schema = archiveSourceSchema(input.kind),
+    schema = archiveSourceSchema(input.kind, input.source),
     { ballot } = input;
   if (
     input.source.codeHash !== schema.codeHash ||

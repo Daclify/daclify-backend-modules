@@ -26,7 +26,7 @@ export function archiveManifestForPlan(value: OrdinaryPollArchivePlan, values: r
   if (plan.blocked.length || !plan.families.length) throw new RangeError('ARCHIVE_NOT_ELIGIBLE');
   if (!kind || plan.families.some((f) => f.kind !== kind))
     throw new RangeError('ARCHIVE_FAMILY_PROTECTED');
-  const schema = archiveSourceSchema(kind),
+  const schema = archiveSourceSchema(kind, plan.source),
     scope =
       kind === 'document-versions' ? plan.dao.daoId : Name.from(plan.dao.contract).value.toString();
   if (plan.blocked.length || !plan.families.length) throw new RangeError('ARCHIVE_NOT_ELIGIBLE');
