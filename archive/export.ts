@@ -38,7 +38,7 @@ export function archiveManifestForPlan(value: OrdinaryPollArchivePlan, values: r
   const families = plan.families.map((family) => ({
     kind: family.kind,
     parentId: family.parentId,
-    table: kind === 'document-versions' ? 'documents' : 'votes',
+    table: schema.table,
     scope,
     schemaHash: schema.schemaHash,
     records: String(family.chunks.reduce((n, c) => n + c.rows.length, 0)),

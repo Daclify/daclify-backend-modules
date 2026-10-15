@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.10.0-alpha.36';
+export const VERSION = '0.10.0-alpha.38';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.10.0-alpha.4';
-const CORE_RANGE = '0.15.0-alpha.27';
+const CORE_RANGE = '0.15.0-alpha.29';
 export const ModulePermissions = Object.freeze({
+  'quick-ballots': { actions: ['open', 'close'] as const, grants: [] as const },
   activity: {
     actions: [
       'recordact',
@@ -99,6 +100,7 @@ export const EndorsementConfigSchema = z.strictObject({
   witnessLimit: z.literal(64),
 });
 export const Catalog = Object.freeze([
+  ModuleManifestSchema.parse({ id: 'quick-ballots', version: CONTRACT_VERSION, coreRange: CORE_RANGE, interfaceVersion: 1, configVersion: 1, capabilities: ['ballot.create', 'ballot.finalize'], helpTopic: 'quick-ballots' }),
   ModuleManifestSchema.parse({
     id: 'activity',
     version: CONTRACT_VERSION,
@@ -155,6 +157,7 @@ export const Catalog = Object.freeze([
   }),
 ]);
 export const ModuleInstallationSchema = z.discriminatedUnion('id', [
+  z.strictObject({ id: z.literal('quick-ballots'), account: NativeAccountSchema, version: z.literal(CONTRACT_VERSION), config: z.strictObject({ configVersion: z.literal(1) }), actions: z.tuple([z.literal('open'), z.literal('close')]), grants: z.tuple([]) }),
   z.strictObject({
     id: z.literal('activity'),
     account: NativeAccountSchema,
@@ -265,4 +268,5 @@ export type ModuleInstallation = z.infer<typeof ModuleInstallationSchema>;
 export * from './api.js';
 export * from './agreements.js';
 export * from './ballots.js';
+export * from './quick-ballots.js';
 export * from './telos-governance.js';

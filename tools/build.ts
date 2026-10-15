@@ -12,9 +12,10 @@ if (
     'cdt-cpp version 4.1.1'
 )
   throw new Error('PINNED_CDT_REQUIRED');
-const contracts = ['decide', 'works', 'payroll', 'grants', 'endorse', 'activity'];
+const contracts = ['decide', 'works', 'payroll', 'grants', 'endorse', 'activity', 'quickvote'];
 const selected = process.argv.slice(2);
-if (selected.some((name) => !contracts.includes(name))) throw new Error('CONTRACT_UNKNOWN');
+if (selected.some((name) => ![...contracts, 'quickfixture'].includes(name)))
+  throw new Error('CONTRACT_UNKNOWN');
 for (const name of selected.length ? selected : contracts)
   execFileSync(
     compiler ?? 'docker',

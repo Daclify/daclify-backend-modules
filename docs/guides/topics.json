@@ -1,5 +1,18 @@
 [
   {
+    "id": "quick-ballots",
+    "title": "Quick ballots: encrypted up/down questions",
+    "paragraphs": [
+      "Quick ballots is experimental encrypted voting on testnet. A current executive opens a public question for all Daclify accounts or active members of one to twenty selected DAOs. Each canonical account has one current response; changing wallets or DAO memberships does not add a vote. This is account uniqueness, not proof of one human per account.",
+      "Write a question of up to 256 UTF-8 bytes and an optional explanation of up to 4096 bytes. Add a closing time or close manually. The current originating executives and their encryption public keys are fixed when the question opens. Every reader needs working private-content access; an uploaded key grant alone cannot prove they decrypted it. Other audience DAOs receive no reader keys.",
+      "The browser encrypts each up/down response and proves it is a valid choice before signing. Private ballot keys, choices and randomness stay on the device. Your existing default approval method authorizes the exact response; enabling a wallet for account-wide ballots grants no DAO spending authority. A ballot retains at most 5000 response identities. The originating DAO funds its storage.",
+      "Individual choices are encrypted, but account participation, timing, the public question and readers remain visible on-chain. Fixed readers can decrypt individual choices and copy their keys. Authorized managed recovery may also affect who can obtain a reader key. Removing current database links or on-chain rows does not erase historical chain transactions.",
+      "After closure, bounded preparation freezes a complete ordered response commitment and independently checks the encrypted aggregate and count. A reader produces a public cryptographic proof of the final up/down totals locally. Pending totals are never presented as a result. The proof implementation has native and independent-vector tests; those tests are not an independent cryptographic security audit or mainnet qualification.",
+      "Thirty days after closure, verified encrypted archiving and a separately verified backup permit bounded cleanup of individual response and reader-grant rows. The final summary, public key, aggregate, source root and protocol inputs stay on-chain. Missing tally keys leave No verified result; a valid proof may still arrive after cleanup. Archiving can proceed after DAO closure under this opening policy without finding a departed executive.",
+      "Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive."
+    ]
+  },
+  {
     "id": "decide",
     "title": "Weights with an explicit snapshot",
     "paragraphs": [

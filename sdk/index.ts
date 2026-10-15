@@ -1,4 +1,5 @@
 import { ABI, Serializer } from '@wharfkit/antelope';
+export * from './quick-ballots.js';
 export { encodeBallotMetadata, readBallotMetadata } from './ballots.js';
 export { ballotCommitment, type BallotCommitmentInput } from './ballot-commitment.js';
 export { prepareBallotVote } from './ballot-vote.js';

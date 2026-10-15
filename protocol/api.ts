@@ -13,8 +13,9 @@ import { GrantsTableSchemas } from '../sdk/generated/grants-schemas.js';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
 import { WorksTableSchemas } from '../sdk/generated/works-schemas.js';
 import { PayrollTableSchemas } from '../sdk/generated/payroll-schemas.js';
+import { QuickBallotRoutes } from './quick-ballots.js';
 export const ModuleDeploymentSchema = z.strictObject({
-  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission', 'activity']),
+  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission', 'activity', 'quick-ballots']),
   account: NativeAccountSchema,
   version: z.string(),
   codeHash: ChainIdSchema,
@@ -150,6 +151,7 @@ export const GoverningDocumentPageSchema = z.strictObject({
 export type GoverningDocumentQuery = z.infer<typeof GoverningDocumentQuerySchema>;
 export type GoverningDocumentPage = z.infer<typeof GoverningDocumentPageSchema>;
 export const ModuleApiRoutes = {
+  ...QuickBallotRoutes,
   arbitration:{method:'POST',path:'/v1/works/arbitration',input:z.strictObject({dao:DaoRefSchema,obligationId:IdSchema,operation:z.enum(['advance','open-vote'])}),response:z.strictObject({transactionId:ChainIdSchema,ballotId:IdSchema.nullable(),state:z.int().min(0).max(8)}),helpTopic:'works'},
   ballotExport:{method:'GET',path:'/v1/daos/:id/ballots/:ballotId/export',response:BallotExportSchema,helpTopic:'decide'},
   clearDocuments: {

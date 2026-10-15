@@ -8,3 +8,4 @@ export * from './attestation.js';
 export * from './pruning.js';
 export * from './recovery.js';
 export * from './document-planner.js';
+export * from './quick-ballots.js';

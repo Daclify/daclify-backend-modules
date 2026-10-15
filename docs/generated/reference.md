@@ -1,8 +1,24 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.36 · interface 1.
+Package 0.10.0-alpha.38 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
+
+## Quick ballots: encrypted up/down questions
+
+Quick ballots is experimental encrypted voting on testnet. A current executive opens a public question for all Daclify accounts or active members of one to twenty selected DAOs. Each canonical account has one current response; changing wallets or DAO memberships does not add a vote. This is account uniqueness, not proof of one human per account.
+
+Write a question of up to 256 UTF-8 bytes and an optional explanation of up to 4096 bytes. Add a closing time or close manually. The current originating executives and their encryption public keys are fixed when the question opens. Every reader needs working private-content access; an uploaded key grant alone cannot prove they decrypted it. Other audience DAOs receive no reader keys.
+
+The browser encrypts each up/down response and proves it is a valid choice before signing. Private ballot keys, choices and randomness stay on the device. Your existing default approval method authorizes the exact response; enabling a wallet for account-wide ballots grants no DAO spending authority. A ballot retains at most 5000 response identities. The originating DAO funds its storage.
+
+Individual choices are encrypted, but account participation, timing, the public question and readers remain visible on-chain. Fixed readers can decrypt individual choices and copy their keys. Authorized managed recovery may also affect who can obtain a reader key. Removing current database links or on-chain rows does not erase historical chain transactions.
+
+After closure, bounded preparation freezes a complete ordered response commitment and independently checks the encrypted aggregate and count. A reader produces a public cryptographic proof of the final up/down totals locally. Pending totals are never presented as a result. The proof implementation has native and independent-vector tests; those tests are not an independent cryptographic security audit or mainnet qualification.
+
+Thirty days after closure, verified encrypted archiving and a separately verified backup permit bounded cleanup of individual response and reader-grant rows. The final summary, public key, aggregate, source root and protocol inputs stay on-chain. Missing tally keys leave No verified result; a valid proof may still arrive after cleanup. Archiving can proceed after DAO closure under this opening policy without finding a departed executive.
+
+Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive.
 
 ## Weights with an explicit snapshot
 
@@ -1913,6 +1929,1195 @@ Source ABI JSON SHA-256: `3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d
 | --- | --- |
 | runtime | name |
 
+## quickvote contract
+
+Source ABI JSON SHA-256: `f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4cef8ea6d384c`.
+
+### Action: bindrampool
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
+### Action: checkmig
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| kind | uint8 |
+
+### Action: checkquota
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: clearclosed
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+
+### Action: close
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| ballot_id | uint64 |
+
+### Action: finalize
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| ballot_id | uint64 |
+| up | uint32 |
+| proof | bytes |
+
+### Action: init
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| authority | name |
+| authority_hash | checksum256 |
+
+### Action: open
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| ballot_id | uint64 |
+| definition | quick_definition |
+| key | bytes |
+| possession | bytes |
+| grants | bytes[] |
+
+### Action: prepare
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| ballot_id | uint64 |
+| limit | uint32 |
+
+### Action: prune
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| ballot_id | uint64 |
+| archive_id | uint64 |
+| chunk_ordinal | uint32 |
+| start | uint32 |
+| proofs | archive_prune_proof[] |
+
+### Action: prunegrants
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| ballot_id | uint64 |
+| archive_id | uint64 |
+| siblings | checksum256[] |
+
+### Action: remove
+
+| Field | ABI type |
+| --- | --- |
+| actor | quick_actor_context |
+| ballot_id | uint64 |
+| expected_revision | uint64 |
+
+### Action: respond
+
+| Field | ABI type |
+| --- | --- |
+| actor | quick_actor_context |
+| ballot_id | uint64 |
+| expected_revision | uint64 |
+| ciphertext | bytes |
+| proof | bytes |
+| receipt | bytes |
+
+### Action: scanclose
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| limit | uint32 |
+
+### Action: scanram
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| table | name |
+| limit | uint32 |
+
+### Action: tick
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| ballot_id | uint64 |
+
+### Table: closechecks
+
+| Field | ABI type |
+| --- | --- |
+| dao_id | uint64 |
+| code_hash | checksum256 |
+| closing_at | uint32 |
+| stage | uint8 |
+| cursor | uint64 |
+| complete | bool |
+
+### Table: qballots
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| creator_id | uint64 |
+| opened_at | uint32 |
+| definition | quick_definition |
+| definition_hash | checksum256 |
+| key | bytes |
+| key_proof | bytes |
+| aggregate | bytes |
+| count | uint32 |
+| identities | uint32 |
+| closed_at | uint32 |
+| scan_cursor | uint64 |
+| scan_rows | uint32 |
+| scan_count | uint32 |
+| scan_aggregate | bytes |
+| response_root | checksum256 |
+| prepared | bool |
+| up | uint32 |
+| final_proof | bytes |
+| verified | bool |
+| pruned | bool |
+
+### Table: qclock
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| authority | name |
+| authority_hash | checksum256 |
+| next_response_id | uint64 |
+
+### Table: qgrants
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| grants | bytes[] |
+
+### Table: qresponses
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| dao_id | uint64 |
+| ballot_id | uint64 |
+| identity | checksum256 |
+| revision | uint64 |
+| active | bool |
+| ciphertext | bytes |
+| proof | bytes |
+| receipt | bytes |
+| updated_at | uint32 |
+
+### Table: ramcursors
+
+| Field | ABI type |
+| --- | --- |
+| table | name |
+| cursor | uint64 |
+| advanced | bool |
+| complete | bool |
+
+### Table: ramoverlays
+
+| Field | ABI type |
+| --- | --- |
+| id | uint64 |
+| table | name |
+| row | uint64 |
+
+### Table: rampayer
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+
+## GET /v1/quick-ballots
+
+Guide: quick-ballots.
+
+No request body.
+
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "after": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "daoId": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "available": {
+      "type": "boolean"
+    },
+    "experimental": {
+      "type": "boolean",
+      "const": true
+    },
+    "domain": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "chainId": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "runtime": {
+              "type": "string",
+              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            },
+            "source": {
+              "type": "string",
+              "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+            }
+          },
+          "required": [
+            "chainId",
+            "runtime",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ballots": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "creator_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "opened_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "definition": {
+            "type": "object",
+            "properties": {
+              "protocol": {
+                "type": "number",
+                "const": 1
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "explanation": {
+                "type": "string",
+                "maxLength": 4096
+              },
+              "all_accounts": {
+                "type": "boolean"
+              },
+              "audience": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 20
+                }
+              },
+              "closes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "readers": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "member_id": {
+                      "type": "string",
+                      "maxLength": 20
+                    },
+                    "encryption_key": {
+                      "type": "string",
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "member_id",
+                    "encryption_key"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "protocol",
+              "question",
+              "explanation",
+              "all_accounts",
+              "audience",
+              "closes",
+              "readers"
+            ],
+            "additionalProperties": false
+          },
+          "definition_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{192}$"
+          },
+          "key_proof": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{128}$"
+          },
+          "aggregate": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{384}$"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "identities": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "closed_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "scan_cursor": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "scan_rows": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "scan_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "scan_aggregate": {
+            "type": "string",
+            "maxLength": 32768,
+            "pattern": "^(?:[0-9a-f]{2})*$"
+          },
+          "response_root": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "prepared": {
+            "type": "boolean"
+          },
+          "up": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "final_proof": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{128}$"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "pruned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "creator_id",
+          "opened_at",
+          "definition",
+          "definition_hash",
+          "key",
+          "key_proof",
+          "aggregate",
+          "count",
+          "identities",
+          "closed_at",
+          "scan_cursor",
+          "scan_rows",
+          "scan_count",
+          "scan_aggregate",
+          "response_root",
+          "prepared",
+          "up",
+          "final_proof",
+          "verified",
+          "pruned"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "next": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "available",
+    "experimental",
+    "domain",
+    "ballots",
+    "next"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/quick-ballots/:ballotId
+
+Guide: quick-ballots.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "chainId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "runtime": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "ballot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "dao_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "creator_id": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "opened_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "definition": {
+          "type": "object",
+          "properties": {
+            "protocol": {
+              "type": "number",
+              "const": 1
+            },
+            "question": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "explanation": {
+              "type": "string",
+              "maxLength": 4096
+            },
+            "all_accounts": {
+              "type": "boolean"
+            },
+            "audience": {
+              "maxItems": 20,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 20
+              }
+            },
+            "closes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "readers": {
+              "minItems": 1,
+              "maxItems": 8,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "member_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "encryption_key": {
+                    "type": "string",
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "member_id",
+                  "encryption_key"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "protocol",
+            "question",
+            "explanation",
+            "all_accounts",
+            "audience",
+            "closes",
+            "readers"
+          ],
+          "additionalProperties": false
+        },
+        "definition_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{192}$"
+        },
+        "key_proof": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{128}$"
+        },
+        "aggregate": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{384}$"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "identities": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "closed_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "scan_cursor": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "scan_rows": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "scan_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "scan_aggregate": {
+          "type": "string",
+          "maxLength": 32768,
+          "pattern": "^(?:[0-9a-f]{2})*$"
+        },
+        "response_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "prepared": {
+          "type": "boolean"
+        },
+        "up": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "final_proof": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{128}$"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "pruned": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "dao_id",
+        "creator_id",
+        "opened_at",
+        "definition",
+        "definition_hash",
+        "key",
+        "key_proof",
+        "aggregate",
+        "count",
+        "identities",
+        "closed_at",
+        "scan_cursor",
+        "scan_rows",
+        "scan_count",
+        "scan_aggregate",
+        "response_root",
+        "prepared",
+        "up",
+        "final_proof",
+        "verified",
+        "pruned"
+      ],
+      "additionalProperties": false
+    },
+    "grants": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "dao_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "grants": {
+              "maxItems": 5000,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 32768,
+                "pattern": "^(?:[0-9a-f]{2})*$"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "dao_id",
+            "grants"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "chainId",
+    "runtime",
+    "source",
+    "ballot",
+    "grants"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/quick-ballots/:ballotId/responses
+
+Guide: quick-ballots.
+
+No request body.
+
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "after": {
+      "type": "string",
+      "maxLength": 20
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "responses": {
+      "maxItems": 25,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "dao_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "ballot_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "identity": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "revision": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "ciphertext": {
+            "type": "string",
+            "maxLength": 32768,
+            "pattern": "^(?:[0-9a-f]{2})*$"
+          },
+          "proof": {
+            "type": "string",
+            "maxLength": 32768,
+            "pattern": "^(?:[0-9a-f]{2})*$"
+          },
+          "receipt": {
+            "type": "string",
+            "maxLength": 32768,
+            "pattern": "^(?:[0-9a-f]{2})*$"
+          },
+          "updated_at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "id",
+          "dao_id",
+          "ballot_id",
+          "identity",
+          "revision",
+          "active",
+          "ciphertext",
+          "proof",
+          "receipt",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "next": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 20
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pruned": {
+      "type": "boolean"
+    },
+    "root": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "responses",
+    "next",
+    "pruned",
+    "root"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/quick-ballots/:ballotId/response
+
+Guide: quick-ballots.
+
+No request body.
+
+Query:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "identity": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "identity"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "response": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "dao_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "ballot_id": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "identity": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "revision": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "ciphertext": {
+              "type": "string",
+              "maxLength": 32768,
+              "pattern": "^(?:[0-9a-f]{2})*$"
+            },
+            "proof": {
+              "type": "string",
+              "maxLength": 32768,
+              "pattern": "^(?:[0-9a-f]{2})*$"
+            },
+            "receipt": {
+              "type": "string",
+              "maxLength": 32768,
+              "pattern": "^(?:[0-9a-f]{2})*$"
+            },
+            "updated_at": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "id",
+            "dao_id",
+            "ballot_id",
+            "identity",
+            "revision",
+            "active",
+            "ciphertext",
+            "proof",
+            "receipt",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "response"
+  ],
+  "additionalProperties": false
+}
+```
+
+## GET /v1/daos/:id/quick-ballots/readers
+
+Guide: quick-ballots.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "readers": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "encryption_key": {
+            "type": "string",
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "member_id",
+          "encryption_key"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "dao",
+    "readers"
+  ],
+  "additionalProperties": false
+}
+```
+
+## POST /v1/quick-ballots/:ballotId/advance
+
+Guide: quick-ballots.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "transactionId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prepared": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "transactionId",
+    "prepared"
+  ],
+  "additionalProperties": false
+}
+```
+
+## POST /v1/quick-ballots/:ballotId/finalize
+
+Guide: quick-ballots.
+
+Request:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "expectedDefinitionHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "expectedRoot": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "up": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5000
+    },
+    "proof": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{128}$"
+    }
+  },
+  "required": [
+    "expectedDefinitionHash",
+    "expectedRoot",
+    "up",
+    "proof"
+  ],
+  "additionalProperties": false
+}
+```
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "transactionId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prepared": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "transactionId",
+    "prepared"
+  ],
+  "additionalProperties": false
+}
+```
+
 ## POST /v1/works/arbitration
 
 Guide: works.
@@ -3729,7 +4934,8 @@ Response:
                     "payroll",
                     "grants-rounds",
                     "endorsement-admission",
-                    "activity"
+                    "activity",
+                    "quick-ballots"
                   ]
                 },
                 "account": {
@@ -4753,7 +5959,8 @@ Response:
                   "payroll",
                   "grants-rounds",
                   "endorsement-admission",
-                  "activity"
+                  "activity",
+                  "quick-ballots"
                 ]
               },
               "account": {
@@ -8513,6 +9720,8 @@ Response:
                 "enum": [
                   "ordinary-poll-votes",
                   "document-versions",
+                  "quick-ballot-responses",
+                  "quick-ballot-grants",
                   "protected-export"
                 ]
               },
@@ -9230,7 +10439,9 @@ Response:
             "type": "string",
             "enum": [
               "ordinary-poll-votes",
-              "document-versions"
+              "document-versions",
+              "quick-ballot-responses",
+              "quick-ballot-grants"
             ]
           },
           "parentId": {
@@ -9242,7 +10453,7 @@ Response:
             "maxLength": 20
           },
           "chunks": {
-            "maxItems": 1,
+            "maxItems": 32,
             "type": "array",
             "items": {
               "type": "object",
@@ -12544,6 +13755,8 @@ Response:
                 "enum": [
                   "ordinary-poll-votes",
                   "document-versions",
+                  "quick-ballot-responses",
+                  "quick-ballot-grants",
                   "protected-export"
                 ]
               },
@@ -15179,9 +16392,34 @@ Response:
 }
 ```
 
+## quick-ballots configuration
+
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
+
+Capabilities: ballot.create, ballot.finalize.
+
+Guide: quick-ballots.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "configVersion": {
+      "type": "number",
+      "const": 1
+    }
+  },
+  "required": [
+    "configVersion"
+  ],
+  "additionalProperties": false
+}
+```
+
 ## activity configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: content.publish.
 
@@ -15211,7 +16449,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -15263,7 +16501,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -15299,7 +16537,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -15336,7 +16574,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: obligation.create.
 
@@ -15376,7 +16614,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.27.
+Module 0.10.0-alpha.4 · config 1 · core 0.15.0-alpha.29.
 
 Capabilities: member.manage.
 

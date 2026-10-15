@@ -2,9 +2,22 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.36",
+  "packageVersion": "0.10.0-alpha.38",
   "interfaceVersion": 1,
   "topics": [
+    {
+      "id": "quick-ballots",
+      "title": "Quick ballots: encrypted up/down questions",
+      "paragraphs": [
+        "Quick ballots is experimental encrypted voting on testnet. A current executive opens a public question for all Daclify accounts or active members of one to twenty selected DAOs. Each canonical account has one current response; changing wallets or DAO memberships does not add a vote. This is account uniqueness, not proof of one human per account.",
+        "Write a question of up to 256 UTF-8 bytes and an optional explanation of up to 4096 bytes. Add a closing time or close manually. The current originating executives and their encryption public keys are fixed when the question opens. Every reader needs working private-content access; an uploaded key grant alone cannot prove they decrypted it. Other audience DAOs receive no reader keys.",
+        "The browser encrypts each up/down response and proves it is a valid choice before signing. Private ballot keys, choices and randomness stay on the device. Your existing default approval method authorizes the exact response; enabling a wallet for account-wide ballots grants no DAO spending authority. A ballot retains at most 5000 response identities. The originating DAO funds its storage.",
+        "Individual choices are encrypted, but account participation, timing, the public question and readers remain visible on-chain. Fixed readers can decrypt individual choices and copy their keys. Authorized managed recovery may also affect who can obtain a reader key. Removing current database links or on-chain rows does not erase historical chain transactions.",
+        "After closure, bounded preparation freezes a complete ordered response commitment and independently checks the encrypted aggregate and count. A reader produces a public cryptographic proof of the final up/down totals locally. Pending totals are never presented as a result. The proof implementation has native and independent-vector tests; those tests are not an independent cryptographic security audit or mainnet qualification.",
+        "Thirty days after closure, verified encrypted archiving and a separately verified backup permit bounded cleanup of individual response and reader-grant rows. The final summary, public key, aggregate, source root and protocol inputs stay on-chain. Missing tally keys leave No verified result; a valid proof may still arrive after cleanup. Archiving can proceed after DAO closure under this opening policy without finding a departed executive.",
+        "Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive."
+      ]
+    },
     {
       "id": "decide",
       "title": "Weights with an explicit snapshot",
@@ -4557,9 +4570,1467 @@ export const ModulesHelpBundle={
           ]
         }
       ]
+    },
+    {
+      "name": "quickvote",
+      "abiVersion": "eosio::abi/1.2",
+      "sourceAbiHash": "f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4cef8ea6d384c",
+      "actions": [
+        {
+          "name": "bindrampool",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        },
+        {
+          "name": "checkmig",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "checkquota",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "clearclosed",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "close",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "finalize",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "up",
+              "type": "uint32"
+            },
+            {
+              "name": "proof",
+              "type": "bytes"
+            }
+          ]
+        },
+        {
+          "name": "init",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "authority",
+              "type": "name"
+            },
+            {
+              "name": "authority_hash",
+              "type": "checksum256"
+            }
+          ]
+        },
+        {
+          "name": "open",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "definition",
+              "type": "quick_definition"
+            },
+            {
+              "name": "key",
+              "type": "bytes"
+            },
+            {
+              "name": "possession",
+              "type": "bytes"
+            },
+            {
+              "name": "grants",
+              "type": "bytes[]"
+            }
+          ]
+        },
+        {
+          "name": "prepare",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "prune",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "archive_id",
+              "type": "uint64"
+            },
+            {
+              "name": "chunk_ordinal",
+              "type": "uint32"
+            },
+            {
+              "name": "start",
+              "type": "uint32"
+            },
+            {
+              "name": "proofs",
+              "type": "archive_prune_proof[]"
+            }
+          ]
+        },
+        {
+          "name": "prunegrants",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "archive_id",
+              "type": "uint64"
+            },
+            {
+              "name": "siblings",
+              "type": "checksum256[]"
+            }
+          ]
+        },
+        {
+          "name": "remove",
+          "fields": [
+            {
+              "name": "actor",
+              "type": "quick_actor_context"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "expected_revision",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "respond",
+          "fields": [
+            {
+              "name": "actor",
+              "type": "quick_actor_context"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "expected_revision",
+              "type": "uint64"
+            },
+            {
+              "name": "ciphertext",
+              "type": "bytes"
+            },
+            {
+              "name": "proof",
+              "type": "bytes"
+            },
+            {
+              "name": "receipt",
+              "type": "bytes"
+            }
+          ]
+        },
+        {
+          "name": "scanclose",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "scanram",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "limit",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "tick",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "name": "closechecks",
+          "fields": [
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "code_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "closing_at",
+              "type": "uint32"
+            },
+            {
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "qballots",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "creator_id",
+              "type": "uint64"
+            },
+            {
+              "name": "opened_at",
+              "type": "uint32"
+            },
+            {
+              "name": "definition",
+              "type": "quick_definition"
+            },
+            {
+              "name": "definition_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "key",
+              "type": "bytes"
+            },
+            {
+              "name": "key_proof",
+              "type": "bytes"
+            },
+            {
+              "name": "aggregate",
+              "type": "bytes"
+            },
+            {
+              "name": "count",
+              "type": "uint32"
+            },
+            {
+              "name": "identities",
+              "type": "uint32"
+            },
+            {
+              "name": "closed_at",
+              "type": "uint32"
+            },
+            {
+              "name": "scan_cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "scan_rows",
+              "type": "uint32"
+            },
+            {
+              "name": "scan_count",
+              "type": "uint32"
+            },
+            {
+              "name": "scan_aggregate",
+              "type": "bytes"
+            },
+            {
+              "name": "response_root",
+              "type": "checksum256"
+            },
+            {
+              "name": "prepared",
+              "type": "bool"
+            },
+            {
+              "name": "up",
+              "type": "uint32"
+            },
+            {
+              "name": "final_proof",
+              "type": "bytes"
+            },
+            {
+              "name": "verified",
+              "type": "bool"
+            },
+            {
+              "name": "pruned",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "qclock",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "authority",
+              "type": "name"
+            },
+            {
+              "name": "authority_hash",
+              "type": "checksum256"
+            },
+            {
+              "name": "next_response_id",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "qgrants",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "grants",
+              "type": "bytes[]"
+            }
+          ]
+        },
+        {
+          "name": "qresponses",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "ballot_id",
+              "type": "uint64"
+            },
+            {
+              "name": "identity",
+              "type": "checksum256"
+            },
+            {
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "name": "active",
+              "type": "bool"
+            },
+            {
+              "name": "ciphertext",
+              "type": "bytes"
+            },
+            {
+              "name": "proof",
+              "type": "bytes"
+            },
+            {
+              "name": "receipt",
+              "type": "bytes"
+            },
+            {
+              "name": "updated_at",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "name": "ramcursors",
+          "fields": [
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "cursor",
+              "type": "uint64"
+            },
+            {
+              "name": "advanced",
+              "type": "bool"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "name": "ramoverlays",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uint64"
+            },
+            {
+              "name": "table",
+              "type": "name"
+            },
+            {
+              "name": "row",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "name": "rampayer",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            }
+          ]
+        }
+      ]
     }
   ],
   "api": [
+    {
+      "method": "GET",
+      "path": "/v1/quick-ballots",
+      "query": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "after": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "daoId": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "runtime": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+                  }
+                },
+                "required": [
+                  "chainId",
+                  "runtime",
+                  "source"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ballots": {
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "creator_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "opened_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "definition": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "question": {
+                      "type": "string",
+                      "maxLength": 256
+                    },
+                    "explanation": {
+                      "type": "string",
+                      "maxLength": 4096
+                    },
+                    "all_accounts": {
+                      "type": "boolean"
+                    },
+                    "audience": {
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 20
+                      }
+                    },
+                    "closes": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    },
+                    "readers": {
+                      "minItems": 1,
+                      "maxItems": 8,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member_id": {
+                            "type": "string",
+                            "maxLength": 20
+                          },
+                          "encryption_key": {
+                            "type": "string",
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "member_id",
+                          "encryption_key"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "protocol",
+                    "question",
+                    "explanation",
+                    "all_accounts",
+                    "audience",
+                    "closes",
+                    "readers"
+                  ],
+                  "additionalProperties": false
+                },
+                "definition_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "key": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{192}$"
+                },
+                "key_proof": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{128}$"
+                },
+                "aggregate": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{384}$"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 5000
+                },
+                "identities": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 5000
+                },
+                "closed_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "scan_cursor": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "scan_rows": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "scan_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "scan_aggregate": {
+                  "type": "string",
+                  "maxLength": 32768,
+                  "pattern": "^(?:[0-9a-f]{2})*$"
+                },
+                "response_root": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "prepared": {
+                  "type": "boolean"
+                },
+                "up": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                },
+                "final_proof": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{128}$"
+                },
+                "verified": {
+                  "type": "boolean"
+                },
+                "pruned": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "creator_id",
+                "opened_at",
+                "definition",
+                "definition_hash",
+                "key",
+                "key_proof",
+                "aggregate",
+                "count",
+                "identities",
+                "closed_at",
+                "scan_cursor",
+                "scan_rows",
+                "scan_count",
+                "scan_aggregate",
+                "response_root",
+                "prepared",
+                "up",
+                "final_proof",
+                "verified",
+                "pruned"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "available",
+          "experimental",
+          "domain",
+          "ballots",
+          "next"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/quick-ballots/:ballotId",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "runtime": {
+            "type": "string",
+            "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+          },
+          "ballot": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "dao_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "creator_id": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "opened_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "definition": {
+                "type": "object",
+                "properties": {
+                  "protocol": {
+                    "type": "number",
+                    "const": 1
+                  },
+                  "question": {
+                    "type": "string",
+                    "maxLength": 256
+                  },
+                  "explanation": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  "all_accounts": {
+                    "type": "boolean"
+                  },
+                  "audience": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
+                  },
+                  "closes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  },
+                  "readers": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "member_id": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "encryption_key": {
+                          "type": "string",
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "member_id",
+                        "encryption_key"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "protocol",
+                  "question",
+                  "explanation",
+                  "all_accounts",
+                  "audience",
+                  "closes",
+                  "readers"
+                ],
+                "additionalProperties": false
+              },
+              "definition_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "key": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{192}$"
+              },
+              "key_proof": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{128}$"
+              },
+              "aggregate": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{384}$"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5000
+              },
+              "identities": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5000
+              },
+              "closed_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "scan_cursor": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "scan_rows": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "scan_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "scan_aggregate": {
+                "type": "string",
+                "maxLength": 32768,
+                "pattern": "^(?:[0-9a-f]{2})*$"
+              },
+              "response_root": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "prepared": {
+                "type": "boolean"
+              },
+              "up": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "final_proof": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{128}$"
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "pruned": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "dao_id",
+              "creator_id",
+              "opened_at",
+              "definition",
+              "definition_hash",
+              "key",
+              "key_proof",
+              "aggregate",
+              "count",
+              "identities",
+              "closed_at",
+              "scan_cursor",
+              "scan_rows",
+              "scan_count",
+              "scan_aggregate",
+              "response_root",
+              "prepared",
+              "up",
+              "final_proof",
+              "verified",
+              "pruned"
+            ],
+            "additionalProperties": false
+          },
+          "grants": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "grants": {
+                    "maxItems": 5000,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 32768,
+                      "pattern": "^(?:[0-9a-f]{2})*$"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "grants"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "chainId",
+          "runtime",
+          "source",
+          "ballot",
+          "grants"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/quick-ballots/:ballotId/responses",
+      "query": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "after": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "responses": {
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "dao_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "ballot_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "identity": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "revision": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "ciphertext": {
+                  "type": "string",
+                  "maxLength": 32768,
+                  "pattern": "^(?:[0-9a-f]{2})*$"
+                },
+                "proof": {
+                  "type": "string",
+                  "maxLength": 32768,
+                  "pattern": "^(?:[0-9a-f]{2})*$"
+                },
+                "receipt": {
+                  "type": "string",
+                  "maxLength": 32768,
+                  "pattern": "^(?:[0-9a-f]{2})*$"
+                },
+                "updated_at": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "id",
+                "dao_id",
+                "ballot_id",
+                "identity",
+                "revision",
+                "active",
+                "ciphertext",
+                "proof",
+                "receipt",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pruned": {
+            "type": "boolean"
+          },
+          "root": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "responses",
+          "next",
+          "pruned",
+          "root"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/quick-ballots/:ballotId/response",
+      "query": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "identity"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "response": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "dao_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "ballot_id": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "identity": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "revision": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "ciphertext": {
+                    "type": "string",
+                    "maxLength": 32768,
+                    "pattern": "^(?:[0-9a-f]{2})*$"
+                  },
+                  "proof": {
+                    "type": "string",
+                    "maxLength": 32768,
+                    "pattern": "^(?:[0-9a-f]{2})*$"
+                  },
+                  "receipt": {
+                    "type": "string",
+                    "maxLength": 32768,
+                    "pattern": "^(?:[0-9a-f]{2})*$"
+                  },
+                  "updated_at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                  }
+                },
+                "required": [
+                  "id",
+                  "dao_id",
+                  "ballot_id",
+                  "identity",
+                  "revision",
+                  "active",
+                  "ciphertext",
+                  "proof",
+                  "receipt",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "response"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/daos/:id/quick-ballots/readers",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "readers": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "member_id": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "encryption_key": {
+                  "type": "string",
+                  "maxLength": 16384
+                }
+              },
+              "required": [
+                "member_id",
+                "encryption_key"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "dao",
+          "readers"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/quick-ballots/:ballotId/advance",
+      "input": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prepared": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "transactionId",
+          "prepared"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/quick-ballots/:ballotId/finalize",
+      "input": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "expectedDefinitionHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "expectedRoot": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "up": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "proof": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{128}$"
+          }
+        },
+        "required": [
+          "expectedDefinitionHash",
+          "expectedRoot",
+          "up",
+          "proof"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prepared": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "transactionId",
+          "prepared"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "quick-ballots"
+    },
     {
       "method": "POST",
       "path": "/v1/works/arbitration",
@@ -6341,7 +7812,8 @@ export const ModulesHelpBundle={
                           "payroll",
                           "grants-rounds",
                           "endorsement-admission",
-                          "activity"
+                          "activity",
+                          "quick-ballots"
                         ]
                       },
                       "account": {
@@ -7348,7 +8820,8 @@ export const ModulesHelpBundle={
                         "payroll",
                         "grants-rounds",
                         "endorsement-admission",
-                        "activity"
+                        "activity",
+                        "quick-ballots"
                       ]
                     },
                     "account": {
@@ -11072,6 +12545,8 @@ export const ModulesHelpBundle={
                       "enum": [
                         "ordinary-poll-votes",
                         "document-versions",
+                        "quick-ballot-responses",
+                        "quick-ballot-grants",
                         "protected-export"
                       ]
                     },
@@ -11771,7 +13246,9 @@ export const ModulesHelpBundle={
                   "type": "string",
                   "enum": [
                     "ordinary-poll-votes",
-                    "document-versions"
+                    "document-versions",
+                    "quick-ballot-responses",
+                    "quick-ballot-grants"
                   ]
                 },
                 "parentId": {
@@ -11783,7 +13260,7 @@ export const ModulesHelpBundle={
                   "maxLength": 20
                 },
                 "chunks": {
-                  "maxItems": 1,
+                  "maxItems": 32,
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -15037,6 +16514,8 @@ export const ModulesHelpBundle={
                       "enum": [
                         "ordinary-poll-votes",
                         "document-versions",
+                        "quick-ballot-responses",
+                        "quick-ballot-grants",
                         "protected-export"
                       ]
                     },
@@ -17615,9 +19094,37 @@ export const ModulesHelpBundle={
   "modules": [
     {
       "manifest": {
+        "id": "quick-ballots",
+        "version": "0.10.0-alpha.4",
+        "coreRange": "0.15.0-alpha.29",
+        "interfaceVersion": 1,
+        "configVersion": 1,
+        "capabilities": [
+          "ballot.create",
+          "ballot.finalize"
+        ],
+        "helpTopic": "quick-ballots"
+      },
+      "configuration": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "configVersion": {
+            "type": "number",
+            "const": 1
+          }
+        },
+        "required": [
+          "configVersion"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "manifest": {
         "id": "activity",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -17649,7 +19156,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "decide",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -17705,7 +19212,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "works",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -17744,7 +19251,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "payroll",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -17784,7 +19291,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "grants-rounds",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -17826,7 +19333,7 @@ export const ModulesHelpBundle={
       "manifest": {
         "id": "endorsement-admission",
         "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.27",
+        "coreRange": "0.15.0-alpha.29",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

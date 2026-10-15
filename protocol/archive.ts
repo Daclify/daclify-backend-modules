@@ -51,7 +51,7 @@ export const ArchiveChunkDescriptorSchema = z
   .refine((value) => BigInt(value.firstKey) <= BigInt(value.lastKey));
 export type ArchiveChunkDescriptor = z.infer<typeof ArchiveChunkDescriptorSchema>;
 export const ArchiveFamilySchema = z.strictObject({
-  kind: z.enum(['ordinary-poll-votes', 'document-versions', 'protected-export']),
+  kind: z.enum(['ordinary-poll-votes', 'document-versions', 'quick-ballot-responses', 'quick-ballot-grants', 'protected-export']),
   parentId: Uint64Schema,
   table: ArchiveDomainSchema.shape.table,
   scope: Uint64Schema,
@@ -122,6 +122,8 @@ function checkManifest(value: z.infer<typeof ManifestBody>, context: z.Refinemen
       invalid('ARCHIVE_FAMILY_TABLE');
     if (family.kind === 'document-versions' && (family.table !== 'documents' || parent === 0n))
       invalid('ARCHIVE_FAMILY_TABLE');
+    if (family.kind === 'quick-ballot-responses' && (family.table !== 'qresponses' || parent === 0n)) invalid('ARCHIVE_FAMILY_TABLE');
+    if (family.kind === 'quick-ballot-grants' && (family.table !== 'qgrants' || parent === 0n)) invalid('ARCHIVE_FAMILY_TABLE');
     let count = 0n,
       previousKey = -1n;
     totalChunks += family.chunks.length;
@@ -217,7 +219,7 @@ export const OrdinaryPollArchivePlanSchema = z.strictObject({
   families: z
     .array(
       z.strictObject({
-        kind: z.enum(['ordinary-poll-votes', 'document-versions']),
+        kind: z.enum(['ordinary-poll-votes', 'document-versions', 'quick-ballot-responses', 'quick-ballot-grants']),
         parentId: IdSchema,
         grossRamBytes: Uint64Schema,
         chunks: z
@@ -229,7 +231,7 @@ export const OrdinaryPollArchivePlanSchema = z.strictObject({
               rows: z.array(ArchiveRowSchema).min(1).max(MAX_ARCHIVE_LEAVES),
             }),
           )
-          .max(1),
+          .max(32),
       }),
     )
     .max(64),

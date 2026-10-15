@@ -24,6 +24,7 @@ const contracts = await Promise.all(
     'payroll',
     'grants',
     'endorse',
+    'quickvote',
   ].map(async (name) => ({
     name,
     abi: await readFile(`.artifacts/contracts/${name}.abi`, 'utf8'),

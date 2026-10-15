@@ -9,6 +9,9 @@ import {
 } from '@daclify/core-protocol/sdk';
 import { decideAbi, decideAbiHash } from '../sdk/generated/decide.js';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
+import { quickvoteAbi, quickvoteAbiHash } from '../sdk/generated/quickvote.js';
+import { QuickvoteTableSchemas } from '../sdk/generated/quickvote-schemas.js';
+import { QuickBallotResponseSchema } from '../protocol/quick-ballots.js';
 import { ModuleCodeHashes } from '../sdk/generated/releases.js';
 import {
   ArchiveDomainSchema,
@@ -50,6 +53,18 @@ import {
   precedingDocumentIdentity,
 } from './releases/governing-documents-previous.js';
 const sources = {
+  'quick-ballot-responses': {
+    abi: ABI.from(quickvoteAbi),
+    canonicalAbiHash: quickvoteAbiHash,
+    codeHash: ModuleCodeHashes['quick-ballots'],
+    table: 'qresponses',
+  },
+  'quick-ballot-grants': {
+    abi: ABI.from(quickvoteAbi),
+    canonicalAbiHash: quickvoteAbiHash,
+    codeHash: ModuleCodeHashes['quick-ballots'],
+    table: 'qgrants',
+  },
   'ordinary-poll-votes': {
     abi: ABI.from(decideAbi),
     canonicalAbiHash: decideAbiHash,
@@ -68,16 +83,21 @@ export function archiveSourceSchema(kind: keyof typeof sources) {
     rowType = source.abi.tables.find((table) => table.name.toString() === source.table)?.type;
   if (!rowType) throw new Error('ARCHIVE_RELEASE_SCHEMA_MISSING');
   return {
+    table: source.table,
     codeHash: source.codeHash,
     rawAbiHash: Checksum256.hash(Serializer.encode({ object: source.abi }).array).toString(),
     schemaHash: Checksum256.hash(
       new TextEncoder().encode(
-        JSON.stringify({
-          formatVersion: 1,
-          canonicalAbiHash: source.canonicalAbiHash,
-          table: source.table,
-          rowType,
-        }),
+        kind === 'quick-ballot-responses'
+          ? 'daclify.quick-ballot.responses.row.v1'
+          : kind === 'quick-ballot-grants'
+            ? 'daclify.quick-ballot.grants.row.v1'
+            : JSON.stringify({
+                formatVersion: 1,
+                canonicalAbiHash: source.canonicalAbiHash,
+                table: source.table,
+                rowType,
+              }),
       ),
     ).toString(),
     rowType,
@@ -156,7 +176,11 @@ export function decodeReleasedArchiveRow(
       ? 'ordinary-poll-votes'
       : domain.table === 'documents'
         ? 'document-versions'
-        : undefined;
+        : domain.table === 'qresponses'
+          ? 'quick-ballot-responses'
+          : domain.table === 'qgrants'
+            ? 'quick-ballot-grants'
+            : undefined;
   if (!kind) throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
   const source = releasedSource(kind, domain.code_hash, domain.abi_hash, domain.schema_hash);
   if (
@@ -171,6 +195,31 @@ export function decodeReleasedArchiveRow(
     JSON.stringify(Serializer.decode({ abi: source.abi, type: source.rowType, data: reader })),
   );
   if (reader.canRead()) throw new RangeError('ARCHIVE_ROW_TRAILING');
+  if (kind === 'quick-ballot-responses' || kind === 'quick-ballot-grants') {
+    const value =
+      kind === 'quick-ballot-responses'
+        ? QuickBallotResponseSchema.parse(decoded)
+        : QuickvoteTableSchemas.qgrants.parse(decoded);
+    if (
+      value.id !== row.primaryKey ||
+      value.dao_id !== domain.dao_id ||
+      ('ballot_id' in value ? value.ballot_id !== parent : value.id !== parent)
+    )
+      throw new RangeError('ARCHIVE_ROW_DOMAIN');
+    if (
+      Serializer.encode({ abi: source.abi, type: source.rowType, object: value }).hexString !==
+      row.packed
+    )
+      throw new RangeError('ARCHIVE_ROW_CANONICAL');
+    if (
+      'grants' in value &&
+      (value.grants.length < 1 ||
+        value.grants.length > 8 ||
+        value.grants.some((grant) => grant.length === 0 || grant.length > 1536))
+    )
+      throw new RangeError('ARCHIVE_ROW_DOMAIN');
+    return { kind, value, original: row } as const;
+  }
   if (kind === 'ordinary-poll-votes') {
     const vote = DecideTableSchemas.votes.parse(decoded);
     if (vote.id !== row.primaryKey || vote.ballot !== parent)
