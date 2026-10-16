@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.43 development
+
+- Consume the core35 private-record schema foundation and retain exact core compatibility. Regenerate the producer guide cohort; contract binaries, stored module rows and native contract version are unchanged.
+
 ## 0.10.0-alpha.31
 
 - Publish bounded ballot content schema version 2 and compatible metadata reading/encoding for existing Decide contracts. Binary semantics and deployed binaries are unchanged.
