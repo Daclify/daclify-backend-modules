@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.10.0-alpha.43';
+export const VERSION = '0.10.0-alpha.46';
 // SDK/help releases do not require redeploying unchanged contract binaries.
 export const CONTRACT_VERSION = '0.10.0-alpha.4';
-const CORE_RANGE = '0.15.0-alpha.35';
+const CORE_RANGE = '0.15.0-alpha.37';
 export const ModulePermissions = Object.freeze({
   'quick-ballots': { actions: ['open', 'close'] as const, grants: [] as const },
   activity: {
@@ -70,7 +70,10 @@ export const ModulePermissions = Object.freeze({
     ] as const,
     grants: ['awardwork'] as const,
   },
-  payroll: { actions: ['commit', 'edit', 'commitdoc'] as const, grants: ['reserve', 'approve'] as const },
+  payroll: {
+    actions: ['commit', 'edit', 'commitdoc'] as const,
+    grants: ['reserve', 'approve'] as const,
+  },
 });
 export const DecideConfigSchema = z.strictObject({
   configVersion: z.literal(1),
@@ -100,7 +103,15 @@ export const EndorsementConfigSchema = z.strictObject({
   witnessLimit: z.literal(64),
 });
 export const Catalog = Object.freeze([
-  ModuleManifestSchema.parse({ id: 'quick-ballots', version: CONTRACT_VERSION, coreRange: CORE_RANGE, interfaceVersion: 1, configVersion: 1, capabilities: ['ballot.create', 'ballot.finalize'], helpTopic: 'quick-ballots' }),
+  ModuleManifestSchema.parse({
+    id: 'quick-ballots',
+    version: CONTRACT_VERSION,
+    coreRange: CORE_RANGE,
+    interfaceVersion: 1,
+    configVersion: 1,
+    capabilities: ['ballot.create', 'ballot.finalize'],
+    helpTopic: 'quick-ballots',
+  }),
   ModuleManifestSchema.parse({
     id: 'activity',
     version: CONTRACT_VERSION,
@@ -157,7 +168,14 @@ export const Catalog = Object.freeze([
   }),
 ]);
 export const ModuleInstallationSchema = z.discriminatedUnion('id', [
-  z.strictObject({ id: z.literal('quick-ballots'), account: NativeAccountSchema, version: z.literal(CONTRACT_VERSION), config: z.strictObject({ configVersion: z.literal(1) }), actions: z.tuple([z.literal('open'), z.literal('close')]), grants: z.tuple([]) }),
+  z.strictObject({
+    id: z.literal('quick-ballots'),
+    account: NativeAccountSchema,
+    version: z.literal(CONTRACT_VERSION),
+    config: z.strictObject({ configVersion: z.literal(1) }),
+    actions: z.tuple([z.literal('open'), z.literal('close')]),
+    grants: z.tuple([]),
+  }),
   z.strictObject({
     id: z.literal('activity'),
     account: NativeAccountSchema,

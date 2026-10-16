@@ -1,12 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { HelpBundleSchema } from '@daclify/core-protocol';
 import { Catalog, VERSION } from '../protocol/index.js';
+import { readFileSync } from 'node:fs';
+import { z } from 'zod';
 import { ModulesHelpBundle } from '../protocol/generated/help.js';
 describe('released module documentation', () => {
   it('documents every module at its producer version with an exact configuration schema', () => {
     const bundle = HelpBundleSchema.parse(ModulesHelpBundle);
     expect(bundle.producer).toBe('modules');
     expect(bundle.packageVersion).toBe(VERSION);
+    expect(bundle.packageVersion).toBe(
+      z
+        .object({ version: z.string() })
+        .parse(JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')))
+        .version,
+    );
     expect(bundle.modules.map((module) => module.manifest)).toEqual(Catalog);
     for (const module of bundle.modules) {
       expect(bundle.topics.some((topic) => topic.id === module.manifest.helpTopic)).toBe(true);
