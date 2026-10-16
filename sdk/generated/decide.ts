@@ -2482,8 +2482,8 @@ export interface ballot_target {
   ballot_id: string;
   dao_id: string;
   version: number;
-  work: work_ballot_target | undefined;
-  grant: grant_ballot_target | undefined;
+  work?: work_ballot_target | undefined;
+  grant?: grant_ballot_target | undefined;
   released: boolean;
 }
 export interface bindrampool {
@@ -2614,7 +2614,7 @@ export interface grant_application {
 export interface grant_ballot_target {
   round: grant_round;
   application: grant_application;
-  protection: arbitration_terms | undefined;
+  protection?: arbitration_terms | undefined;
   rules_commitment: string;
   application_commitment: string;
   decision_commitment: string;
@@ -2913,8 +2913,8 @@ export interface votecommit {
 export interface work_ballot_target {
   project: project_record;
   milestones: milestone_record[];
-  agreement: agreement_record | undefined;
-  protection: arbitration_terms | undefined;
+  agreement?: agreement_record | undefined;
+  protection?: arbitration_terms | undefined;
   document_commitment: string;
 }
 export interface work_execution_record {

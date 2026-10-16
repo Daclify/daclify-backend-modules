@@ -1,6 +1,6 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.48 · interface 1.
+Package 0.10.0-alpha.50 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
@@ -86,6 +86,10 @@ One settlement pays every installment that is already due, oldest first, and lea
 
 New commitments require an agreed name and exact terms document commitment before reserving funds. Renew with fresh funding creates one separately funded successor for the same recipient after the previous term, preserving all earlier installment claims. Retries cannot create a second successor. A later display-label edit does not change the immutable agreed name or document terms. All-paid reference cleanup retains the successor marker.
 
+With the matching private-label capability enabled, new encrypted DAO payroll names live in encrypted DAO documents. The agreed name is pinned to the immutable term. An editable display name has a separate reference; changing it preserves the agreed name, payment amount, recipient, installment dates and pause state. Public chain rows use Private payroll. Read names on demand with the original account keys and permitted DAO history grants.
+
+Private names do not hide financial records, recipients or payment timing. Missing content or keys makes a name unavailable and must never stop an existing approved payment claim. Legacy agreed names remain public in their original term rows and history. Encrypted name references can be released only after every installment is settled; document pruning still requires its existing verified archive and retention checks.
+
 ## Read the matching module reference
 
 Each reference bundle identifies the module package and interface version it describes. The module read API reports deployment versions, configured permissions and code verification alongside current ballots, projects and payroll entries.
@@ -155,6 +159,8 @@ DAO administrators may change the admission policy or explicitly enable administ
 ## Elect representatives for a fixed term
 
 An administrator creates a named representative election, exact rules document version, future nomination cutoff, one to eight seats and a term of at most one year. The term must allow the saved DAO voting duration after nominations close. Candidate and voter identities are stable member IDs; paired logins add no votes.
+
+For a DAO using protected identity metadata, describe a representative office inside the encrypted rules document. Its public title is Office. The reserved Executives title retains its existing authority and roster meaning. Historical public titles remain public in rows and chain history.
 
 Each active member nominates only themselves or withdraws before the cutoff. At most fifteen current eligible candidates plus the abstention choice enter voting. Withdrawal removes a nomination slot. Inactive or guardian-revoked nominations can be cleared when another member nominates. There is no random group assignment or meeting attendance oracle.
 
@@ -1318,7 +1324,7 @@ Source ABI JSON SHA-256: `e1171a3876b32914123c74cbba1a79b4d282d020ab22535c19dfb8
 
 ## payroll contract
 
-Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916ff51c76ec9`.
+Source ABI JSON SHA-256: `d70ab21057308d4da7007177458c53c46ceaf96bc2d93dec67f4b1b1a421298e`.
 
 ### Action: backfillrefs
 
@@ -1387,6 +1393,25 @@ Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916
 | expected | checksum256 |
 | successor_of | uint64 |
 
+### Action: commitpriv
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| schedule_id | uint64 |
+| recipient | uint64 |
+| quantity | asset |
+| periods | uint8 |
+| interval | uint32 |
+| starts | uint32 |
+| label | private_record_reference |
+| document_id | uint64 |
+| document_version | uint32 |
+| expected | checksum256 |
+| successor_of | uint64 |
+
 ### Action: edit
 
 | Field | ABI type |
@@ -1397,6 +1422,24 @@ Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916
 | schedule_id | uint64 |
 | paused | uint8 |
 | label | string |
+
+### Action: editpriv
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| member_id | uint64 |
+| schedule_id | uint64 |
+| label | private_record_reference |
+
+### Action: releaselabel
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
+| schedule_id | uint64 |
 
 ### Action: releaseterms
 
@@ -1449,6 +1492,7 @@ Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916
 | paused | uint8 |
 | last_payout | uint32 |
 | label | string |
+| private_label | private_record_reference?$ |
 
 ### Table: entries
 
@@ -1472,6 +1516,7 @@ Source ABI JSON SHA-256: `833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916
 | successor_of | uint64 |
 | schema_version | uint16 |
 | references_released | bool |
+| private_label | private_record_reference?$ |
 
 ### Table: ramcursors
 
@@ -2177,6 +2222,139 @@ Source ABI JSON SHA-256: `f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4ce
 | Field | ABI type |
 | --- | --- |
 | runtime | name |
+
+## GET /v1/daos/:id/private-payroll/:schedule
+
+Guide: payroll.
+
+No request body.
+
+Response:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dao": {
+      "type": "object",
+      "properties": {
+        "chainId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+        },
+        "daoId": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "interfaceVersion": {
+          "type": "number",
+          "const": 1
+        }
+      },
+      "required": [
+        "chainId",
+        "contract",
+        "daoId",
+        "interfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+    },
+    "scheduleId": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "agreed": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "documentId": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "keyEpoch": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          "required": [
+            "documentId",
+            "version",
+            "commitment",
+            "keyEpoch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "display": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "documentId": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "commitment": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "keyEpoch": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          "required": [
+            "documentId",
+            "version",
+            "commitment",
+            "keyEpoch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "dao",
+    "source",
+    "scheduleId",
+    "agreed",
+    "display"
+  ],
+  "additionalProperties": false
+}
+```
 
 ## GET /v1/quick-ballots
 
@@ -17203,7 +17381,7 @@ Response:
 
 ## quick-ballots configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: ballot.create, ballot.finalize.
 
@@ -17228,7 +17406,7 @@ Guide: quick-ballots.
 
 ## activity configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: content.publish.
 
@@ -17258,7 +17436,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -17310,7 +17488,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17346,7 +17524,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17383,7 +17561,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: obligation.create.
 
@@ -17423,7 +17601,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.5 · config 1 · core 0.15.0-alpha.39.
+Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
 
 Capabilities: member.manage.
 

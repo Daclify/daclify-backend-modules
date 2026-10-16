@@ -13,7 +13,7 @@ describe('public module codecs', () => {
       expect(compatible('0.9.0-alpha.6', manifest.coreRange)).toBe(false);
       expect(compatible('0.10.0-alpha.1', manifest.coreRange)).toBe(false);
       expect(compatible('0.11.0-alpha.1', manifest.coreRange)).toBe(false);
-      expect(manifest.version).toBe('0.10.0-alpha.5');
+      expect(manifest.version).toBe('0.10.0-alpha.7');
     }
   });
   it('installs the private-ballot contract release with its complete action list', () => {
@@ -22,7 +22,7 @@ describe('public module codecs', () => {
       ModuleInstallationSchema.parse({
         id: 'decide',
         account: 'decide',
-        version: '0.10.0-alpha.5',
+        version: '0.10.0-alpha.7',
         config: DecideConfigSchema.parse({
           configVersion: 1,
           weight: 'member',
@@ -50,12 +50,18 @@ describe('public module codecs', () => {
         ],
         grants: ['govlock', 'electexec'],
       }).version,
-    ).toBe('0.10.0-alpha.5');
+    ).toBe('0.10.0-alpha.7');
   });
   it('requires the core release with the new definition RAM migration coverage', () => {
     for (const manifest of Catalog) {
       expect(compatible(CoreVersion, manifest.coreRange)).toBe(true);
-      for (const unsupported of ['0.12.0-alpha.1', '0.14.0-alpha.10', '0.15.0-alpha.22', '0.15.0-alpha.24', '0.16.0'])
+      for (const unsupported of [
+        '0.12.0-alpha.1',
+        '0.14.0-alpha.10',
+        '0.15.0-alpha.22',
+        '0.15.0-alpha.24',
+        '0.16.0',
+      ])
         expect(compatible(unsupported, manifest.coreRange)).toBe(false);
     }
   });

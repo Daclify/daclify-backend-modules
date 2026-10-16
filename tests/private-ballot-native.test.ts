@@ -8,8 +8,10 @@ import { encodeAction, makeInstruction, instructionDigest } from '@daclify/core-
 import { load, send, row, listFirstParty, replaceContract } from './helpers/vert.js';
 import { wasmCodeHash } from './helpers/code-hash.js';
 import { DecideTableSchemas } from '../sdk/generated/decide-schemas.js';
+import { encodeDecide } from '../sdk/index.js';
 import { z } from 'zod';
 let chain: Blockchain, core: ReturnType<typeof load>, decide: ReturnType<typeof load>;
+let memberKey: PrivateKey;
 beforeAll(() => {
   execFileSync(
     process.execPath,
@@ -43,7 +45,7 @@ const metadata = {
   options: [0, 1, 2],
   privateContent: reference,
 };
-beforeEach(async () => {
+async function setup(governance = false) {
   chain = new Blockchain();
   chain.setTime(TimePointSec.from(1000));
   chain.createAccounts('alice', 'relay', 'eosio.token');
@@ -58,7 +60,9 @@ beforeEach(async () => {
     [1, 'alice', JSON.stringify(source), 1, 'eosio.token', '4,TLOS'],
     'alice@active',
   );
+  if (governance) await send(core, 'initgov', [1, { participant_mode: 0, decide: 'decide', guardian: '', kind: 0, duration: 300, quorum: 5000, approval: 5001, governed_works: false, max_commitment: 0, daily_commitment: 0 }], 'alice@active');
   const key = PrivateKey.generate('K1');
+  memberKey = key;
   await send(core, 'enroll', [1, 1, '', key.toPublic().toString(), 'fixture', 0], 'alice@active');
   await send(
     core,
@@ -104,7 +108,8 @@ beforeEach(async () => {
       'relay@active',
     );
   }
-});
+}
+beforeEach(() => setup());
 const open = (id = 9, value: unknown = metadata, choices = 3, action = 'openpoll') =>
   send(
     decide,
@@ -112,6 +117,19 @@ const open = (id = 9, value: unknown = metadata, choices = 3, action = 'openpoll
     ['daclifycore', 1, 1, id, 0, choices, 300, 5000, 5001, JSON.stringify(value)],
     'daclifycore@active',
   );
+it('keeps private representative titles in encrypted rules while preserving the executive marker', async () => {
+  await setup(true);
+  await send(core, 'setmodule', [1, 'decide', 1, ['newelect'], [], wasmCodeHash('.artifacts/contracts/decide.wasm')], 'alice@active');
+  const create = async (title: string) => {
+    const member = z.object({ nonce: z.coerce.string() }).parse(row(core, 'members', 1n, 1n));
+    const dao = { chainId: 'ab'.repeat(32), contract: 'daclifycore', daoId: '1', interfaceVersion: 1 as const };
+    const request = makeInstruction(dao, '1', member.nonce, 1300, 'decide', 'newelect', encodeDecide('newelect', { runtime: dao.contract, dao_id: '1', member_id: '1', election_id: '88', title, document_id: '9', document_version: 1, nomination_close: 1100, term_start: 1500, term_end: 2500, seats: 1 }));
+    await send(core, 'submit', [request, memberKey.signDigest(instructionDigest(request)).toString()], 'relay@active');
+  };
+  await expect(create('Private office canary')).rejects.toThrow('PRIVATE_ELECTION_REQUIRED');
+  await create('Office');
+  expect(DecideTableSchemas.elections.parse(row(decide, 'elections', core.toBigInt(), 88n)).title).toBe('Office');
+});
 it('retains the exact private body and freezes its definition without storing descriptive text', async () => {
   await open();
   const ballot = DecideTableSchemas.ballots.parse(row(decide, 'ballots', core.toBigInt(), 9n));

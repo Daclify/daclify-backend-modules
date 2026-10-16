@@ -8,7 +8,7 @@ it('installs only executive opening/closure and no treasury grants', () => {
   const value = {
     id: 'quick-ballots',
     account: 'quickvote',
-    version: '0.10.0-alpha.5',
+    version: '0.10.0-alpha.7',
     config: { configVersion: 1 },
     actions: ['open', 'close'],
     grants: [],

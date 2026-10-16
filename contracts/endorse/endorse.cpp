@@ -11,6 +11,7 @@ public:
  }
  ACTION bindrampool(name runtime){bind_ram_pool(get_self(),runtime);}
  ACTION applyjoin(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t application_id,public_key signing_key,std::string encryption_key,uint8_t custody,uint8_t kind,std::string operator_label,uint64_t document_id,uint32_t document_version,uint32_t expires){
+  const auto dao=daos(runtime,runtime.value).get(dao_id,"DAO_UNKNOWN");if(kind==1&&dao.privacy>0){const auto metadata=nlohmann::json::parse(dao.metadata,nullptr,false);if(metadata.is_object()&&metadata.contains("schemaVersion")&&metadata["schemaVersion"]==4)check(operator_label=="Agent","PRIVATE_AGENT_REQUIRED");}
   module_actor(runtime,dao_id,member_id,get_self(),"applyjoin"_n);const auto policy=current_policy(runtime,dao_id);check(application_id>0,"APPLICATION_ID");check(kind<=1&&custody<=1,"PARTICIPANT_MODE");check(!encryption_key.empty()&&encryption_key.size()<=1024,"ENCRYPTION_KEY");check(operator_label.size()<=64,"AGENT_OPERATOR");if(kind==1){check(!operator_label.empty(),"AGENT_OPERATOR");for(unsigned char c:operator_label)check(c>=0x20&&c<=0x7e,"AGENT_OPERATOR");}
   const auto now=current_time_point().sec_since_epoch();check(expires>now&&uint64_t(expires)<=uint64_t(now)+2592000,"APPLICATION_EXPIRED");documents docs(runtime,dao_id);const auto index=docs.get_index<"byversion"_n>();const auto& document=index.get((uint128_t(document_id)<<32)|document_version,"DOCUMENT_UNKNOWN");
   admission_applications apps(get_self(),runtime.value);auto found=apps.find(application_id);

@@ -74,7 +74,7 @@ template<typename Table,typename Visit>void backfill_document_refs(name runtime,
  document_scans scans(runtime,dao_id);auto index=scans.get_index<"bysource"_n>();auto data=pack(std::make_tuple(source,table));auto found=index.find(sha256(data.data(),data.size()));
  const bool current=found!=index.end()&&found->code_hash==get_code_hash(source);if(current&&found->complete)return;const auto start=current?found->cursor:0;auto next=start;
  Table rows(source,runtime.value);auto it=rows.upper_bound(start);uint32_t count=0;
- for(;it!=rows.end()&&count<limit;++it,++count){next=it->primary_key();if(it->dao_id==dao_id)visit(*it);}
+ for(;it!=rows.end()&&count<limit;++it,++count){next=it->primary_key();using record=std::decay_t<decltype(*it)>;uint64_t owner;if constexpr(row_has_dao<record>::value)owner=it->dao_id;else owner=it->ram_owner(source,runtime.value);if(owner==dao_id)visit(*it);}
  core_action(runtime,source,"docscanstep"_n,pack(std::make_tuple(dao_id,source,table,start,next,it==rows.end(),count)));
 }
 }

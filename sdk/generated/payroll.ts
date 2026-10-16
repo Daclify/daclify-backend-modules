@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const payrollAbiHash = '833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916ff51c76ec9';
+export const payrollAbiHash = 'd70ab21057308d4da7007177458c53c46ceaf96bc2d93dec67f4b1b1a421298e';
 export const payrollAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -206,6 +206,68 @@ export const payrollAbi = {
       ]
     },
     {
+      "name": "commitpriv",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schedule_id",
+          "type": "uint64"
+        },
+        {
+          "name": "recipient",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "asset"
+        },
+        {
+          "name": "periods",
+          "type": "uint8"
+        },
+        {
+          "name": "interval",
+          "type": "uint32"
+        },
+        {
+          "name": "starts",
+          "type": "uint32"
+        },
+        {
+          "name": "label",
+          "type": "private_record_reference"
+        },
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "document_version",
+          "type": "uint32"
+        },
+        {
+          "name": "expected",
+          "type": "checksum256"
+        },
+        {
+          "name": "successor_of",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
       "name": "control_record",
       "base": "",
       "fields": [
@@ -224,6 +286,10 @@ export const payrollAbi = {
         {
           "name": "label",
           "type": "string"
+        },
+        {
+          "name": "private_label",
+          "type": "private_record_reference?$"
         }
       ]
     },
@@ -254,6 +320,32 @@ export const payrollAbi = {
         {
           "name": "label",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "editpriv",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "member_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schedule_id",
+          "type": "uint64"
+        },
+        {
+          "name": "label",
+          "type": "private_record_reference"
         }
       ]
     },
@@ -318,6 +410,32 @@ export const payrollAbi = {
         {
           "name": "references_released",
           "type": "bool"
+        },
+        {
+          "name": "private_label",
+          "type": "private_record_reference?$"
+        }
+      ]
+    },
+    {
+      "name": "private_record_reference",
+      "base": "",
+      "fields": [
+        {
+          "name": "document_id",
+          "type": "uint64"
+        },
+        {
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "name": "commitment",
+          "type": "checksum256"
+        },
+        {
+          "name": "key_epoch",
+          "type": "uint64"
         }
       ]
     },
@@ -368,6 +486,24 @@ export const payrollAbi = {
         {
           "name": "runtime",
           "type": "name"
+        }
+      ]
+    },
+    {
+      "name": "releaselabel",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
+        },
+        {
+          "name": "schedule_id",
+          "type": "uint64"
         }
       ]
     },
@@ -523,8 +659,23 @@ export const payrollAbi = {
       "ricardian_contract": ""
     },
     {
+      "name": "commitpriv",
+      "type": "commitpriv",
+      "ricardian_contract": ""
+    },
+    {
       "name": "edit",
       "type": "edit",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "editpriv",
+      "type": "editpriv",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "releaselabel",
+      "type": "releaselabel",
       "ricardian_contract": ""
     },
     {
@@ -664,11 +815,28 @@ export interface commitdoc {
   expected: string;
   successor_of: string;
 }
+export interface commitpriv {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  schedule_id: string;
+  recipient: string;
+  quantity: string;
+  periods: number;
+  interval: number;
+  starts: number;
+  label: private_record_reference;
+  document_id: string;
+  document_version: number;
+  expected: string;
+  successor_of: string;
+}
 export interface control_record {
   schedule_id: string;
   paused: number;
   last_payout: number;
   label: string;
+  private_label?: private_record_reference | undefined | undefined;
 }
 export interface edit {
   runtime: string;
@@ -677,6 +845,13 @@ export interface edit {
   schedule_id: string;
   paused: number;
   label: string;
+}
+export interface editpriv {
+  runtime: string;
+  dao_id: string;
+  member_id: string;
+  schedule_id: string;
+  label: private_record_reference;
 }
 export interface entry_record {
   id: string;
@@ -694,6 +869,13 @@ export interface payroll_terms {
   successor_of: string;
   schema_version: number;
   references_released: boolean;
+  private_label?: private_record_reference | undefined | undefined;
+}
+export interface private_record_reference {
+  document_id: string;
+  version: number;
+  commitment: string;
+  key_epoch: string;
 }
 export interface ram_migration_cursor {
   table: string;
@@ -708,6 +890,11 @@ export interface ram_migration_overlay {
 }
 export interface ram_payer_owner {
   runtime: string;
+}
+export interface releaselabel {
+  runtime: string;
+  dao_id: string;
+  schedule_id: string;
 }
 export interface releaseterms {
   runtime: string;
@@ -748,7 +935,10 @@ export interface PayrollActions {
   clearclose: clearclose;
   commit: commit;
   commitdoc: commitdoc;
+  commitpriv: commitpriv;
   edit: edit;
+  editpriv: editpriv;
+  releaselabel: releaselabel;
   releaseterms: releaseterms;
   scanclose: scanclose;
   scanram: scanram;

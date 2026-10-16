@@ -7,6 +7,7 @@ import {
   NativeAccountSchema,
   ChainIdSchema,
   Uint64Schema,
+  PrivateRecordReferenceSchema,
 } from '@daclify/core-protocol';
 import { EndorseTableSchemas } from '../sdk/generated/endorse-schemas.js';
 import { GrantsTableSchemas } from '../sdk/generated/grants-schemas.js';
@@ -15,7 +16,15 @@ import { WorksTableSchemas } from '../sdk/generated/works-schemas.js';
 import { PayrollTableSchemas } from '../sdk/generated/payroll-schemas.js';
 import { QuickBallotRoutes } from './quick-ballots.js';
 export const ModuleDeploymentSchema = z.strictObject({
-  id: z.enum(['decide', 'works', 'payroll', 'grants-rounds', 'endorsement-admission', 'activity', 'quick-ballots']),
+  id: z.enum([
+    'decide',
+    'works',
+    'payroll',
+    'grants-rounds',
+    'endorsement-admission',
+    'activity',
+    'quick-ballots',
+  ]),
   account: NativeAccountSchema,
   version: z.string(),
   codeHash: ChainIdSchema,
@@ -78,17 +87,17 @@ export const ModuleStateSchema = z.strictObject({
   ballotDefinitions: z.array(DecideTableSchemas.ballotdefs).default([]),
   ballotTargets: z.array(DecideTableSchemas.votetargets).default([]),
   documentChanges: z.array(DecideTableSchemas.docchanges).default([]),
-  arbitrationPlans:z.array(DecideTableSchemas.arbplans).default([]),
-  protectedWorksTerms:z.array(WorksTableSchemas.arbterms).default([]),
-  protectedGrantTerms:z.array(GrantsTableSchemas.arbterms).default([]),
+  arbitrationPlans: z.array(DecideTableSchemas.arbplans).default([]),
+  protectedWorksTerms: z.array(WorksTableSchemas.arbterms).default([]),
+  protectedGrantTerms: z.array(GrantsTableSchemas.arbterms).default([]),
   votes: z.array(DecideTableSchemas.votes),
   projects: z.array(WorksTableSchemas.projects),
   milestones: z.array(WorksTableSchemas.milestones),
   agreements: z.array(WorksTableSchemas.agreements).default([]),
   schedules: z.array(PayrollTableSchemas.schedules),
   entries: z.array(PayrollTableSchemas.entries),
-  controls: z.array(PayrollTableSchemas.controls),
-  payrollTerms: z.array(PayrollTableSchemas.payterms).default([]),
+  controls: z.array(PayrollTableSchemas.controls.omit({ private_label: true })),
+  payrollTerms: z.array(PayrollTableSchemas.payterms.omit({ private_label: true })).default([]),
   elections: z.array(DecideTableSchemas.elections).default([]),
   nominations: z.array(DecideTableSchemas.nominations).default([]),
   terms: z.array(DecideTableSchemas.terms).default([]),
@@ -101,13 +110,23 @@ export const ModuleStateSchema = z.strictObject({
 export type ModuleDeployment = z.infer<typeof ModuleDeploymentSchema>;
 export type ModuleState = z.infer<typeof ModuleStateSchema>;
 export const BallotExportSchema = z.strictObject({
-  schemaVersion:z.literal(1),dao:DaoRefSchema,decide:NativeAccountSchema,
-  ballot:DecideTableSchemas.ballots,definition:DecideTableSchemas.ballotdefs.nullable(),
-  election:DecideTableSchemas.elections.optional(),execution:DecideTableSchemas.executions.optional(),
-  grantPlan:DecideTableSchemas.grantplans.optional(),documentChange:DecideTableSchemas.docchanges.optional(),dispute:DecideTableSchemas.arbplans.optional(),target:DecideTableSchemas.votetargets.optional(),
-  votes:z.array(DecideTableSchemas.votes).max(5000),
-  verification:z.enum(['verified','legacy-unbound']),coverage:z.enum(['complete-live','partial-live']),
-  archiveNotice:z.literal('Archived vote rows are not included; partial-live is not a complete history.'),
+  schemaVersion: z.literal(1),
+  dao: DaoRefSchema,
+  decide: NativeAccountSchema,
+  ballot: DecideTableSchemas.ballots,
+  definition: DecideTableSchemas.ballotdefs.nullable(),
+  election: DecideTableSchemas.elections.optional(),
+  execution: DecideTableSchemas.executions.optional(),
+  grantPlan: DecideTableSchemas.grantplans.optional(),
+  documentChange: DecideTableSchemas.docchanges.optional(),
+  dispute: DecideTableSchemas.arbplans.optional(),
+  target: DecideTableSchemas.votetargets.optional(),
+  votes: z.array(DecideTableSchemas.votes).max(5000),
+  verification: z.enum(['verified', 'legacy-unbound']),
+  coverage: z.enum(['complete-live', 'partial-live']),
+  archiveNotice: z.literal(
+    'Archived vote rows are not included; partial-live is not a complete history.',
+  ),
 });
 export type BallotExport = z.infer<typeof BallotExportSchema>;
 export const GoverningDocumentCategories = Object.freeze([
@@ -151,9 +170,40 @@ export const GoverningDocumentPageSchema = z.strictObject({
 export type GoverningDocumentQuery = z.infer<typeof GoverningDocumentQuerySchema>;
 export type GoverningDocumentPage = z.infer<typeof GoverningDocumentPageSchema>;
 export const ModuleApiRoutes = {
+  privatePayroll: {
+    method: 'GET',
+    path: '/v1/daos/:id/private-payroll/:schedule',
+    response: z.strictObject({
+      dao: DaoRefSchema,
+      source: NativeAccountSchema,
+      scheduleId: IdSchema,
+      agreed: PrivateRecordReferenceSchema.nullable(),
+      display: PrivateRecordReferenceSchema.nullable(),
+    }),
+    helpTopic: 'payroll',
+  },
   ...QuickBallotRoutes,
-  arbitration:{method:'POST',path:'/v1/works/arbitration',input:z.strictObject({dao:DaoRefSchema,obligationId:IdSchema,operation:z.enum(['advance','open-vote'])}),response:z.strictObject({transactionId:ChainIdSchema,ballotId:IdSchema.nullable(),state:z.int().min(0).max(8)}),helpTopic:'works'},
-  ballotExport:{method:'GET',path:'/v1/daos/:id/ballots/:ballotId/export',response:BallotExportSchema,helpTopic:'decide'},
+  arbitration: {
+    method: 'POST',
+    path: '/v1/works/arbitration',
+    input: z.strictObject({
+      dao: DaoRefSchema,
+      obligationId: IdSchema,
+      operation: z.enum(['advance', 'open-vote']),
+    }),
+    response: z.strictObject({
+      transactionId: ChainIdSchema,
+      ballotId: IdSchema.nullable(),
+      state: z.int().min(0).max(8),
+    }),
+    helpTopic: 'works',
+  },
+  ballotExport: {
+    method: 'GET',
+    path: '/v1/daos/:id/ballots/:ballotId/export',
+    response: BallotExportSchema,
+    helpTopic: 'decide',
+  },
   clearDocuments: {
     method: 'POST',
     path: '/v1/decide/clear-documents',

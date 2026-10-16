@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.48",
+  "packageVersion": "0.10.0-alpha.50",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -63,7 +63,9 @@ export const ModulesHelpBundle={
         "This initial contract uses fixed terms of at most twelve installments. Renewal is a new funded commitment. It does not promise an unfunded, automatically renewable salary.",
         "Choose a future first-installment time in UTC. The interval between installments is the claim frequency. The UI shows each installment’s due time, the schedule label, whether settlement is paused, and the core obligation state. Once due, settlement remains available after payroll is disabled; disabling the module prevents new commitments and does not cancel an approved term.",
         "One settlement pays every installment that is already due, oldest first, and leaves any later installment unpaid. Pausing a schedule stops the payroll settlement helper until an administrator resumes it. It does not stop direct Treasury payment of an approved, due obligation. Only the separate DAO guardian pause blocks those obligation payments. Pause and the last payout time remain after the module is removed. An administrator can change the short label without changing the funded amount, the recipient, or the interval. The recipient is the member stored on the approved obligation, and the only treasury is the DAO treasury in its configured asset. A direct treasury payment can still pay one approved obligation and does not apply this schedule.",
-        "New commitments require an agreed name and exact terms document commitment before reserving funds. Renew with fresh funding creates one separately funded successor for the same recipient after the previous term, preserving all earlier installment claims. Retries cannot create a second successor. A later display-label edit does not change the immutable agreed name or document terms. All-paid reference cleanup retains the successor marker."
+        "New commitments require an agreed name and exact terms document commitment before reserving funds. Renew with fresh funding creates one separately funded successor for the same recipient after the previous term, preserving all earlier installment claims. Retries cannot create a second successor. A later display-label edit does not change the immutable agreed name or document terms. All-paid reference cleanup retains the successor marker.",
+        "With the matching private-label capability enabled, new encrypted DAO payroll names live in encrypted DAO documents. The agreed name is pinned to the immutable term. An editable display name has a separate reference; changing it preserves the agreed name, payment amount, recipient, installment dates and pause state. Public chain rows use Private payroll. Read names on demand with the original account keys and permitted DAO history grants.",
+        "Private names do not hide financial records, recipients or payment timing. Missing content or keys makes a name unavailable and must never stop an existing approved payment claim. Legacy agreed names remain public in their original term rows and history. Encrypted name references can be released only after every installment is settled; document pruning still requires its existing verified archive and retention checks."
       ]
     },
     {
@@ -129,6 +131,7 @@ export const ModulesHelpBundle={
       "title": "Elect representatives for a fixed term",
       "paragraphs": [
         "An administrator creates a named representative election, exact rules document version, future nomination cutoff, one to eight seats and a term of at most one year. The term must allow the saved DAO voting duration after nominations close. Candidate and voter identities are stable member IDs; paired logins add no votes.",
+        "For a DAO using protected identity metadata, describe a representative office inside the encrypted rules document. Its public title is Office. The reserved Executives title retains its existing authority and roster meaning. Historical public titles remain public in rows and chain history.",
         "Each active member nominates only themselves or withdraws before the cutoff. At most fifteen current eligible candidates plus the abstention choice enter voting. Withdrawal removes a nomination slot. Inactive or guardian-revoked nominations can be cleared when another member nominates. There is no random group assignment or meeting attendance oracle.",
         "After nominations close, any active member may start the election before the term’s start. A changed policy revision prevents starting; schedule a successor election with reviewed rules. Starting freezes the sorted candidate IDs, exact DAO quorum/weight and normal voting denominator/highest member snapshot. One member votes once for one candidate or explicit abstention.",
         "Finalization requires the frozen quorum; the yes/no approval majority is not used to rank candidates. Positive candidate tallies rank by weight. A tied group is installed only when the whole group fits remaining seats; a tie crossing the seat boundary leaves those seats vacant. No quorum or abstention-only voting creates no terms. Inactive or revoked winners leave their ranked seats vacant, without promoting a runner-up. Finalizing after the term ends creates no terms.",
@@ -3002,7 +3005,7 @@ export const ModulesHelpBundle={
     {
       "name": "payroll",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "833e2e3a629d7e55df59c5f5243c6b5423ba7ba161a39c5db12916ff51c76ec9",
+      "sourceAbiHash": "d70ab21057308d4da7007177458c53c46ceaf96bc2d93dec67f4b1b1a421298e",
       "actions": [
         {
           "name": "backfillrefs",
@@ -3168,6 +3171,67 @@ export const ModulesHelpBundle={
           ]
         },
         {
+          "name": "commitpriv",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "schedule_id",
+              "type": "uint64"
+            },
+            {
+              "name": "recipient",
+              "type": "uint64"
+            },
+            {
+              "name": "quantity",
+              "type": "asset"
+            },
+            {
+              "name": "periods",
+              "type": "uint8"
+            },
+            {
+              "name": "interval",
+              "type": "uint32"
+            },
+            {
+              "name": "starts",
+              "type": "uint32"
+            },
+            {
+              "name": "label",
+              "type": "private_record_reference"
+            },
+            {
+              "name": "document_id",
+              "type": "uint64"
+            },
+            {
+              "name": "document_version",
+              "type": "uint32"
+            },
+            {
+              "name": "expected",
+              "type": "checksum256"
+            },
+            {
+              "name": "successor_of",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
           "name": "edit",
           "fields": [
             {
@@ -3193,6 +3257,48 @@ export const ModulesHelpBundle={
             {
               "name": "label",
               "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "editpriv",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "member_id",
+              "type": "uint64"
+            },
+            {
+              "name": "schedule_id",
+              "type": "uint64"
+            },
+            {
+              "name": "label",
+              "type": "private_record_reference"
+            }
+          ]
+        },
+        {
+          "name": "releaselabel",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            },
+            {
+              "name": "schedule_id",
+              "type": "uint64"
             }
           ]
         },
@@ -3313,6 +3419,10 @@ export const ModulesHelpBundle={
             {
               "name": "label",
               "type": "string"
+            },
+            {
+              "name": "private_label",
+              "type": "private_record_reference?$"
             }
           ]
         },
@@ -3375,6 +3485,10 @@ export const ModulesHelpBundle={
             {
               "name": "references_released",
               "type": "bool"
+            },
+            {
+              "name": "private_label",
+              "type": "private_record_reference?$"
             }
           ]
         },
@@ -5146,6 +5260,133 @@ export const ModulesHelpBundle={
     }
   ],
   "api": [
+    {
+      "method": "GET",
+      "path": "/v1/daos/:id/private-payroll/:schedule",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dao": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "contract": {
+                "type": "string",
+                "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+              },
+              "daoId": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "interfaceVersion": {
+                "type": "number",
+                "const": 1
+              }
+            },
+            "required": [
+              "chainId",
+              "contract",
+              "daoId",
+              "interfaceVersion"
+            ],
+            "additionalProperties": false
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^[a-z1-5][a-z1-5.]{0,12}$"
+          },
+          "scheduleId": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "agreed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "documentId": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "keyEpoch": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "documentId",
+                  "version",
+                  "commitment",
+                  "keyEpoch"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "documentId": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                  },
+                  "commitment": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "keyEpoch": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "documentId",
+                  "version",
+                  "commitment",
+                  "keyEpoch"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "dao",
+          "source",
+          "scheduleId",
+          "agreed",
+          "display"
+        ],
+        "additionalProperties": false
+      },
+      "helpTopic": "payroll"
+    },
     {
       "method": "GET",
       "path": "/v1/quick-ballots",
@@ -19890,8 +20131,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "quick-ballots",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19918,8 +20159,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "activity",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19950,8 +20191,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "decide",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20006,8 +20247,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "works",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20045,8 +20286,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20085,8 +20326,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20127,8 +20368,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.10.0-alpha.5",
-        "coreRange": "0.15.0-alpha.39",
+        "version": "0.10.0-alpha.7",
+        "coreRange": "0.15.0-alpha.41",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
