@@ -75,3 +75,13 @@ it('verifies the public final proof even after individual rows are archived', ()
     'QUICK_DEFINITION',
   );
 });
+it('keeps the exact private question bound through snapshot, final tally and response pruning', () => {
+  const reference = { documentId: '9', version: 1, commitment: 'ab'.repeat(32), keyEpoch: '1' };
+  const fixture = snapshotFixture({ protocol: 2, question: JSON.stringify(reference), explanation: '', all_accounts: false, audience: ['7'] });
+  expect(verifyQuickBallotSnapshot({ ...fixture.domain, ballot: fixture.ballot, responses: fixture.responses }).result).toBeNull();
+  const context = quickTallyContext({ chainId: fixture.domain.chainId, runtime: fixture.domain.runtime, ballotId: fixture.ballot.id, definitionHash: fixture.ballot.definition_hash, root: fixture.ballot.response_root, count: '2', aggregate: fixture.ballot.aggregate });
+  const final = { ...fixture.ballot, verified: true, pruned: true, up: 1, final_proof: proveBallotTally(context, fixture.key.secret, fixture.ballot.aggregate, 2n, 1n) };
+  expect(verifyQuickBallotResult({ ...fixture.domain, ballot: final })).toEqual({ up: 1, down: 1, count: 2 });
+  expect(final.definition.question).toBe(JSON.stringify(reference));
+  expect(() => verifyQuickBallotResult({ ...fixture.domain, ballot: { ...final, definition: { ...final.definition, question: JSON.stringify({ ...reference, version: 2 }) } } })).toThrow('QUICK_DEFINITION');
+});

@@ -7,6 +7,7 @@ import {
   QuickBallotDefinitionSchema,
   QuickBallotResultInputSchema,
   QuickBallotSnapshotSchema,
+  quickQuestionReference,
 } from '../protocol/quick-ballots.js';
 import {
   addBallotCiphertexts,
@@ -57,6 +58,8 @@ export function encodeQuickBallot<K extends keyof QuickvoteActions>(
 }
 export function quickBallotDefinitionHash(value: unknown): string {
   const input = definitionInput.parse(value);
+  const reference = quickQuestionReference(input.definition);
+  if (reference && (reference.documentId !== input.ballotId || input.definition.audience[0] !== input.daoId)) throw Error('QUICK_QUESTION_PARENT');
   return hash([
     Serializer.encode({ object: 'daclify.quick-ballot.definition.v1', type: 'string' }).array,
     Checksum256.from(input.chainId).array,

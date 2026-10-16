@@ -1,8 +1,9 @@
 #define DACLIFY_MODULE_METERING
 #define DACLIFY_RAM_PAYER_CONTRACT "quickvote"
-#define DACLIFY_DOCUMENT_TABLES {}
+#define DACLIFY_DOCUMENT_TABLES {"qballots"_n}
 #include "quick_ballots.hpp"
 #include "archive_state.hpp"
+#include "private_content.hpp"
 using namespace eosio;
 using namespace daclify;
 CONTRACT quickvote:public contract {
@@ -23,12 +24,18 @@ CONTRACT quickvote:public contract {
   const bool responses=table=="qresponses"_n;const std::string kind=responses?"quick-ballot-responses":"quick-ballot-grants";
   const std::string schema=responses?"daclify.quick-ballot.responses.row.v1":"daclify.quick-ballot.grants.row.v1";
   check(family.kind==kind&&family.table==table&&family.scope==runtime.value&&family.parent_id==ballot.id&&family.records==(responses?ballot.identities:1)&&family.schema_hash==sha256(schema.data(),schema.size()),"ARCHIVE_FAMILY_PROTECTED");
-  // Opening v1 preauthorizes only these encrypted rows after 30 days; generic archive approval is unchanged.
+  // Opening preauthorizes only these encrypted rows after 30 days; generic archive approval is unchanged.
   return anchor;
  }
  void mark_pruned(name runtime,uint64_t id){
   quick_responses responses(get_self(),runtime.value);auto index=responses.get_index<"byballot"_n>();auto first=index.lower_bound(uint128_t(id)<<64);quick_grants grants(get_self(),runtime.value);
-  if((first==index.end()||first->ballot_id!=id)&&grants.find(id)==grants.end()){quick_ballots rows(get_self(),runtime.value);rows.modify(rows.get(id),same_payer,[](auto& row){row.pruned=true;});}
+  if((first==index.end()||first->ballot_id!=id)&&grants.find(id)==grants.end()){quick_ballots rows(get_self(),runtime.value);const auto& ballot=rows.get(id);if(ballot.definition.protocol==2)document_ref(runtime,ballot.dao_id,get_self(),"qballots"_n,id,0,0,0);rows.modify(ballot,same_payer,[](auto& row){row.pruned=true;});}
+ }
+ void retain_question(name runtime,const quick_ballot& ballot,bool current_epoch){
+  if(ballot.definition.protocol!=2||ballot.pruned)return;
+  const auto& definition=ballot.definition;check(!definition.all_accounts&&definition.audience.size()==1&&definition.audience[0]==ballot.dao_id&&definition.explanation.empty(),"QUICK_QUESTION_AUDIENCE");
+  const auto value=nlohmann::json::parse(definition.question,nullptr,false);const auto doc=private_content_document(runtime,ballot.dao_id,value,current_epoch);check(doc.document_id==ballot.id,"QUICK_QUESTION_PARENT");
+  document_ref(runtime,ballot.dao_id,get_self(),"qballots"_n,ballot.id,0,doc.document_id,doc.version);
  }
  quick_clock configuration(name runtime)const{check_ram_payer_runtime(get_self(),runtime);return quick_clocks(get_self(),runtime.value).get(0,"QUICK_NOT_CONFIGURED");}
  quick_account account(const quick_actor_context& actor)const{
@@ -50,9 +57,11 @@ public:
   else rows.modify(found,same_payer,[&](auto& row){row.authority=authority;row.authority_hash=authority_hash;});
  }
  ACTION bindrampool(name runtime){configuration(runtime);bind_ram_pool(get_self(),runtime);}
+ ACTION backfillrefs(name runtime,uint64_t dao_id){configuration(runtime);backfill_document_refs<quick_ballots>(runtime,dao_id,get_self(),"qballots"_n,25,[&](const auto& ballot){retain_question(runtime,ballot,false);});}
  ACTION open(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t ballot_id,quick_definition definition,std::vector<char> key,std::vector<char> possession,std::vector<std::vector<char>> grants){
   configuration(runtime);module_actor(runtime,dao_id,member_id,get_self(),"open"_n);quick_executive(runtime,dao_id,member_id);
-  check(ballot_id&&definition.protocol==1,"QUICK_DEFINITION");check(!definition.question.empty()&&definition.question.size()<=256&&definition.explanation.size()<=4096&&quick_utf8(definition.question)&&quick_utf8(definition.explanation),"QUICK_QUESTION");
+  check(ballot_id&&definition.protocol>=1&&definition.protocol<=3,"QUICK_DEFINITION");check(!definition.question.empty()&&definition.question.size()<=256&&definition.explanation.size()<=4096&&quick_utf8(definition.question)&&quick_utf8(definition.explanation),"QUICK_QUESTION");
+  if(definition.protocol==1){const auto dao=daos(runtime,runtime.value).get(dao_id,"DAO_UNKNOWN");if(dao.privacy>0){const auto identity=nlohmann::json::parse(dao.metadata,nullptr,false);check(!identity.is_object()||!identity.contains("schemaVersion")||identity["schemaVersion"]!=4,"PRIVATE_QUICK_REQUIRED");}}
   check((definition.all_accounts&&definition.audience.empty())||(!definition.all_accounts&&!definition.audience.empty()&&definition.audience.size()<=20),"QUICK_AUDIENCE");
   uint64_t previous=0;for(auto id:definition.audience){check(id>previous,"QUICK_AUDIENCE");daos(runtime,runtime.value).get(id,"DAO_UNKNOWN");check(dao_lifecycle(runtime,id)==0,"QUICK_AUDIENCE");previous=id;}
   const auto now=current_time_point().sec_since_epoch();check(!definition.closes||definition.closes>now,"QUICK_DEADLINE");
@@ -67,6 +76,7 @@ public:
   quick_ballot value;value.id=ballot_id;value.dao_id=dao_id;value.creator_id=member_id;value.opened_at=now;value.definition=definition;
   value.definition_hash=quick_definition_hash(runtime,get_self(),ballot_id,dao_id,member_id,definition);value.key=key;value.key_proof=possession;
   quick_ballot_proof::validkey(quick_proof_context(runtime,value,"key"),key,possession);
+  retain_question(runtime,value,true);
   ballots.emplace(get_self(),[&](auto& row){row=value;});quick_grants(get_self(),runtime.value).emplace(get_self(),[&](auto& row){row={ballot_id,dao_id,grants};});
  }
  ACTION respond(quick_actor_context actor,uint64_t ballot_id,uint64_t expected_revision,std::vector<char> ciphertext,std::vector<char> proof,std::vector<char> receipt){
@@ -153,4 +163,4 @@ public:
   if(table=="closechecks"_n){closure_checks(get_self(),runtime.value).backfill(limit);return;}check(false,"RAM_MIGRATION_TABLE");
  }
 };
-EOSIO_DISPATCH(quickvote,(init)(bindrampool)(open)(respond)(remove)(close)(tick)(prepare)(finalize)(prune)(prunegrants)(checkquota)(scanclose)(clearclosed)(checkmig)(scanram))
+EOSIO_DISPATCH(quickvote,(init)(bindrampool)(backfillrefs)(open)(respond)(remove)(close)(tick)(prepare)(finalize)(prune)(prunegrants)(checkquota)(scanclose)(clearclosed)(checkmig)(scanram))

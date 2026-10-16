@@ -7,6 +7,7 @@ import {
   IdSchema,
   NativeAccountSchema,
   Uint64Schema,
+  PrivateRecordReferenceSchema,
 } from '@daclify/core-protocol';
 import {
   QuickvoteActionSchemas,
@@ -27,9 +28,13 @@ const text = (maximum: number) =>
       'The UTF-8 text exceeds the byte limit.',
     );
 const hex = (bytes: number) => z.string().regex(new RegExp(`^[0-9a-f]{${bytes * 2}}$`));
+export function quickQuestionReference(definition: { protocol: number; question: string }) {
+  if (definition.protocol !== 2) return;
+  return PrivateRecordReferenceSchema.parse(JSON.parse(definition.question));
+}
 export const QuickBallotDefinitionSchema = QuickvoteActionSchemas.open.shape.definition
   .extend({
-    protocol: z.literal(1),
+    protocol: z.union([z.literal(1), z.literal(2), z.literal(3)]),
     question: text(256).refine((value) => value.length > 0),
     explanation: text(4096),
     audience: z.array(IdSchema).max(20),
@@ -53,6 +58,12 @@ export const QuickBallotDefinitionSchema = QuickvoteActionSchemas.open.shape.def
       ctx.addIssue({ code: 'custom', message: 'QUICK_AUDIENCE' });
     if (!ordered(value.readers.map((reader) => reader.member_id)))
       ctx.addIssue({ code: 'custom', message: 'QUICK_READERS' });
+    if (value.protocol === 2) {
+      if (value.all_accounts || value.audience.length !== 1 || value.explanation !== '')
+        ctx.addIssue({ code: 'custom', message: 'QUICK_QUESTION_AUDIENCE' });
+      try { quickQuestionReference(value); }
+      catch { ctx.addIssue({ code: 'custom', message: 'QUICK_QUESTION_REFERENCE' }); }
+    }
   });
 export const QuickBallotRowSchema = QuickvoteTableSchemas.qballots.extend({
   definition: QuickBallotDefinitionSchema,
@@ -99,7 +110,7 @@ const maintenance = z.strictObject({
 export const QuickBallotRoutes = {
   quickList: {
     method: 'GET',
-    path: '/v1/quick-ballots',
+    path: '/v1/quick-ballots/definitions',
     query: z.strictObject({ after: Uint64Schema.optional(), daoId: IdSchema.optional() }),
     response: z.strictObject({
       available: z.boolean(),
@@ -112,7 +123,7 @@ export const QuickBallotRoutes = {
   },
   quickDetail: {
     method: 'GET',
-    path: '/v1/quick-ballots/:ballotId',
+    path: '/v1/quick-ballots/:ballotId/definition',
     response: QuickBallotResultInputSchema.extend({
       grants: QuickvoteTableSchemas.qgrants.nullable(),
     }),
@@ -174,4 +185,11 @@ export const QuickBallotRoutes = {
     response: maintenance,
     helpTopic: 'quick-ballots',
   },
+} as const;
+const LegacyQuickBallotRowSchema = QuickBallotRowSchema.extend({
+  definition: QuickBallotDefinitionSchema.safeExtend({ protocol: z.literal(1) }),
+});
+export const LegacyQuickBallotRoutes = {
+  quickList: { ...QuickBallotRoutes.quickList, path: '/v1/quick-ballots', response: QuickBallotRoutes.quickList.response.extend({ ballots: z.array(LegacyQuickBallotRowSchema).max(25) }) },
+  quickDetail: { ...QuickBallotRoutes.quickDetail, path: '/v1/quick-ballots/:ballotId', response: QuickBallotRoutes.quickDetail.response.extend({ ballot: LegacyQuickBallotRowSchema }) },
 } as const;

@@ -1,6 +1,6 @@
 // Generated from compiled C++ ABI. Regenerate with npm run codegen; do not edit.
 import type { ABI } from '@wharfkit/antelope';
-export const quickvoteAbiHash = 'f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4cef8ea6d384c';
+export const quickvoteAbiHash = '47d728ba05fc1c03f7a6acca2063e4c0bc41a41fc382ac57c853d82f1e34edb1';
 export const quickvoteAbi = {
   "version": "eosio::abi/1.2",
   "types": [],
@@ -16,6 +16,20 @@ export const quickvoteAbi = {
         {
           "name": "siblings",
           "type": "checksum256[]"
+        }
+      ]
+    },
+    {
+      "name": "backfillrefs",
+      "base": "",
+      "fields": [
+        {
+          "name": "runtime",
+          "type": "name"
+        },
+        {
+          "name": "dao_id",
+          "type": "uint64"
         }
       ]
     },
@@ -686,6 +700,11 @@ export const quickvoteAbi = {
   ],
   "actions": [
     {
+      "name": "backfillrefs",
+      "type": "backfillrefs",
+      "ricardian_contract": ""
+    },
+    {
       "name": "bindrampool",
       "type": "bindrampool",
       "ricardian_contract": ""
@@ -831,6 +850,10 @@ export const quickvoteAbi = {
 export interface archive_prune_proof {
   primary_key: string;
   siblings: string[];
+}
+export interface backfillrefs {
+  runtime: string;
+  dao_id: string;
 }
 export interface bindrampool {
   runtime: string;
@@ -1013,6 +1036,7 @@ export interface tick {
   ballot_id: string;
 }
 export interface QuickvoteActions {
+  backfillrefs: backfillrefs;
   bindrampool: bindrampool;
   checkmig: checkmig;
   checkquota: checkquota;

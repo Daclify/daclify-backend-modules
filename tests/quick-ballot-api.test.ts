@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { Catalog, ModuleInstallationSchema, ModulePermissions } from '../protocol/index.js';
-import { QuickBallotRoutes, QuickBallotDefinitionSchema } from '../protocol/quick-ballots.js';
+import { QuickBallotRoutes, LegacyQuickBallotRoutes, QuickBallotDefinitionSchema } from '../protocol/quick-ballots.js';
 
 it('installs only executive opening/closure and no treasury grants', () => {
   expect(Catalog.find((value) => value.id === 'quick-ballots')?.helpTopic).toBe('quick-ballots');
@@ -8,7 +8,7 @@ it('installs only executive opening/closure and no treasury grants', () => {
   const value = {
     id: 'quick-ballots',
     account: 'quickvote',
-    version: '0.10.0-alpha.7',
+    version: '0.10.0-alpha.9',
     config: { configVersion: 1 },
     actions: ['open', 'close'],
     grants: [],
@@ -64,6 +64,12 @@ it('looks up one current response by its canonical account commitment', () => {
       accountId: '00000000-0000-4000-8000-000000000001',
     }).success,
   ).toBe(false);
+});
+it('keeps legacy definition readers separate from the versioned private-question readers', () => {
+  expect(QuickBallotRoutes.quickList.path).toBe('/v1/quick-ballots/definitions');
+  expect(QuickBallotRoutes.quickDetail.path).toBe('/v1/quick-ballots/:ballotId/definition');
+  expect(LegacyQuickBallotRoutes.quickList.path).toBe('/v1/quick-ballots');
+  expect(LegacyQuickBallotRoutes.quickDetail.path).toBe('/v1/quick-ballots/:ballotId');
 });
 
 it('can verify any nonempty UTF-8 question accepted by the native protocol', () => {

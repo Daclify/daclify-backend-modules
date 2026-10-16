@@ -6,5 +6,5 @@ export const ModuleCodeHashes={
   "grants-rounds": "577dae6135b0a2ba0b7ec9fd5fd47953e597076d309993a6d86e6ceb2cfe5ab8",
   "endorsement-admission": "278ad1dd05824976b496470be210369dba8e6d7cd57d9e22819f98e5ad2790da",
   "activity": "02070bc67e5d6cec2e5d803b396c14eb27bac82d8f56e41c6dcd726bc5a6ddc1",
-  "quick-ballots": "b2771fbd69b556f79dbbe6c5e675a7dac1c6838d45985af8995dd4640e948aef"
+  "quick-ballots": "963a7b2b7cd558c3726f00a68a67b404a0b94aa6c3b8f8b66149269ba6ce94bc"
 };

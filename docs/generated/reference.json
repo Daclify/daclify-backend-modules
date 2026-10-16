@@ -1,19 +1,23 @@
 {
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.50",
+  "packageVersion": "0.10.0-alpha.52",
   "interfaceVersion": 1,
   "topics": [
     {
       "id": "quick-ballots",
       "title": "Quick ballots: encrypted up/down questions",
       "paragraphs": [
-        "Quick ballots is experimental encrypted voting on testnet. A current executive opens a public question for all Daclify accounts or active members of one to twenty selected DAOs. Each canonical account has one current response; changing wallets or DAO memberships does not add a vote. This is account uniqueness, not proof of one human per account.",
+        "Quick ballots provides experimental encrypted up/down voting on testnet. A current executive can open a question for permitted members of the originating encrypted DAO, or explicitly publish a question for active members of one to twenty selected DAOs or all Daclify accounts. Each canonical account has one current response; changing wallets or memberships does not add a vote. This is account uniqueness, not proof of one human per account.",
         "Write a question of up to 256 UTF-8 bytes and an optional explanation of up to 4096 bytes. Add a closing time or close manually. The current originating executives and their encryption public keys are fixed when the question opens. Every reader needs working private-content access; an uploaded key grant alone cannot prove they decrypted it. Other audience DAOs receive no reader keys.",
         "The browser encrypts each up/down response and proves it is a valid choice before signing. Private ballot keys, choices and randomness stay on the device. Your existing default approval method authorizes the exact response; enabling a wallet for account-wide ballots grants no DAO spending authority. A ballot retains at most 5000 response identities. The originating DAO funds its storage.",
         "Individual choices are encrypted, but account participation, timing, the public question and readers remain visible on-chain. Fixed readers can decrypt individual choices and copy their keys. Authorized managed recovery may also affect who can obtain a reader key. Removing current database links or on-chain rows does not erase historical chain transactions.",
         "After closure, bounded preparation freezes a complete ordered response commitment and independently checks the encrypted aggregate and count. A reader produces a public cryptographic proof of the final up/down totals locally. Pending totals are never presented as a result. The proof implementation has native and independent-vector tests; those tests are not an independent cryptographic security audit or mainnet qualification.",
         "Thirty days after closure, verified encrypted archiving and a separately verified backup permit bounded cleanup of individual response and reader-grant rows. The final summary, public key, aggregate, source root and protocol inputs stay on-chain. Missing tally keys leave No verified result; a valid proof may still arrive after cleanup. Archiving can proceed after DAO closure under this opening policy without finding a departed executive.",
-        "Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive."
+        "Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive.",
+        "A private question and explanation use the originating DAO’s content keys and history grants. Individual vote decryption remains separate: only the executives fixed when opening receive the vote key. An eligible non-executive can read the question and respond without receiving anyone else’s vote key. Missing question keys or ciphertext blocks new votes, while removing an existing response remains available with its normal authorization.",
+        "Definition format1 preserves legacy public questions. Format2 contains only an exact protected-question reference, an empty public explanation and the single originating DAO audience. Format3 explicitly publishes question wording. All formats retain the same proof system: the complete native definition, including the protected reference and format, is hashed into every key, response and final-tally context. No existing commitment is reinterpreted and no new circuit is introduced.",
+        "Confidential multi-DAO and all-account questions are disabled. Changing the audience never silently makes wording public; the author must review the explicit public disclosure. Current readers use the versioned list/detail endpoints. Legacy list/detail endpoints return only supported format1 records and a client-update error for a newer definition, preserving old proof interpretation.",
+        "The protected question version stays retained through closure. After 30 days and verified encrypted-response and reader-grant archiving, pruning releases its active document hold. Its exact reference and final proof inputs remain frozen on chain. Removing the underlying document still requires its separate verified document archive and existing cleanup authorization. Losing question keys does not expose individual votes or permit replacing the fixed vote readers."
       ]
     },
     {
@@ -4694,8 +4698,21 @@
     {
       "name": "quickvote",
       "abiVersion": "eosio::abi/1.2",
-      "sourceAbiHash": "f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4cef8ea6d384c",
+      "sourceAbiHash": "47d728ba05fc1c03f7a6acca2063e4c0bc41a41fc382ac57c853d82f1e34edb1",
       "actions": [
+        {
+          "name": "backfillrefs",
+          "fields": [
+            {
+              "name": "runtime",
+              "type": "name"
+            },
+            {
+              "name": "dao_id",
+              "type": "uint64"
+            }
+          ]
+        },
         {
           "name": "bindrampool",
           "fields": [
@@ -5387,7 +5404,7 @@
     },
     {
       "method": "GET",
-      "path": "/v1/quick-ballots",
+      "path": "/v1/quick-ballots/definitions",
       "query": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -5471,8 +5488,20 @@
                   "type": "object",
                   "properties": {
                     "protocol": {
-                      "type": "number",
-                      "const": 1
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "const": 1
+                        },
+                        {
+                          "type": "number",
+                          "const": 2
+                        },
+                        {
+                          "type": "number",
+                          "const": 3
+                        }
+                      ]
                     },
                     "question": {
                       "type": "string",
@@ -5658,7 +5687,7 @@
     },
     {
       "method": "GET",
-      "path": "/v1/quick-ballots/:ballotId",
+      "path": "/v1/quick-ballots/:ballotId/definition",
       "response": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -5699,8 +5728,20 @@
                 "type": "object",
                 "properties": {
                   "protocol": {
-                    "type": "number",
-                    "const": 1
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "const": 1
+                      },
+                      {
+                        "type": "number",
+                        "const": 2
+                      },
+                      {
+                        "type": "number",
+                        "const": 3
+                      }
+                    ]
                   },
                   "question": {
                     "type": "string",
@@ -20129,8 +20170,8 @@
     {
       "manifest": {
         "id": "quick-ballots",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20157,8 +20198,8 @@
     {
       "manifest": {
         "id": "activity",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20189,8 +20230,8 @@
     {
       "manifest": {
         "id": "decide",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20245,8 +20286,8 @@
     {
       "manifest": {
         "id": "works",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20284,8 +20325,8 @@
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20324,8 +20365,8 @@
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20366,8 +20407,8 @@
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.10.0-alpha.7",
-        "coreRange": "0.15.0-alpha.41",
+        "version": "0.10.0-alpha.9",
+        "coreRange": "0.15.0-alpha.43",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

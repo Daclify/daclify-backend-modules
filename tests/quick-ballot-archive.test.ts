@@ -134,6 +134,17 @@ it('exports exact encrypted rows without a tally at the thirty-day boundary', ()
   );
   expect(() => decodeReleasedArchiveRow(chunk.domain, row, '10')).toThrow('ARCHIVE_ROW_DOMAIN');
 });
+it('archives private-question responses without changing the immutable question reference', () => {
+  const reference = { documentId: '9', version: 1, commitment: 'ab'.repeat(32), keyEpoch: '1' };
+  const fixture = snapshotFixture({ protocol: 2, question: JSON.stringify(reference), explanation: '', all_accounts: false, audience: ['7'] });
+  const original = structuredClone(fixture.ballot);
+  const plan = planQuickBallotArchive(input(fixture));
+  expect(plan.blocked).toEqual([]);
+  expect(plan.families.flatMap((family) => family.chunks.flatMap((chunk) => chunk.rows))).toHaveLength(3);
+  expect(fixture.ballot).toEqual(original);
+  const copied = { ...fixture.ballot, definition: { ...fixture.ballot.definition, question: JSON.stringify({ ...reference, version: 2 }) } };
+  expect(() => planQuickBallotArchive(input({ ...fixture, ballot: copied }))).toThrow();
+});
 
 it('blocks early/open exports and fails closed on omitted or noncanonical source rows', () => {
   const value = input();

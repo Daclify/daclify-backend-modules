@@ -1,12 +1,12 @@
 # Daclify modules reference
 
-Package 0.10.0-alpha.50 · interface 1.
+Package 0.10.0-alpha.52 · interface 1.
 
 Generated from compiled ABI and canonical API schemas. Field layout does not describe all contract business rules; read the matching explanatory guides.
 
 ## Quick ballots: encrypted up/down questions
 
-Quick ballots is experimental encrypted voting on testnet. A current executive opens a public question for all Daclify accounts or active members of one to twenty selected DAOs. Each canonical account has one current response; changing wallets or DAO memberships does not add a vote. This is account uniqueness, not proof of one human per account.
+Quick ballots provides experimental encrypted up/down voting on testnet. A current executive can open a question for permitted members of the originating encrypted DAO, or explicitly publish a question for active members of one to twenty selected DAOs or all Daclify accounts. Each canonical account has one current response; changing wallets or memberships does not add a vote. This is account uniqueness, not proof of one human per account.
 
 Write a question of up to 256 UTF-8 bytes and an optional explanation of up to 4096 bytes. Add a closing time or close manually. The current originating executives and their encryption public keys are fixed when the question opens. Every reader needs working private-content access; an uploaded key grant alone cannot prove they decrypted it. Other audience DAOs receive no reader keys.
 
@@ -19,6 +19,14 @@ After closure, bounded preparation freezes a complete ordered response commitmen
 Thirty days after closure, verified encrypted archiving and a separately verified backup permit bounded cleanup of individual response and reader-grant rows. The final summary, public key, aggregate, source root and protocol inputs stay on-chain. Missing tally keys leave No verified result; a valid proof may still arrive after cleanup. Archiving can proceed after DAO closure under this opening policy without finding a departed executive.
 
 Cleanup still requires the operator to enable pruning, current pinned source code, a fresh verifier attestation, exact row proofs and verified retained copies. Lost or corrupt archives block deletion. History nodes are an additional recovery source, not a promised permanent hosted archive.
+
+A private question and explanation use the originating DAO’s content keys and history grants. Individual vote decryption remains separate: only the executives fixed when opening receive the vote key. An eligible non-executive can read the question and respond without receiving anyone else’s vote key. Missing question keys or ciphertext blocks new votes, while removing an existing response remains available with its normal authorization.
+
+Definition format1 preserves legacy public questions. Format2 contains only an exact protected-question reference, an empty public explanation and the single originating DAO audience. Format3 explicitly publishes question wording. All formats retain the same proof system: the complete native definition, including the protected reference and format, is hashed into every key, response and final-tally context. No existing commitment is reinterpreted and no new circuit is introduced.
+
+Confidential multi-DAO and all-account questions are disabled. Changing the audience never silently makes wording public; the author must review the explicit public disclosure. Current readers use the versioned list/detail endpoints. Legacy list/detail endpoints return only supported format1 records and a client-update error for a newer definition, preserving old proof interpretation.
+
+The protected question version stays retained through closure. After 30 days and verified encrypted-response and reader-grant archiving, pruning releases its active document hold. Its exact reference and final proof inputs remain frozen on chain. Removing the underlying document still requires its separate verified document archive and existing cleanup authorization. Losing question keys does not expose individual votes or permit replacing the fixed vote readers.
 
 ## Weights with an explicit snapshot
 
@@ -1992,7 +2000,14 @@ Source ABI JSON SHA-256: `3a143af1dffbc2e5a8d2b11cb232a0f878a52da3879dc4c1ada81d
 
 ## quickvote contract
 
-Source ABI JSON SHA-256: `f6e6888d9173f29a7f39f18303c03aaca91d471adbdf50ac7ad4cef8ea6d384c`.
+Source ABI JSON SHA-256: `47d728ba05fc1c03f7a6acca2063e4c0bc41a41fc382ac57c853d82f1e34edb1`.
+
+### Action: backfillrefs
+
+| Field | ABI type |
+| --- | --- |
+| runtime | name |
+| dao_id | uint64 |
 
 ### Action: bindrampool
 
@@ -2356,7 +2371,7 @@ Response:
 }
 ```
 
-## GET /v1/quick-ballots
+## GET /v1/quick-ballots/definitions
 
 Guide: quick-ballots.
 
@@ -2453,8 +2468,20 @@ Response:
             "type": "object",
             "properties": {
               "protocol": {
-                "type": "number",
-                "const": 1
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 1
+                  },
+                  {
+                    "type": "number",
+                    "const": 2
+                  },
+                  {
+                    "type": "number",
+                    "const": 3
+                  }
+                ]
               },
               "question": {
                 "type": "string",
@@ -2638,7 +2665,7 @@ Response:
 }
 ```
 
-## GET /v1/quick-ballots/:ballotId
+## GET /v1/quick-ballots/:ballotId/definition
 
 Guide: quick-ballots.
 
@@ -2687,8 +2714,20 @@ Response:
           "type": "object",
           "properties": {
             "protocol": {
-              "type": "number",
-              "const": 1
+              "anyOf": [
+                {
+                  "type": "number",
+                  "const": 1
+                },
+                {
+                  "type": "number",
+                  "const": 2
+                },
+                {
+                  "type": "number",
+                  "const": 3
+                }
+              ]
             },
             "question": {
               "type": "string",
@@ -17381,7 +17420,7 @@ Response:
 
 ## quick-ballots configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: ballot.create, ballot.finalize.
 
@@ -17406,7 +17445,7 @@ Guide: quick-ballots.
 
 ## activity configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: content.publish.
 
@@ -17436,7 +17475,7 @@ Guide: activity.
 
 ## decide configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: ballot.create, ballot.finalize, ballot.execute.
 
@@ -17488,7 +17527,7 @@ Guide: decide.
 
 ## works configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17524,7 +17563,7 @@ Guide: works.
 
 ## payroll configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: obligation.create, obligation.execute.
 
@@ -17561,7 +17600,7 @@ Guide: payroll.
 
 ## grants-rounds configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: obligation.create.
 
@@ -17601,7 +17640,7 @@ Guide: grants-rounds.
 
 ## endorsement-admission configuration
 
-Module 0.10.0-alpha.7 · config 1 · core 0.15.0-alpha.41.
+Module 0.10.0-alpha.9 · config 1 · core 0.15.0-alpha.43.
 
 Capabilities: member.manage.
 

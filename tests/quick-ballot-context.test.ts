@@ -65,6 +65,27 @@ it('binds the definition to the exact source, creator, question and fixed reader
   ])
     expect(quickBallotDefinitionHash({ ...input, ...change })).not.toBe(expected);
 });
+it('binds private questions to the originating DAO and exact ballot without changing the proof domains', () => {
+  const reference = { documentId: input.ballotId, version: 1, commitment: 'ab'.repeat(32), keyEpoch: '1' };
+  const privateInput = { ...input, definition: { ...input.definition, protocol: 2, all_accounts: false, audience: [input.daoId], question: JSON.stringify(reference) } };
+  const hash = quickBallotDefinitionHash(privateInput);
+  expect(hash).toMatch(/^[0-9a-f]{64}$/);
+  for (const change of [
+    { question: JSON.stringify({ ...reference, version: 2 }) },
+    { question: JSON.stringify({ ...reference, commitment: 'cd'.repeat(32) }) },
+    { question: JSON.stringify({ ...reference, keyEpoch: '2' }) },
+    { readers: [{ member_id: '2', encryption_key: 'different-executive-key' }] },
+  ]) expect(quickBallotDefinitionHash({ ...privateInput, definition: { ...privateInput.definition, ...change } })).not.toBe(hash);
+  for (const change of [
+    { question: 'Plaintext must not be accepted' },
+    { explanation: 'Private explanation must not leak here' },
+    { question: JSON.stringify({ ...reference, documentId: '999' }) },
+    { all_accounts: true, audience: [] },
+    { audience: ['8'] },
+    { audience: ['7', '8'] },
+  ]) expect(() => quickBallotDefinitionHash({ ...privateInput, definition: { ...privateInput.definition, ...change } })).toThrow();
+  expect(quickBallotDefinitionHash({ ...input, definition: { ...input.definition, protocol: 3 } })).not.toBe(quickBallotDefinitionHash(input));
+});
 it('separates key, per-account revision and frozen tally contexts', () => {
   const definitionHash = quickBallotDefinitionHash(input),
     base = {

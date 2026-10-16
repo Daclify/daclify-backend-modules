@@ -1,4 +1,6 @@
 import { ABI, Bytes, Checksum256, Serializer } from '@wharfkit/antelope';
+import type { z } from 'zod';
+import { QuickBallotDefinitionSchema } from '../../protocol/quick-ballots.js';
 import { quickvoteAbi } from '../../sdk/generated/quickvote.js';
 import {
   quickBallotDefinitionHash,
@@ -20,7 +22,7 @@ function concatenate(parts: Uint8Array[]) {
   }
   return out;
 }
-export function snapshotFixture() {
+export function snapshotFixture(overrides: Partial<z.infer<typeof QuickBallotDefinitionSchema>> = {}) {
   const domain = { chainId: '11'.repeat(32), runtime: 'daclifycore1', source: 'quickvote' };
   const definition = {
     protocol: 1,
@@ -30,6 +32,7 @@ export function snapshotFixture() {
     audience: [],
     closes: 0,
     readers: [{ member_id: '1', encryption_key: 'reader-key' }],
+    ...overrides,
   };
   const definitionHash = quickBallotDefinitionHash({
     ...domain,
