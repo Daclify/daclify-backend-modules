@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { ChainIdSchema, IdSchema } from '@daclify/core-protocol';
+import {
+  ChainIdSchema,
+  IdSchema,
+  PrivateRecordReferenceSchema,
+  type PrivateRecordReference,
+} from '@daclify/core-protocol';
 
 const orderedChoices = z
   .array(z.string().trim().min(1).max(80))
@@ -10,11 +15,10 @@ const orderedChoices = z
       new Set(values.map((value) => value.normalize('NFC').toLowerCase())).size === values.length,
     'Each choice must have a different label.',
   );
-const choices = orderedChoices
-  .refine(
-    (values) => values.length !== 2 || (values[0] === 'Reject' && values[1] === 'Approve'),
-    'Two-choice ballots must use Reject and Approve; custom polls need at least three choices.',
-  );
+const choices = orderedChoices.refine(
+  (values) => values.length !== 2 || (values[0] === 'Reject' && values[1] === 'Approve'),
+  'Two-choice ballots must use Reject and Approve; custom polls need at least three choices.',
+);
 
 export const BallotContentSchema = z.object({
   title: z.string().trim().max(160).optional(),
@@ -38,13 +42,33 @@ export const BallotMetadataSchema = BallotContentSchema.extend({
 
 export const BallotMetadataV3Schema = BallotMetadataSchema.extend({
   schemaVersion: z.literal(3),
+  publicDisclosure: z.literal(true).optional(),
   semantics: z.enum(['proposal', 'poll']),
   options: orderedChoices,
 }).refine(
-  (value) => value.semantics === 'poll' || (value.options.length === 2 && value.options[0] === 'Reject' && value.options[1] === 'Approve'),
+  (value) =>
+    value.semantics === 'poll' ||
+    (value.options.length === 2 && value.options[0] === 'Reject' && value.options[1] === 'Approve'),
   'Proposals use Reject and Approve; polls use their own ordered choices.',
 );
 
 export type BallotMetadata = z.infer<typeof BallotMetadataSchema>;
 export type BallotMetadataV3 = z.infer<typeof BallotMetadataV3Schema>;
-export type BallotContent = z.infer<typeof BallotContentSchema>;
+export const BallotMetadataV4Schema = z
+  .strictObject({
+    schemaVersion: z.literal(4),
+    semantics: z.enum(['proposal', 'poll']),
+    options: z.array(z.int().min(0).max(15)).min(2).max(16),
+    privateContent: PrivateRecordReferenceSchema,
+    document: BallotContentSchema.shape.document,
+  })
+  .refine(
+    (value) =>
+      value.options.every((choice, index) => choice === index) &&
+      (value.semantics === 'poll' || value.options.length === 2),
+    'Private ballot choices must preserve their ordered indices and semantics.',
+  );
+export type BallotMetadataV4 = z.infer<typeof BallotMetadataV4Schema>;
+export type BallotContent = z.infer<typeof BallotContentSchema> & {
+  privateContent?: PrivateRecordReference;
+};

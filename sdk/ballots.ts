@@ -3,13 +3,23 @@ import {
   BallotContentSchema,
   BallotMetadataSchema,
   BallotMetadataV3Schema,
+  BallotMetadataV4Schema,
   type BallotContent,
   type BallotMetadata,
   type BallotMetadataV3,
+  type BallotMetadataV4,
 } from '../protocol/ballots.js';
 
-export function encodeBallotMetadata(value: BallotMetadata | BallotMetadataV3): string {
-  const metadata = JSON.stringify(value.schemaVersion === 3 ? BallotMetadataV3Schema.parse(value) : BallotMetadataSchema.parse(value));
+export function encodeBallotMetadata(
+  value: BallotMetadata | BallotMetadataV3 | BallotMetadataV4,
+): string {
+  const metadata = JSON.stringify(
+    value.schemaVersion === 4
+      ? BallotMetadataV4Schema.parse(value)
+      : value.schemaVersion === 3
+        ? BallotMetadataV3Schema.parse(value)
+        : BallotMetadataSchema.parse(value),
+  );
   if (new TextEncoder().encode(metadata).length > 4096) throw new Error('BALLOT_METADATA_SIZE');
   return metadata;
 }
@@ -18,18 +28,25 @@ export function readBallotMetadata(metadata: string, choices: number): BallotCon
   if (choices < 2 || choices > 16 || new TextEncoder().encode(metadata).length > 4096) return;
   try {
     const value = z
-      .object({ schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() })
+      .object({
+        schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+      })
       .passthrough()
       .parse(JSON.parse(metadata));
+    if (value.schemaVersion === 4) {
+      const content = BallotMetadataV4Schema.parse(value);
+      if (content.options.length !== choices) return;
+      return { ...content, options: content.options.map((index) => `Choice ${index + 1}`) };
+    }
     const content =
       value.schemaVersion === 3
         ? BallotMetadataV3Schema.parse(value)
         : value.schemaVersion === 2
-        ? BallotMetadataSchema.parse(value)
-        : BallotContentSchema.parse({
-            ...value,
-            options: value.options ?? (choices === 2 ? ['Reject', 'Approve'] : undefined),
-          });
+          ? BallotMetadataSchema.parse(value)
+          : BallotContentSchema.parse({
+              ...value,
+              options: value.options ?? (choices === 2 ? ['Reject', 'Approve'] : undefined),
+            });
     if (content.options.length === choices) return content;
   } catch {
     // Missing or inconsistent choices must not become a different decision.

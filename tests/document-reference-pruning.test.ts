@@ -67,7 +67,7 @@ it.each(['works', 'decide'] as const)(
     await send(core, 'backfilldocs', [1, 25], 'daclifycore@active');
     for (const table of module === 'works'
       ? ['projects', 'milestones']
-      : ['elections', 'terms', 'docchanges', 'votetargets'])
+      : ['elections', 'terms', 'docchanges', 'votetargets', 'ballotdefs'])
       await send(works, 'backfillrefs', ['daclifycore', 1, table, 25], 'daclifycore@active');
     await send(core, 'setarchcfg', ['bob', 7776000, true], 'daclifycore@active');
     chain.addTime(TimePointSec.from(7776000));

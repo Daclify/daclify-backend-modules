@@ -2,7 +2,7 @@
 import type {HelpBundle} from '@daclify/core-protocol';
 export const ModulesHelpBundle={
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.46",
+  "packageVersion": "0.10.0-alpha.48",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -28,10 +28,12 @@ export const ModulesHelpBundle={
         "After the closing time, select Finalize ballot to calculate its result and release its expired governance lock. The service only forwards the reviewed Decide finalization action. Finalization is idempotent and remains available for a compatible, verified deployment after disabling new member actions.",
         "DAOs with a saved governance policy must use its exact ballot settings. A funding vote binds one proposed Works project and all milestone records; ordinary ballots remain advisory.",
         "Executive elections are opt-in: initialize a core executive policy and install the electexec grant. The reserved title Executives schedules a core roster handover at term start; the pending roster activates after eligible successor pairing and synchronization within its term. Other titles remain representative terms. The old roster retains control until a valid successor activates, and recall cannot remove the final paired native controller. Non-voting members are excluded from new ballot denominators and cannot cast votes.",
-        "The ballot editor requires a public title and explanation, and offers an optional existing DAO document pinned to its exact version and content commitment. Inline text and choice labels are public even in a private DAO. Use an encrypted supporting document for confidential details. The metadata reference adds no storage-retention guarantee.",
+        "Confidential DAOs encrypt ballot titles, explanations and custom choice labels before publication. Metadata4 exposes ordered numeric indices and the exact protected document reference. The optional supporting document ID/version/hash is also public technical retention data; its contents can remain encrypted. Both exact versions are retained by the native document-reference system. Explicitly publishing wording publicly requires the disclosure checkbox; historical plaintext stays public.",
         "Binary proposals use Reject and Approve. Explicit advisory polls have two to sixteen distinct labels; either option can win a neutral two-option poll. Polls use the saved DAO quorum and approval threshold: the unique leading option must reach that threshold, so a simple plurality can fail. Ordinary ballots remain single-choice and once-only; advanced election methods are a separate release.",
-        "New editor metadata uses schemaVersion 3 with explicit proposal or poll semantics, a title up to 160 characters, an explanation up to 2000 characters, labels up to 80 characters and an optional documentId/version/commitment reference. Serialized JSON is limited to 4096 UTF-8 bytes. Schema-one/two ballots retain their original interpretation. Every newly opened ballot stores a versioned contract-checked definition commitment; votecommit binds exact metadata, domain, frozen rules and execution/election/document targets. Legacy vote is accepted only for genuinely pre-upgrade ballots.",
-        "Funding ballots retain immutable opening snapshots of recipient, payments, due dates, contribution terms and exact supporting document commitments. Review those terms and verified supporting versions before voting. Export ballot and votes downloads the full domain, definition, target and every available live vote; partial-live explicitly excludes archived history."
+        "Private metadata4 freezes proposal/poll semantics, numbered ordered choices and ciphertext references in the existing definition commitment. Read private ballot decrypts only the selected ballot with original account keys and the permitted DAO epoch grant; unavailable or inconsistent wording blocks voting. Public editor metadata3 and schema-one/two ballots preserve their recorded interpretation. Public title/explanation bounds remain160/2000 characters and custom choices80 characters, with4096-byte metadata; larger private envelopes use existing encrypted file uploads. Every new ballot requires votecommit over its frozen domain, metadata, policy and targets. An explicitly public ballot in a confidential DAO carries publicDisclosure:true.",
+        "Funding ballots retain immutable opening snapshots of recipient, payments, due dates, contribution terms and exact supporting document commitments. Review those terms and verified supporting versions before voting. Export ballot and votes downloads the full domain, definition, target and every available live vote; partial-live explicitly excludes archived history.",
+        "Private content references use ballotdefs document-source slots0/1. The protected body document ID equals its ballot ID; references pin the exact encrypted version, hash and epoch, with current-epoch publication. Definition markers and protected content remain with the ballot after finalization and vote-row archival. Bounded backfillrefs scans preserve these references across reviewed upgrades. Exports include technical definitions/references and public votes without decrypted wording. Sign-out, key lock and account/DAO changes clear local private presentations. Ordinary vote choices, participation and results remain public.",
+        "Private ordinary definitions use marker version3; private funding definitions use version4 while retaining the exact version2 target snapshot rules. Existing version1/2 definitions, including arbitrary historical metadata, keep their original hash and authority. Bounded private-reference backfill visits only marked private definitions. Core supports at most five registered source families per module; the additional ballotdefs family needs one exact body reference and at most one supporting reference, without new tables or indexes."
       ]
     },
     {
@@ -19888,8 +19890,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "quick-ballots",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19916,8 +19918,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "activity",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -19948,8 +19950,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "decide",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20004,8 +20006,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "works",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20043,8 +20045,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20083,8 +20085,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20125,8 +20127,8 @@ export const ModulesHelpBundle={
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.10.0-alpha.4",
-        "coreRange": "0.15.0-alpha.37",
+        "version": "0.10.0-alpha.5",
+        "coreRange": "0.15.0-alpha.39",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [

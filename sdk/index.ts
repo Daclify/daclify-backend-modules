@@ -2,7 +2,7 @@ import { ABI, Serializer } from '@wharfkit/antelope';
 export * from './quick-ballots.js';
 export { encodeBallotMetadata, readBallotMetadata } from './ballots.js';
 export { ballotCommitment, type BallotCommitmentInput } from './ballot-commitment.js';
-export { prepareBallotVote } from './ballot-vote.js';
+export { prepareBallotVote, verifyBallotDefinition } from './ballot-vote.js';
 import { activityAbi, type ActivityActions } from './generated/activity.js';
 import { ActivityActionSchemas } from './generated/activity-schemas.js';
 export { activityAbi, activityAbiHash } from './generated/activity.js';
@@ -108,4 +108,4 @@ export {
   type ActivityIntent,
 } from './community-activity.js';
 
-export { makeBallotExport } from "./ballot-export.js";
+export { makeBallotExport } from './ballot-export.js';

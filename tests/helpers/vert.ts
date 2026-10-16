@@ -101,7 +101,7 @@ export function ballotExpectation(account: Account, runtime: string, ballotId: s
   const definition = row(account, 'ballotdefs', scope, BigInt(ballotId));
   if (definition === undefined) return '00'.repeat(32);
   const d = DecideTableSchemas.ballotdefs.parse(definition), b = DecideTableSchemas.ballots.parse(row(account, 'ballots', scope, BigInt(ballotId)));
-  const input = { chainId:'ab'.repeat(32), runtime, decide:account.name.toString(), ballot:b, definition:d, target:d.version===2?DecideTableSchemas.votetargets.parse(row(account,'votetargets',scope,BigInt(ballotId))):undefined };
+  const input = { chainId:'ab'.repeat(32), runtime, decide:account.name.toString(), ballot:b, definition:d, target:d.version===2||d.version===4?DecideTableSchemas.votetargets.parse(row(account,'votetargets',scope,BigInt(ballotId))):undefined };
   if (d.purpose === 2) return ballotCommitment({...input,election:DecideTableSchemas.elections.parse(row(account,'elections',scope,BigInt(ballotId)))});
   if (d.purpose === 3) return ballotCommitment({...input,execution:DecideTableSchemas.executions.parse(row(account,'executions',scope,BigInt(ballotId)))});
   if (d.purpose === 4) return ballotCommitment({...input,grantPlan:DecideTableSchemas.grantplans.parse(row(account,'grantplans',scope,BigInt(ballotId)))});

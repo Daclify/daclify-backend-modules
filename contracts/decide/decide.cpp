@@ -1,4 +1,4 @@
-#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n,"docchanges"_n,"votetargets"_n}
+#define DACLIFY_DOCUMENT_TABLES {"elections"_n,"terms"_n,"docchanges"_n,"votetargets"_n,"ballotdefs"_n}
 #define DACLIFY_RAM_PAYER_CONTRACT "decide"
 #include "grants_records.hpp"
 #include "admission.hpp"
@@ -9,6 +9,7 @@
 #include "ballot_commitments.hpp"
 #include "arbitration_plans.hpp"
 #include "ballot_targets.hpp"
+#include "private_content.hpp"
 using namespace daclify;
 CONTRACT decide:public contract {
 public:
@@ -116,6 +117,7 @@ public:
   if(table=="elections"_n)backfill_document_refs<elections>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_election(runtime,r);});
   else if(table=="terms"_n)backfill_document_refs<terms>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_term(runtime,r);});
   else if(table=="votetargets"_n)backfill_document_refs<ballot_targets>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_target(runtime,r);});
+  else if(table=="ballotdefs"_n)backfill_document_refs<ballot_definitions>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){if(r.version>=3)retain_private_ballot(runtime,ballots(get_self(),runtime.value).get(r.ballot_id),r.purpose,false);});
   else if(table=="docchanges"_n)backfill_document_refs<document_changes>(runtime,dao_id,get_self(),table,limit,[&](const auto& r){sync_docchange(runtime,r);});else check(false,"DOCUMENT_SOURCE_TABLE");
  }
  ACTION newelect(name runtime,uint64_t dao_id,uint64_t member_id,uint64_t election_id,std::string title,uint64_t document_id,uint32_t document_version,uint32_t nomination_close,uint32_t term_start,uint32_t term_end,uint8_t seats){
@@ -250,6 +252,9 @@ private:
  void validate_poll(const std::string& metadata,uint8_t choices){
   json_metadata(metadata);const auto value=nlohmann::json::parse(metadata,nullptr,false);
   check(value.contains("options")&&value["options"].is_array()&&value["options"].size()==choices,"BALLOT_OPTIONS");
+  if(value.contains("schemaVersion")&&value["schemaVersion"]==4){
+   for(size_t i=0;i<choices;i++)check(value["options"][i].is_number_unsigned()&&value["options"][i]==i,"BALLOT_OPTIONS");return;
+  }
   std::vector<std::string> labels;
   for(const auto& option:value["options"]){check(option.is_string(),"BALLOT_OPTIONS");const auto label=option.get<std::string>();check(!label.empty()&&label.size()<=320&&std::any_of(label.begin(),label.end(),[](unsigned char c){return c>0x20;}),"BALLOT_OPTIONS");check(std::find(labels.begin(),labels.end(),label)==labels.end(),"BALLOT_OPTIONS");labels.push_back(label);}
  }
@@ -262,11 +267,24 @@ private:
   else if(purpose==5){document_changes rows(get_self(),runtime.value);auto index=rows.get_index<"byballot"_n>();auto r=index.get(ballot_id,"DOCUMENT_PROPOSAL_UNKNOWN");check(r.dao_id==dao_id,"DOCUMENT_DOMAIN");r.adopted_at=0;r.adopted_by=0;r.status=0;bytes=pack(r);}
   else if(purpose==6){auto r=arbitration_plans(get_self(),runtime.value).get(ballot_id,"ARBITRATION_PLAN_UNKNOWN");check(r.dao_id==dao_id,"ARBITRATION_DOMAIN");r.executed=false;bytes=pack(r);}
   else check(false,"BALLOT_SEMANTICS");
-  const auto base=sha256(bytes.data(),bytes.size());if(version==2){check(purpose==3||purpose==4,"BALLOT_SEMANTICS");auto target=ballot_targets(get_self(),runtime.value).get(ballot_id,"BALLOT_TARGET_REQUIRED");check(target.version==1&&target.dao_id==dao_id&&target.ballot_id==ballot_id&&bool(target.work)==(purpose==3)&&bool(target.grant)==(purpose==4),"BALLOT_DEFINITION_DOMAIN");target.released=false;const auto snapshot=pack(target);const auto target_hash=sha256(snapshot.data(),snapshot.size());auto bound=pack(std::make_tuple(base,target_hash));return sha256(bound.data(),bound.size());}return base;
+  const auto base=sha256(bytes.data(),bytes.size());if(version==2||version==4){check(purpose==3||purpose==4,"BALLOT_SEMANTICS");auto target=ballot_targets(get_self(),runtime.value).get(ballot_id,"BALLOT_TARGET_REQUIRED");check(target.version==1&&target.dao_id==dao_id&&target.ballot_id==ballot_id&&bool(target.work)==(purpose==3)&&bool(target.grant)==(purpose==4),"BALLOT_DEFINITION_DOMAIN");target.released=false;const auto snapshot=pack(target);const auto target_hash=sha256(snapshot.data(),snapshot.size());auto bound=pack(std::make_tuple(base,target_hash));return sha256(bound.data(),bound.size());}return base;
  }
  checksum256 current_definition(name runtime,const ballot_record& b,const ballot_definition_record& d){
-  check((d.version==1||d.version==2)&&d.dao_id==b.dao_id&&d.ballot_id==b.id,"BALLOT_DEFINITION_DOMAIN");
+  check((d.version>=1&&d.version<=4)&&d.dao_id==b.dao_id&&d.ballot_id==b.id,"BALLOT_DEFINITION_DOMAIN");
   return definition_commitment(runtime_chain_id(runtime),runtime,get_self(),b,d,subtype_commitment(runtime,b.dao_id,b.id,d.purpose,d.version));
+ }
+ void retain_private_ballot(name runtime,const ballot_record& b,uint8_t purpose,bool current){
+  const auto value=nlohmann::json::parse(b.metadata,nullptr,false);
+  if(!value.contains("schemaVersion")||value["schemaVersion"]!=4)return;
+  check(value.size()==4+value.contains("document")&&value.contains("semantics")&&value["semantics"]==(purpose==1?"poll":"proposal")&&value.contains("privateContent"),"PRIVATE_BALLOT_FIELDS");validate_poll(b.metadata,b.choices);check(purpose==1||b.choices==2,"BALLOT_SEMANTICS");
+  const auto doc=private_content_document(runtime,b.dao_id,value["privateContent"],current);check(doc.document_id==b.id,"PRIVATE_BALLOT_PARENT");
+  uint64_t support=0;uint32_t version=0;
+  if(value.contains("document")){
+   const auto& ref=value["document"];check(ref.is_object()&&ref.size()==3&&ref.contains("documentId")&&ref.contains("version")&&ref.contains("commitment")&&ref["version"].is_number_unsigned()&&ref["version"].get<uint64_t>()>0&&ref["version"].get<uint64_t>()<=std::numeric_limits<uint32_t>::max(),"PRIVATE_CONTENT_REFERENCE");
+   support=private_content_id(ref["documentId"]);version=ref["version"].get<uint32_t>();private_content_hash(target_document_hash(runtime,b.dao_id,support,version),ref["commitment"]);
+  }
+  document_ref(runtime,b.dao_id,get_self(),"ballotdefs"_n,b.id,0,doc.document_id,doc.version);
+  document_ref(runtime,b.dao_id,get_self(),"ballotdefs"_n,b.id,1,support,version);
  }
  void freeze_definition(name runtime,uint64_t ballot_id,uint8_t purpose){
   const auto b=ballots(get_self(),runtime.value).get(ballot_id,"BALLOT_UNKNOWN");ballot_definitions rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_DEFINITION_EXISTS");
@@ -275,7 +293,9 @@ private:
     if(!purpose)check(b.choices==2&&value["options"][0]=="Reject"&&value["options"][1]=="Approve","BALLOT_SEMANTICS");}
   }
   ballot_definition_record d{};d.ballot_id=b.id;d.dao_id=b.dao_id;d.purpose=purpose;if(purpose==3||purpose==4)d.version=2;
+  const auto value=nlohmann::json::parse(b.metadata,nullptr,false);if(value.contains("schemaVersion")&&value["schemaVersion"]==4){check(purpose<=1||purpose==3||purpose==4,"BALLOT_SEMANTICS");d.version=(purpose==3||purpose==4)?4:3;}
   gov_policies policies(runtime,runtime.value);auto policy=policies.find(b.dao_id);if(policy!=policies.end()){d.policy_revision=policy->revision;const auto bytes=pack(*policy);d.policy_hash=sha256(bytes.data(),bytes.size());}
+  retain_private_ballot(runtime,b,purpose,true);
   d.commitment=current_definition(runtime,b,d);rows.emplace(get_self(),[&](auto& r){r=d;});
  }
  void sync_docchange(name runtime,const document_change& r){const bool protect=r.status<=1;document_ref(runtime,r.dao_id,get_self(),"docchanges"_n,r.id,0,protect?r.document_id:0,protect?r.document_version:0);}
@@ -293,7 +313,12 @@ private:
   module_actor(runtime,dao_id,member_id,get_self(),action_name);check(ballot_id>0,"BALLOT_ID");check(kind<=2&&choices>=2&&choices<=16,"BALLOT_PRESET");check(duration>=60&&duration<=2592000,"BALLOT_DURATION");check(quorum>0&&quorum<=10000&&approval>=5001&&approval<=10000,"BALLOT_THRESHOLD");json_metadata(metadata);
   gov_policies policies(runtime,runtime.value);auto policy=policies.find(dao_id);
   if(policy!=policies.end()){const auto& p=policy->config;check(p.decide==get_self()&&p.kind==kind&&p.duration==duration&&p.quorum==quorum&&p.approval==approval,"BALLOT_POLICY");}
-  daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);uint64_t denominator=voting_denominator(runtime,dao_id,kind);check(denominator>0,"NO_ELIGIBLE_WEIGHT");ballots rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_EXISTS");
+  daos communities(runtime,runtime.value);const auto& d=communities.get(dao_id);
+  if(action_name=="open"_n||action_name=="openpoll"_n||action_name=="openwork"_n||action_name=="openaward"_n){
+   const auto identity=nlohmann::json::parse(d.metadata,nullptr,false),value=nlohmann::json::parse(metadata,nullptr,false);
+   if(identity.contains("schemaVersion")&&identity["schemaVersion"]==4)check((value.contains("schemaVersion")&&value["schemaVersion"]==4)||(value.contains("publicDisclosure")&&value["publicDisclosure"]==true)||((action_name=="openwork"_n||action_name=="openaward"_n)&&value.empty()),"PRIVATE_BALLOT_REQUIRED");
+  }
+  uint64_t denominator=voting_denominator(runtime,dao_id,kind);check(denominator>0,"NO_ELIGIBLE_WEIGHT");ballots rows(get_self(),runtime.value);check(rows.find(ballot_id)==rows.end(),"BALLOT_EXISTS");
   auto now=current_time_point().sec_since_epoch();check(uint64_t(now)+duration<=std::numeric_limits<uint32_t>::max(),"TIME_RANGE");uint32_t closes=now+duration;
   rows.emplace(get_self(),[&](auto& r){r.id=ballot_id;r.dao_id=dao_id;r.creator=member_id;r.kind=kind;r.choices=choices;r.closes=closes;r.quorum=quorum;r.approval=approval;r.denominator=denominator;r.max_member=d.max_member;r.tallies=std::vector<uint64_t>(choices,0);r.metadata=metadata;});
   if(action_name=="open"_n||action_name=="openpoll"_n){poll_ends ends(get_self(),runtime.value);check(ends.find(ballot_id)==ends.end(),"POLL_END_EXISTS");ends.emplace(get_self(),[&](auto& r){r.ballot_id=ballot_id;r.dao_id=dao_id;});}

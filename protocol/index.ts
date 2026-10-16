@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { ModuleManifestSchema, NativeAccountSchema } from '@daclify/core-protocol';
-export const VERSION = '0.10.0-alpha.46';
+export const VERSION = '0.10.0-alpha.48';
 // SDK/help releases do not require redeploying unchanged contract binaries.
-export const CONTRACT_VERSION = '0.10.0-alpha.4';
-const CORE_RANGE = '0.15.0-alpha.37';
+export const CONTRACT_VERSION = '0.10.0-alpha.5';
+const CORE_RANGE = '0.15.0-alpha.39';
 export const ModulePermissions = Object.freeze({
   'quick-ballots': { actions: ['open', 'close'] as const, grants: [] as const },
   activity: {
