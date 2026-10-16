@@ -1,4 +1,5 @@
 import { previousContactArchiveReleases } from './releases/trusted-contact-previous.js';
+import { contentPrivacyArchiveReleases } from './releases/content-privacy-previous.js';
 import type { z } from 'zod';
 import { ABI, ABIDecoder, Bytes, Checksum256, Name, Serializer } from '@wharfkit/antelope';
 import { IdSchema, ChainIdSchema } from '@daclify/core-protocol';
@@ -114,6 +115,10 @@ export function archiveSourceSchema(
   const previous = previousContactArchiveReleases[kind].identity;
   if (identity.codeHash === previous.codeHash && identity.abiHash === previous.rawAbiHash)
     return { table: source.table, ...previous };
+  const historical = contentPrivacyArchiveReleases[kind].find(
+    (release) => release.codeHash === identity.codeHash && release.rawAbiHash === identity.abiHash,
+  );
+  if (historical) return { table: source.table, ...historical };
   throw new RangeError('ARCHIVE_SCHEMA_UNSUPPORTED');
 }
 function releasedSource(
@@ -130,6 +135,9 @@ function releasedSource(
   )
     return { abi: sources[kind].abi, rowType: current.rowType };
   const previous = previousContactArchiveReleases[kind];
+  for (const release of contentPrivacyArchiveReleases[kind])
+    if (codeHash === release.codeHash && rawAbiHash === release.rawAbiHash && schemaHash === release.schemaHash)
+      return { abi: ABI.from(previous.abi), rowType: release.rowType };
   if (
     codeHash === previous.identity.codeHash &&
     rawAbiHash === previous.identity.rawAbiHash &&

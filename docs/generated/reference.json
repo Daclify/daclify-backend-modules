@@ -1,6 +1,6 @@
 {
   "producer": "modules",
-  "packageVersion": "0.10.0-alpha.52",
+  "packageVersion": "0.10.0-alpha.55",
   "interfaceVersion": 1,
   "topics": [
     {
@@ -20170,8 +20170,8 @@
     {
       "manifest": {
         "id": "quick-ballots",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20198,8 +20198,8 @@
     {
       "manifest": {
         "id": "activity",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20230,8 +20230,8 @@
     {
       "manifest": {
         "id": "decide",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20286,8 +20286,8 @@
     {
       "manifest": {
         "id": "works",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20325,8 +20325,8 @@
     {
       "manifest": {
         "id": "payroll",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20365,8 +20365,8 @@
     {
       "manifest": {
         "id": "grants-rounds",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
@@ -20407,8 +20407,8 @@
     {
       "manifest": {
         "id": "endorsement-admission",
-        "version": "0.10.0-alpha.9",
-        "coreRange": "0.15.0-alpha.43",
+        "version": "0.10.0-alpha.10",
+        "coreRange": "0.15.0-alpha.44",
         "interfaceVersion": 1,
         "configVersion": 1,
         "capabilities": [
