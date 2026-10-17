@@ -26,6 +26,12 @@ export const contentPrivacyArchiveReleases = {
       schemaHash: 'eb401bb042d2bf45b14b1a51f306a76abbfd6e0d38bea56d788b4537f50d3f7c',
       rowType: 'document_record',
     },
+    {
+      codeHash: '082626e899cc9bc4ede81ad7c7e56f1c82c145785b225b3d94ace61347736dc7',
+      rawAbiHash: '91e3224f49e27df3fc3fc19a3a93812f4cb63a032137fac8074f62ff0dd07186',
+      schemaHash: 'eb401bb042d2bf45b14b1a51f306a76abbfd6e0d38bea56d788b4537f50d3f7c',
+      rowType: 'document_record',
+    },
   ],
   'ordinary-poll-votes': [
     {
@@ -42,6 +48,12 @@ export const contentPrivacyArchiveReleases = {
     },
     {
       codeHash: '8661d334f9ba9ef16fe46477efba59292530c3c1e4a0b43ff0b07f96db3d3695',
+      rawAbiHash: '2268cd779edfda686b5b5533ea1a9f8b771952b43c2628cdda28ac5e30e44511',
+      schemaHash: '9699cf43a51a515f89dc8ef08d161efbbe70ac999332292980bf7dfa007b9917',
+      rowType: 'vote_record',
+    },
+    {
+      codeHash: 'e549cbd8ab46fa254e23a0616aa6d1ee2eef99a685a844fd51c2678c8bb2b853',
       rawAbiHash: '2268cd779edfda686b5b5533ea1a9f8b771952b43c2628cdda28ac5e30e44511',
       schemaHash: '9699cf43a51a515f89dc8ef08d161efbbe70ac999332292980bf7dfa007b9917',
       rowType: 'vote_record',
@@ -66,6 +78,12 @@ export const contentPrivacyArchiveReleases = {
       schemaHash: 'df124c69715167a4e3d14994f0547d4365294005a11496bb553e9bdf4ed2e010',
       rowType: 'quick_response',
     },
+    {
+      codeHash: 'ff91fc2b4e54b6d1a87f365f006af4acb9ee52b6d9094d8df4bf162ae1868ebc',
+      rawAbiHash: '9ee160f982b079960465db760a222a0bb4059dc0b7a37f7c48206e27f504ad05',
+      schemaHash: 'df124c69715167a4e3d14994f0547d4365294005a11496bb553e9bdf4ed2e010',
+      rowType: 'quick_response',
+    },
   ],
   'quick-ballot-grants': [
     {
@@ -82,6 +100,12 @@ export const contentPrivacyArchiveReleases = {
     },
     {
       codeHash: '963a7b2b7cd558c3726f00a68a67b404a0b94aa6c3b8f8b66149269ba6ce94bc',
+      rawAbiHash: '9ee160f982b079960465db760a222a0bb4059dc0b7a37f7c48206e27f504ad05',
+      schemaHash: 'b4002d24c3ca57af2189677753afccb9c23910dc93bceb60f4e654f91cbe1f48',
+      rowType: 'quick_grant',
+    },
+    {
+      codeHash: 'ff91fc2b4e54b6d1a87f365f006af4acb9ee52b6d9094d8df4bf162ae1868ebc',
       rawAbiHash: '9ee160f982b079960465db760a222a0bb4059dc0b7a37f7c48206e27f504ad05',
       schemaHash: 'b4002d24c3ca57af2189677753afccb9c23910dc93bceb60f4e654f91cbe1f48',
       rowType: 'quick_grant',

@@ -14,6 +14,7 @@ const coreCommits = [
   '1e58f70',
   '8f539a1',
   '6aaae633eeb1f2d0e89e32391c9f860c10d8d4dd',
+  '8180d33bd14b3f4c983a9854659a8501214a0159',
 ] as const;
 const moduleCommits = [
   '491e9dbed0fd0895bc54c75bbfe4198aec132a9c',
@@ -21,6 +22,7 @@ const moduleCommits = [
   'fed5453',
   'b52fc03',
   '050f18b',
+  '6f336fd',
 ] as const;
 const hash = (bytes: string | Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 type Kind = keyof typeof previousContactArchiveReleases;
