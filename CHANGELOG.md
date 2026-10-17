@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+Development 0.10.0-alpha.63 makes current cross-repository documentation links usable outside the sibling workspace and republishes the README/help under a new immutable package version. The exact core protocol50 peer, module bytecode, contract version10, persisted rows and ballot proofs are unchanged.
+
+## 0.10.0-alpha.62 development
+
 Development 0.10.0-alpha.62 consumes core protocol50 for the review remediation cohort. Module bytecode, contract version10, persisted rows and ballot proofs are unchanged.
 
 ## 0.10.0-alpha.43 development

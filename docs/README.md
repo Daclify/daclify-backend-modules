@@ -1,6 +1,6 @@
 # Module documentation
 
-Source package/peer versions are pinned in `package.json`; [current status](../../daclify-backend-core/docs/current-status.md) records the dated deployment. [Repository README](../README.md) describes contract behavior and deploy accounts. Shared setup, login, recovery, operations and release manifests belong to [core documentation](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/README.md).
+Source package/peer versions are pinned in `package.json`; [current status](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/current-status.md) records the dated deployment. [Repository README](../README.md) describes contract behavior and deploy accounts. Shared setup, login, recovery, operations and release manifests belong to [core documentation](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/README.md).
 
 ## Guides and reference
 
@@ -12,7 +12,7 @@ The packed `@daclify/modules/help` bundle appears in the app at `/docs/decide`, 
 
 Module manifests declare compatible core versions, interface/configuration versions, actions and grants. The client and runtime verify reviewed module code pins. A guide version alone does not verify a deployed contract. Closed votes, elected titles and service sessions are not administrative or spending authority.
 
-The historical 0.7 runtime update changed no module C++ layout/code. Current binaries also include later ballot-integrity, protected-review and Quick ballot changes. The SDK-only audit checkpoint below is historical; it does not describe the current binaries. Use current producer manifests and migration evidence for an upgrade. The expressly approved [2026-10-11 testnet rollout](../../daclify-backend-core/docs/evidence/2026-10-11-project-audit-testnet-rollout.md) installed SDK `0.9.0-alpha.20` with core/frontend alpha.3 and live Relay operator signing, without redeploying module code. Complete production release qualification remains separate. Existing liabilities and identities stay on chain. Follow [upgrade to 0.7](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/operations/upgrade-0.7.md), and consult [upgrade to 0.5](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/operations/upgrade-0.5.md) only for the earlier contract changes.
+The historical 0.7 runtime update changed no module C++ layout/code. Current binaries also include later ballot-integrity, protected-review and Quick ballot changes. The SDK-only audit checkpoint below is historical; it does not describe the current binaries. Use current producer manifests and migration evidence for an upgrade. The expressly approved [2026-10-11 testnet rollout](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/evidence/2026-10-11-project-audit-testnet-rollout.md) installed SDK `0.9.0-alpha.20` with core/frontend alpha.3 and live Relay operator signing, without redeploying module code. Complete production release qualification remains separate. Existing liabilities and identities stay on chain. Follow [upgrade to 0.7](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/operations/upgrade-0.7.md), and consult [upgrade to 0.5](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/operations/upgrade-0.5.md) only for the earlier contract changes.
 
 For server loss, [disaster recovery](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/disaster-recovery.md) distinguishes on-chain module records from database pairings and each member's private keys. One recovered administrator cannot recover everyone else's secrets. Managed custody, real providers/wallet clients, production deployment and durable off-host backups remain separate qualification work.
 
@@ -24,7 +24,7 @@ Run `npm run verify`, `npm run build` and `npm run format:check` locally. Compil
 
 ## Connected payments and hosting
 
-See core [payment operations](../../daclify-backend-core/docs/operations/connected-payments.md) and app `/docs/shared-hosting`, `/docs/payments`, `/docs/independent-operators`. Independent API discovery now has issuer/code/ABI and current-registration checks; actual operator browser cookies and external providers still need qualification.
+See core [payment operations](https://github.com/Daclify/daclify-backend-core/blob/dev/docs/operations/connected-payments.md) and app `/docs/shared-hosting`, `/docs/payments`, `/docs/independent-operators`. Independent API discovery now has issuer/code/ABI and current-registration checks; actual operator browser cookies and external providers still need qualification.
 
 See [Archive format v1](archive-format.md) for the bounded development library, tested integrity rules and configured service behavior and remaining provider qualification.
 
