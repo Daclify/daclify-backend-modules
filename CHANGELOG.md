@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Development 0.10.0-alpha.62 consumes core protocol50 for the review remediation cohort. Module bytecode, contract version10, persisted rows and ballot proofs are unchanged.
+
 ## 0.10.0-alpha.43 development
 
 - Consume the core35 private-record schema foundation and retain exact core compatibility. Regenerate the producer guide cohort; contract binaries, stored module rows and native contract version are unchanged.
